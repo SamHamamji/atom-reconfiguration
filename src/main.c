@@ -11,9 +11,9 @@ int main() {
   const int size = sizeof(points) / sizeof(points[0]);
 
   struct Interval *interval = new_interval(points, size);
-  interval_print(interval);
+  interval_print(interval)
 
-  struct Mapping *mapping = solve_interval(interval);
+      struct Mapping *mapping = solve_interval(interval);
 
   mapping_print(mapping);
 
