@@ -12,7 +12,6 @@ struct Mapping {
   int pair_count;
 };
 
-struct Mapping *solve_interval(struct Interval *interval);
 void mapping_free(struct Mapping *mapping);
 
 char *mapping_to_string(struct Mapping *mapping);
