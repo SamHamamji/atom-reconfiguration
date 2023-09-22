@@ -4,7 +4,8 @@
 #include "solvers.h"
 #include "utils.h"
 
-int *get_exclusion_array_iter(struct Interval *interval, int *height_array) {
+int *get_exclusion_array_iterative(const struct Interval *interval,
+                                   const int *height_array) {
   int imbalance = height_array[interval->size - 1];
 
   struct {
@@ -37,9 +38,9 @@ int *get_exclusion_array_iter(struct Interval *interval, int *height_array) {
   return exclusion_array;
 }
 
-struct Mapping *iterative_solver(struct Interval *interval) {
+struct Mapping *iterative_solver(const struct Interval *interval) {
   int *height_array = get_height_array(interval);
-  int *exclusion_array = get_exclusion_array_iter(interval, height_array);
+  int *exclusion_array = get_exclusion_array_iterative(interval, height_array);
   struct Mapping *mapping = solve_neutral_interval(interval, exclusion_array);
 
   free(height_array);

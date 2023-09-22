@@ -4,7 +4,7 @@
 
 #include "mapping.h"
 
-int max_mapping_index(struct Mapping *mapping) {
+int max_mapping_index(const struct Mapping *mapping) {
   unsigned int max = 0;
   for (unsigned int i = 0; i < mapping->pair_count; i++) {
     if (mapping->pairs[i].target > max) {
@@ -17,7 +17,7 @@ int max_mapping_index(struct Mapping *mapping) {
   return max;
 }
 
-char *mapping_to_string(struct Mapping *mapping) {
+char *mapping_to_string(const struct Mapping *mapping) {
   int max_index_length = (int)log10((double)max_mapping_index(mapping)) + 1;
   const int line_length = 5 + max_index_length * 2;
   char *string = malloc(line_length * mapping->pair_count * sizeof(char));
@@ -30,7 +30,7 @@ char *mapping_to_string(struct Mapping *mapping) {
   return string;
 }
 
-void mapping_print(struct Mapping *mapping) {
+void mapping_print(const struct Mapping *mapping) {
   char *string = mapping_to_string(mapping);
   printf("%s\n", string);
   free(string);

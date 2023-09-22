@@ -3,7 +3,7 @@
 #include "../interval/interval.h"
 #include "../mapping/mapping.h"
 
-struct Mapping *solve_neutral_interval(struct Interval *interval,
-                                       int *exclusion_array);
+struct Mapping *solve_neutral_interval(const struct Interval *interval,
+                                       const int *exclusion_array);
 
-int *get_height_array(struct Interval *interval);
+int *get_height_array(const struct Interval *interval);
