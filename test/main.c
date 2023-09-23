@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 #include "../unity/unity.h"
-#include "./test_solvers.h"
+#include "./solvers/test_solvers.h"
 
 void setUp(void) {}
 
