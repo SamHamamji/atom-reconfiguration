@@ -2,6 +2,12 @@
 
 #include "utils.h"
 
+static const int point_to_imbalance[NUM_POINT_TYPES] = {
+    [EMPTY] = 0,
+    [SOURCE] = 1,
+    [TARGET] = -1,
+};
+
 struct Mapping *solve_neutral_interval(const struct Interval *interval,
                                        const int *exclusion_array) {
   unsigned int target_num = 0;
@@ -33,23 +39,12 @@ struct Mapping *solve_neutral_interval(const struct Interval *interval,
 
 int *get_height_array(const struct Interval *interval) {
   int *height_array = malloc(interval->size * sizeof(int));
-  if (interval->size > 0) {
-    if (interval->array[0] == SOURCE) {
-      height_array[0] = 1;
-    } else if (interval->array[0] == TARGET) {
-      height_array[0] = -1;
-    } else {
-      height_array[0] = 0;
-    }
-  }
+  if (interval->size > 0)
+    height_array[0] = point_to_imbalance[interval->array[0]];
 
   for (unsigned int i = 1; i < interval->size; i++) {
-    height_array[i] = height_array[i - 1];
-    if (interval->array[i] == SOURCE) {
-      height_array[i] += 1;
-    } else if (interval->array[i] == TARGET) {
-      height_array[i] -= 1;
-    }
+    height_array[i] =
+        height_array[i - 1] + point_to_imbalance[interval->array[i]];
   }
   return height_array;
 }
