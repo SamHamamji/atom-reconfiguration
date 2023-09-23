@@ -2,8 +2,8 @@
 
 #include <stdlib.h>
 
-struct Mapping *solve_neutral_interval(struct Interval *interval,
-                                       int *exclusion_array) {
+struct Mapping *solve_neutral_interval(const struct Interval *interval,
+                                       const int *exclusion_array) {
   unsigned int target_num = 0;
   for (unsigned int i = 0; i < interval->size; i++) {
     if (interval->array[i] == TARGET) {
@@ -31,7 +31,7 @@ struct Mapping *solve_neutral_interval(struct Interval *interval,
   return mapping;
 }
 
-int *get_height_array(struct Interval *interval) {
+int *get_height_array(const struct Interval *interval) {
   int *height_array = malloc(interval->size * sizeof(int));
   height_array[0] = 0;
 

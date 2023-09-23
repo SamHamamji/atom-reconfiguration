@@ -4,7 +4,8 @@
 #include "solvers.h"
 #include "utils.h"
 
-int *get_exclusion_array_karp_li(struct Interval *interval, int *height_array) {
+int *get_exclusion_array_karp_li(const struct Interval *interval,
+                                 const int *height_array) {
   int imbalance = height_array[interval->size - 1];
 
   int max_profit_index_per_height[imbalance];
@@ -36,7 +37,7 @@ int *get_exclusion_array_karp_li(struct Interval *interval, int *height_array) {
   return exclusion_array;
 }
 
-struct Mapping *karp_li_solver(struct Interval *interval) {
+struct Mapping *karp_li_solver(const struct Interval *interval) {
   int *height_array = get_height_array(interval);
   int *exclusion_array = get_exclusion_array_karp_li(interval, height_array);
   struct Mapping *mapping = solve_neutral_interval(interval, exclusion_array);
