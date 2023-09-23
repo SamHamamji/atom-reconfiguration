@@ -21,13 +21,19 @@ build-tests:
 	make check-build-folder
 	clang -o $(exec-tests) $(source-files) $(test-files) $(unity-file) $(libraries-flags)
 
-run:
-	make build
+run: $(exec)
 	./$(exec)
 
-run-tests:
-	make build-tests
+run-tests: $(exec-tests)
 	./$(exec-tests)
+
+build-and-run:
+	make build
+	make run
+
+build-and-run-tests:
+	make build-tests
+	make run-tests
 
 clean:
 	rm -rd $(exec-folder)
