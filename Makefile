@@ -17,7 +17,7 @@ build: $(main-file) $(source-files)
 	make check-build-folder
 	clang -o $(exec) $(main-file) $(source-files) $(libraries-flags)
 
-build-tests:
+build-tests: $(source-files) $(test-files) $(unity-file)
 	make check-build-folder
 	clang -o $(exec-tests) $(source-files) $(test-files) $(unity-file) $(libraries-flags)
 
