@@ -13,25 +13,6 @@
                           .pair_count = sizeof(mapping) / sizeof(mapping[0])}, \
   })
 
-#define DEFINE_TEST_SOLVER_FUNCTION(solver, name)                              \
-  void name(void) {                                                            \
-    for (int i = 0; i < solver_test_cases_num; i++) {                          \
-      struct Mapping *mapping = solver(&solver_test_cases[i].input);           \
-      int mappings_are_equal =                                                 \
-          mapping_equals(mapping, &solver_test_cases[i].expected_output);      \
-      if (mappings_are_equal) {                                                \
-        printf("Passed subtest %d\n", i + 1);                                  \
-      } else {                                                                 \
-        printf("Failed subtest %d\n", i + 1);                                  \
-        printf("Expected:\n");                                                 \
-        mapping_print(&solver_test_cases[i].expected_output);                  \
-        printf("Got:\n");                                                      \
-        mapping_print(mapping);                                                \
-      }                                                                        \
-      TEST_ASSERT(mappings_are_equal);                                         \
-    }                                                                          \
-  }
-
 // Test 1
 static Point interval_1[] = {EMPTY,  EMPTY,  SOURCE, TARGET, TARGET, SOURCE,
                              SOURCE, SOURCE, EMPTY,  TARGET, TARGET, EMPTY};
@@ -69,5 +50,23 @@ static const struct SolverTestCase solver_test_cases[] = {
 static const int solver_test_cases_num =
     sizeof(solver_test_cases) / sizeof(solver_test_cases[0]);
 
-DEFINE_TEST_SOLVER_FUNCTION(iterative_solver, test_iterative_solver)
-DEFINE_TEST_SOLVER_FUNCTION(karp_li_solver, test_karp_li_solver);
+void test_solver(Solver solver) {
+  for (int i = 0; i < solver_test_cases_num; i++) {
+    struct Mapping *mapping = solver(&solver_test_cases[i].input);
+    int mappings_are_equal =
+        mapping_equals(mapping, &solver_test_cases[i].expected_output);
+    if (mappings_are_equal) {
+      printf("Passed subtest %d\n", i + 1);
+    } else {
+      printf("Failed subtest %d\n", i + 1);
+      printf("Expected:\n");
+      mapping_print(&solver_test_cases[i].expected_output);
+      printf("Got:\n");
+      mapping_print(mapping);
+    }
+    TEST_ASSERT(mappings_are_equal);
+  }
+}
+
+void test_iterative_solver(void) { test_solver(iterative_solver); }
+void test_karp_li_solver(void) { test_solver(karp_li_solver); }
