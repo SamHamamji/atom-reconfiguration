@@ -1,18 +1,17 @@
 #include <limits.h>
 #include <stdlib.h>
 
+#include "common.h"
 #include "solvers.h"
-#include "utils.h"
 
-int *get_exclusion_array_karp_li(const struct Interval *interval,
-                                 const int *height_array) {
+static int *get_exclusion_array_karp_li(const struct Interval *interval,
+                                        const int *height_array) {
   int imbalance = height_array[interval->size - 1];
 
   int max_profit_index_per_height[imbalance];
 
   for (int height = imbalance; height >= 1; height--) {
-
-    max_profit_index_per_height[height - 1] = INT_MIN;
+    max_profit_index_per_height[height - 1] = INT_MAX;
 
     int profit = interval->size - 1;
     for (int i = interval->size - 1; i >= 0; i--) {

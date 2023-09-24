@@ -2,7 +2,7 @@
 
 #include "interval.h"
 
-struct Interval *new_interval(const Point points[], int size) {
+struct Interval *new_interval(const Point *points, int size) {
   struct Interval *interval =
       (struct Interval *)malloc(sizeof(struct Interval));
 

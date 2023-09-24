@@ -9,7 +9,7 @@ static const char point_to_char[NUM_POINT_TYPES] = {
     [TARGET] = 'T',
 };
 
-char *interval_to_string(const struct Interval *interval) {
+static char *interval_to_string(const struct Interval *interval) {
   char *string = (char *)malloc(2 * interval->size * sizeof(char));
   for (int i = 0; i < interval->size; i++) {
     sprintf(&string[2 * i], "%c ", point_to_char[interval->array[i]]);

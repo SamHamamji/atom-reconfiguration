@@ -6,10 +6,7 @@
 #include "./test_cases.h"
 #include "./test_solvers.h"
 
-extern const struct SolverTestCase solver_test_cases[];
-extern const int solver_test_cases_num;
-
-void test_solver(Solver solver) {
+static void test_solver(Solver solver) {
   for (int i = 0; i < solver_test_cases_num; i++) {
     struct Mapping *mapping = solver(&solver_test_cases[i].input);
     int mappings_are_equal =

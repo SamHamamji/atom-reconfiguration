@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "utils.h"
+#include "common.h"
 
 static const int point_to_imbalance[NUM_POINT_TYPES] = {
     [EMPTY] = 0,

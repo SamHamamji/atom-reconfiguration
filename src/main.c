@@ -7,9 +7,6 @@
 #include "solvers/solvers.h"
 
 int main() {
-  // const Point points[] = {EMPTY,  EMPTY,  SOURCE, TARGET, TARGET, SOURCE,
-  //                         SOURCE, SOURCE, EMPTY,  TARGET, TARGET, EMPTY};
-
   const Point points[] = {EMPTY,  EMPTY,  SOURCE, SOURCE, TARGET, TARGET,
                           TARGET, SOURCE, TARGET, SOURCE, SOURCE, EMPTY,
                           TARGET, SOURCE, SOURCE, SOURCE, SOURCE, EMPTY,
