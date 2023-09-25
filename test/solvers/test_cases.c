@@ -64,6 +64,19 @@ static struct Pair mapping_10[] = {};
 static Point interval_11[] = {};
 static struct Pair mapping_11[] = {};
 
+// Test 12
+static Point interval_12[] = {TARGET};
+static struct Pair mapping_12[] = {};
+
+// Test 13
+static Point interval_13[] = {TARGET, EMPTY,  SOURCE, EMPTY, TARGET, SOURCE,
+                              TARGET, TARGET, EMPTY,  EMPTY, SOURCE};
+static struct Pair mapping_13[] = {};
+
+// Test 14
+static Point interval_14[] = {TARGET, EMPTY, TARGET};
+static struct Pair mapping_14[] = {};
+
 #define NEW_SOLVER_TEST_CASE(interval, mapping)                                \
   ((struct SolverTestCase){                                                    \
       .input = {.array = interval,                                             \
@@ -84,6 +97,9 @@ const struct SolverTestCase solver_test_cases[] = {
     NEW_SOLVER_TEST_CASE(interval_9, mapping_9),
     NEW_SOLVER_TEST_CASE(interval_10, mapping_10),
     NEW_SOLVER_TEST_CASE(interval_11, mapping_11),
+    NEW_SOLVER_TEST_CASE(interval_12, mapping_12),
+    NEW_SOLVER_TEST_CASE(interval_13, mapping_13),
+    NEW_SOLVER_TEST_CASE(interval_14, mapping_14),
 };
 
 const int solver_test_cases_num =
