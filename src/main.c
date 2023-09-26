@@ -14,7 +14,7 @@ int main() {
 
   const int size = sizeof(points) / sizeof(points[0]);
 
-  struct Interval *interval = new_interval(points, size);
+  struct Interval *interval = interval_factory.new_interval(points, size);
   interval_print(interval);
 
   struct Mapping *mapping = iterative_solver(interval);
