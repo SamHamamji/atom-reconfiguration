@@ -1,5 +1,5 @@
-#include "../../src/interval/interval.h"
-#include "../../src/mapping/mapping.h"
+#include "../../../src/interval/interval.h"
+#include "../../../src/mapping/mapping.h"
 
 struct SolverTestCase {
   const struct Interval input;

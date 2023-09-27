@@ -17,7 +17,7 @@ int main() {
   struct Interval *interval = interval_factory.new_interval(points, size);
   interval_print(interval);
 
-  struct Mapping *mapping = iterative_solver(interval);
+  struct Mapping *mapping = iterative_solver.solve(interval);
   mapping_print(mapping);
 
   interval_free(interval);

@@ -1,7 +1,7 @@
-#include "../interval/interval.h"
-#include "../mapping/mapping.h"
+#include "solver.h"
 
-typedef struct Mapping *Solver(const struct Interval *interval);
+extern const struct Solver iterative_solver;
+extern const struct Solver karp_li_solver;
 
-Solver iterative_solver;
-Solver karp_li_solver;
+extern const struct Solver *const solvers[];
+extern const int solvers_num;

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "common.h"
-#include "solvers.h"
+#include "solver.h"
 
 static int *get_exclusion_array_karp_li(const struct Interval *interval,
                                         const int *height_array) {
@@ -36,7 +36,8 @@ static int *get_exclusion_array_karp_li(const struct Interval *interval,
   return exclusion_array;
 }
 
-struct Mapping *karp_li_solver(const struct Interval *interval) {
+static struct Mapping *
+karp_li_solver_function(const struct Interval *const interval) {
   struct Mapping *mapping;
   int *height_array = get_height_array(interval);
 
@@ -54,3 +55,8 @@ struct Mapping *karp_li_solver(const struct Interval *interval) {
   free(height_array);
   return mapping;
 }
+
+const struct Solver karp_li_solver = {
+    .solve = karp_li_solver_function,
+    .name = "Karp-Li solver",
+};
