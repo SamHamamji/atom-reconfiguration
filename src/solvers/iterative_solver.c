@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "common.h"
-#include "solvers.h"
+#include "solver.h"
 
 static int *get_exclusion_array_iterative(const struct Interval *interval,
                                           const int *height_array) {
@@ -34,7 +34,8 @@ static int *get_exclusion_array_iterative(const struct Interval *interval,
   return exclusion_array;
 }
 
-struct Mapping *iterative_solver(const struct Interval *interval) {
+static struct Mapping *
+iterative_solver_function(const struct Interval *const interval) {
   struct Mapping *mapping;
   int *height_array = get_height_array(interval);
 
@@ -53,3 +54,8 @@ struct Mapping *iterative_solver(const struct Interval *interval) {
   free(height_array);
   return mapping;
 }
+
+const struct Solver iterative_solver = {
+    .solve = iterative_solver_function,
+    .name = "Iterative solver",
+};
