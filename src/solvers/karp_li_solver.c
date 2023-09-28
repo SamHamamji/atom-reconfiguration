@@ -1,18 +1,17 @@
 #include <limits.h>
 #include <stdlib.h>
 
-#include "solvers.h"
-#include "utils.h"
+#include "common.h"
+#include "solver.h"
 
-int *get_exclusion_array_karp_li(const struct Interval *interval,
-                                 const int *height_array) {
+static int *get_exclusion_array_karp_li(const struct Interval *interval,
+                                        const int *height_array) {
   int imbalance = height_array[interval->size - 1];
 
   int max_profit_index_per_height[imbalance];
 
   for (int height = imbalance; height >= 1; height--) {
-
-    max_profit_index_per_height[height - 1] = INT_MIN;
+    max_profit_index_per_height[height - 1] = INT_MAX;
 
     int profit = interval->size - 1;
     for (int i = interval->size - 1; i >= 0; i--) {
@@ -37,12 +36,27 @@ int *get_exclusion_array_karp_li(const struct Interval *interval,
   return exclusion_array;
 }
 
-struct Mapping *karp_li_solver(const struct Interval *interval) {
+static struct Mapping *
+karp_li_solver_function(const struct Interval *const interval) {
+  struct Mapping *mapping;
   int *height_array = get_height_array(interval);
-  int *exclusion_array = get_exclusion_array_karp_li(interval, height_array);
-  struct Mapping *mapping = solve_neutral_interval(interval, exclusion_array);
+
+  if (height_array[interval->size - 1] < 0) {
+    mapping = malloc(sizeof(struct Mapping));
+    mapping->pair_count = 0;
+    mapping->pairs = NULL;
+  } else {
+    int *exclusion_array = get_exclusion_array_karp_li(interval, height_array);
+    mapping = solve_neutral_interval(interval, exclusion_array);
+
+    free(exclusion_array);
+  }
 
   free(height_array);
-  free(exclusion_array);
   return mapping;
 }
+
+const struct Solver karp_li_solver = {
+    .solve = karp_li_solver_function,
+    .name = "Karp-Li solver",
+};

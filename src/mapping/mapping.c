@@ -9,7 +9,7 @@ void mapping_free(struct Mapping *mapping) {
   free(mapping);
 }
 
-int pair_equals(const struct Pair a, const struct Pair b) {
+static int pair_equals(const struct Pair a, const struct Pair b) {
   int diff = a.target - b.target;
   return !((diff == 0) ? a.source - b.source : diff);
 }

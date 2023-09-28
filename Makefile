@@ -1,10 +1,12 @@
 exec-folder = build/
 exec = $(exec-folder)linear-assignment.out
-exec-tests = $(exec-folder)tests.out
+exec-unit-tests = $(exec-folder)unit-tests.out
+exec-performance-tests = $(exec-folder)performance-tests.out
 
 main-file = src/main.c
 source-files = $(shell find src -name "*.c" -not -path $(main-file))
-test-files = $(shell find test -name "*.c")
+unit-test-files = $(shell find test/unit_test -name "*.c")
+performance-test-files = $(shell find test/performance_test -name "*.c")
 unity-file = unity/unity.c
 
 libraries-flags = -lm
@@ -13,27 +15,26 @@ install-path = ~/.local/bin/$(exec:.out=)
 check-build-folder:
 	mkdir -p $(exec-folder)
 
-build: $(main-file) $(source-files)
+build-main: $(main-file) $(source-files)
 	make check-build-folder
 	clang -o $(exec) $(main-file) $(source-files) $(libraries-flags)
 
-build-tests: $(source-files) $(test-files) $(unity-file)
+build-unit-tests: $(source-files) $(unit-test-files) $(unity-file)
 	make check-build-folder
-	clang -o $(exec-tests) $(source-files) $(test-files) $(unity-file) $(libraries-flags)
+	clang -o $(exec-unit-tests) $(source-files) $(unit-test-files) $(unity-file) $(libraries-flags)
 
-run: $(exec)
+build-performance-tests: $(source-files) $(performance-test-files)
+	make check-build-folder
+	clang -o $(exec-performance-tests) $(source-files) $(performance-test-files) $(libraries-flags)
+
+run-main: $(exec)
 	./$(exec)
 
-run-tests: $(exec-tests)
-	./$(exec-tests)
+run-unit-tests: $(exec-unit-tests)
+	./$(exec-unit-tests)
 
-build-and-run:
-	make build
-	make run
-
-build-and-run-tests:
-	make build-tests
-	make run-tests
+run-performance-tests: $(exec-performance-tests)
+	./$(exec-performance-tests)
 
 clean:
 	rm -rd $(exec-folder)
