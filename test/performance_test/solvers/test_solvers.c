@@ -4,8 +4,7 @@
 
 #include "../../../src/solvers/solver.h"
 #include "../../../src/solvers/solvers.h"
-#include "./test_cases.h"
-#include "./test_solvers_performance.h"
+#include "./test_solvers.h"
 
 static int interval_get_imbalance(const struct Interval *const interval) {
   static const int point_to_imbalance[NUM_POINT_TYPES] = {
