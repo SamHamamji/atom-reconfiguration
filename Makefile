@@ -2,6 +2,7 @@ exec-folder = build/
 exec = $(exec-folder)linear-assignment.out
 exec-unit-tests = $(exec-folder)unit-tests.out
 exec-performance-tests = $(exec-folder)performance-tests.out
+visualize-performance-file = visualization/visualize_performance.py
 
 main-file = src/main.c
 source-files = $(shell find src -name "*.c" -not -path $(main-file))
@@ -35,6 +36,9 @@ run-unit-tests: $(exec-unit-tests)
 
 run-performance-tests: $(exec-performance-tests)
 	./$(exec-performance-tests)
+
+visualize: $(file) $(visualize-performance-file)
+	python $(visualize-performance-file) $(file)
 
 clean:
 	rm -rd $(exec-folder)
