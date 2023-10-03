@@ -36,22 +36,21 @@ static int *get_exclusion_array_iterative(const struct Interval *interval,
 
 static struct Mapping *
 iterative_solver_function(const struct Interval *const interval) {
-  struct Mapping *mapping;
-  int *height_array = get_height_array(interval);
-
-  if (height_array[interval->size - 1] < 0) {
-    mapping = malloc(sizeof(struct Mapping));
-    mapping->pair_count = 0;
-    mapping->pairs = NULL;
-  } else {
-    int *exclusion_array =
-        get_exclusion_array_iterative(interval, height_array);
-    mapping = solve_neutral_interval(interval, exclusion_array);
-
-    free(exclusion_array);
+  if (interval->size <= 0) {
+    return mapping_get_null();
   }
 
+  int *height_array = get_height_array(interval);
+  if (height_array[interval->size - 1] < 0) {
+    free(height_array);
+    return mapping_get_null();
+  }
+
+  int *exclusion_array = get_exclusion_array_iterative(interval, height_array);
+  struct Mapping *mapping = solve_neutral_interval(interval, exclusion_array);
+
   free(height_array);
+  free(exclusion_array);
   return mapping;
 }
 

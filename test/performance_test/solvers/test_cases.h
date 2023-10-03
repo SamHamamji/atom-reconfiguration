@@ -7,7 +7,7 @@ struct PerformanceTestCasesConfig {
 };
 
 struct PerformanceTestCases {
-  struct Interval *const intervals;
+  struct Interval **const intervals;
   const int intervals_num;
 };
 
