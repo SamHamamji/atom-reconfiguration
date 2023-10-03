@@ -11,7 +11,7 @@ int main() {
   unsigned int seed = (unsigned int)time(NULL);
   srand(seed);
   printf("Seed set to %u\n", seed);
-  struct Interval *interval = interval_factory.generate_random_interval(50);
+  struct Interval *interval = interval_factory.generate_interval(64, 18, 24);
 
   struct Mapping *mapping = iterative_solver.solve(interval);
 

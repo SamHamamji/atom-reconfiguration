@@ -14,7 +14,8 @@ generate_performance_tests(const struct PerformanceTestCasesConfig config) {
       int target_num = rand() % (config.interval_sizes[i] / 2);
       int imbalance = rand() % (config.interval_sizes[i] - 2 * target_num);
       intervals[i * config.tests_per_size + j] =
-          interval_factory.generate_random_interval(config.interval_sizes[i]);
+          interval_factory.generate_interval(
+              config.interval_sizes[i], target_num, target_num + imbalance);
     }
   }
   struct PerformanceTestCases test_cases = {
