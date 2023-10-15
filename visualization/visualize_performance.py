@@ -15,13 +15,20 @@ parser = argparse.ArgumentParser(
     prog="visualize_performance"
 )
 parser.add_argument(
-    "file",
+    "--file",
     type=str,
     help="Performance results file",
+)
+parser.add_argument(
+    "-p",
+    "--port",
+    type=int,
+    help="Port to run the server on",
+    default=8050,
 )
 
 if __name__== "__main__":
     args = parser.parse_args()
     dataframe = read_data(args.file)
     app = PerformanceVisualizationApp(dataframe)
-    app.run(debug=True)
+    app.run(debug=True, port=args.port)
