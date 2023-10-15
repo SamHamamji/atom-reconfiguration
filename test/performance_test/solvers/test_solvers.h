@@ -5,4 +5,4 @@
 #include "./test_cases.h"
 
 struct Performance *
-test_solvers_performance(struct PerformanceTestCases *test_cases);
+test_solvers_performance(const struct PerformanceTestCases *const test_cases);

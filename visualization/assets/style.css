@@ -1,0 +1,19 @@
+body {
+  background: #EEEEEE;
+}
+
+.grid-item {
+  background: white;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  align-items: stretch;
+  justify-items: stretch;
+  gap: .8rem;
+}
+
+.app {
+  text-align: center;
+}

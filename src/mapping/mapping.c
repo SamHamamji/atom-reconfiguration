@@ -38,3 +38,10 @@ int mapping_equals(const struct Mapping *a, const struct Mapping *b) {
 
   return 1;
 }
+
+struct Mapping *mapping_get_null() {
+  struct Mapping *mapping = malloc(sizeof(struct Mapping));
+  mapping->pair_count = 0;
+  mapping->pairs = NULL;
+  return mapping;
+}

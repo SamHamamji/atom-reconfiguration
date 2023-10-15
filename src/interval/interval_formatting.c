@@ -12,7 +12,8 @@ static const char point_to_char[NUM_POINT_TYPES] = {
 static char *interval_to_string(const struct Interval *interval) {
   char *string = (char *)malloc(2 * interval->size * sizeof(char));
   for (int i = 0; i < interval->size; i++) {
-    sprintf(&string[2 * i], "%c ", point_to_char[interval->array[i]]);
+    string[2 * i] = point_to_char[interval->array[i]];
+    string[2 * i + 1] = ' ';
   }
   string[2 * interval->size - 1] = '\0';
   return string;

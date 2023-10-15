@@ -22,6 +22,6 @@ void test_solver(struct Solver solver) {
       mapping_print(mapping);
     }
     TEST_ASSERT(mappings_are_equal);
-    free(mapping);
+    mapping_free(mapping);
   }
 }
