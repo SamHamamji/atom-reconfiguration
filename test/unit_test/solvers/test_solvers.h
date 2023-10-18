@@ -1,3 +1,3 @@
 #pragma once
 
-void test_solver(struct Solver solver);
+int test_solver(struct Solver solver);
