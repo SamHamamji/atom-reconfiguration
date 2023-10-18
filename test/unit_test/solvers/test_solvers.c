@@ -21,7 +21,7 @@ void test_solver(struct Solver solver) {
       printf("Got:\n");
       mapping_print(mapping);
     }
-    TEST_ASSERT(mappings_are_equal);
     mapping_free(mapping);
+    TEST_ASSERT(mappings_are_equal);
   }
 }

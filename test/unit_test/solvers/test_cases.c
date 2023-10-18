@@ -77,6 +77,48 @@ static struct Pair mapping_13[] = {};
 static Point interval_14[] = {TARGET, EMPTY, TARGET};
 static struct Pair mapping_14[] = {};
 
+// Test 15
+static Point interval_15[] = {
+    TARGET, SOURCE, SOURCE, TARGET, SOURCE, SOURCE, SOURCE, SOURCE, SOURCE,
+    TARGET, SOURCE, SOURCE, SOURCE, EMPTY,  TARGET, EMPTY,  TARGET, TARGET,
+    TARGET, EMPTY,  EMPTY,  EMPTY,  EMPTY,  EMPTY,  SOURCE, SOURCE, TARGET,
+    TARGET, SOURCE, TARGET, EMPTY,  TARGET, EMPTY,
+};
+static struct Pair mapping_15[] = {
+    {1, 0},   {2, 3},   {28, 31}, {25, 29}, {24, 27}, {12, 26},
+    {11, 18}, {10, 17}, {8, 16},  {7, 14},  {6, 9},
+};
+
+// Test 16
+static Point interval_16[] = {
+    SOURCE, EMPTY,  SOURCE, TARGET, SOURCE, SOURCE, SOURCE, EMPTY,  SOURCE,
+    TARGET, TARGET, SOURCE, EMPTY,  SOURCE, TARGET, TARGET, TARGET, SOURCE,
+    SOURCE, SOURCE, SOURCE, EMPTY,  SOURCE, SOURCE, SOURCE,
+};
+static struct Pair mapping_16[] = {
+    {2, 3}, {8, 9}, {11, 10}, {13, 14}, {17, 15}, {18, 16},
+};
+
+// Test 17
+static Point interval_17[] = {
+    SOURCE, EMPTY, TARGET, EMPTY,  SOURCE, EMPTY,  SOURCE, TARGET, TARGET,
+    SOURCE, EMPTY, SOURCE, TARGET, TARGET, TARGET, SOURCE, EMPTY,  SOURCE,
+};
+static struct Pair mapping_17[] = {
+    {0, 2}, {6, 7}, {9, 8}, {11, 12}, {15, 13}, {17, 14},
+};
+
+// Test 18
+static Point interval_18[] = {
+    SOURCE, EMPTY,  EMPTY,  SOURCE, EMPTY,  TARGET, TARGET, TARGET,
+    EMPTY,  TARGET, EMPTY,  EMPTY,  SOURCE, TARGET, TARGET, EMPTY,
+    TARGET, SOURCE, SOURCE, EMPTY,  SOURCE, EMPTY,  EMPTY,  SOURCE,
+    SOURCE, SOURCE, SOURCE, EMPTY,  TARGET, EMPTY,  SOURCE, EMPTY,
+};
+static struct Pair mapping_18[] = {
+    {0, 5}, {3, 6}, {12, 7}, {17, 9}, {18, 13}, {20, 14}, {23, 16}, {26, 28},
+};
+
 #define NEW_SOLVER_TEST_CASE(interval, mapping)                                \
   ((struct SolverTestCase){                                                    \
       .input = {.array = interval,                                             \
@@ -100,6 +142,10 @@ const struct SolverTestCase solver_test_cases[] = {
     NEW_SOLVER_TEST_CASE(interval_12, mapping_12),
     NEW_SOLVER_TEST_CASE(interval_13, mapping_13),
     NEW_SOLVER_TEST_CASE(interval_14, mapping_14),
+    NEW_SOLVER_TEST_CASE(interval_15, mapping_15),
+    NEW_SOLVER_TEST_CASE(interval_16, mapping_16),
+    NEW_SOLVER_TEST_CASE(interval_17, mapping_17),
+    NEW_SOLVER_TEST_CASE(interval_18, mapping_18),
 };
 
 const int solver_test_cases_num =
