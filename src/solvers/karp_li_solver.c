@@ -13,13 +13,13 @@ static int *get_exclusion_array_karp_li(const struct Interval *interval,
   for (int height = imbalance; height >= 1; height--) {
     max_profit_index_per_height[height - 1] = INT_MAX;
 
-    int profit = interval->size - 1;
+    int profit = INT_MAX;
     for (int i = interval->size - 1; i >= 0; i--) {
       if (interval->array[i] == TARGET && height_array[i] == height - 1) {
         profit += 2 * i;
       } else if (interval->array[i] == SOURCE && height_array[i] == height) {
         profit -= i;
-        if (profit >= 0) {
+        if (profit > 0) {
           max_profit_index_per_height[height - 1] = i;
           profit = 0;
         }

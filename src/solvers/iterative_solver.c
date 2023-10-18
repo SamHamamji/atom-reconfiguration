@@ -19,7 +19,7 @@ static int *get_exclusion_array_iterative(const struct Interval *interval,
          i >= 0; i--) {
       relative_profit += (height_array[i] >= height) ? 1 : -1;
       if ((height_array[i] == height) && (interval->array[i] == SOURCE) &&
-          (relative_profit >= 0)) {
+          (relative_profit > 0)) {
         relative_profit = 0;
         max_profit_index_per_height[height - 1] = i;
       }
