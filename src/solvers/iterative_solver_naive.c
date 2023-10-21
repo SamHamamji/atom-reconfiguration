@@ -6,24 +6,19 @@
 
 static int *get_exclusion_array(const struct Interval *interval,
                                 const int *height_array) {
-  int imbalance = height_array[interval->size - 1];
-
+  const int imbalance = height_array[interval->size - 1];
   int max_profit_index_per_height[imbalance];
 
   for (int height = imbalance; height >= 1; height--) {
+    int relative_profit = 0;
     max_profit_index_per_height[height - 1] = INT_MAX;
-    int profit = INT_MAX;
 
     for (int i = interval->size - 1; i >= 0; i--) {
-      if (interval->array[i] == TARGET && height_array[i] == height - 1) {
-        profit += 2 * i;
-      } else if (interval->array[i] == SOURCE && height_array[i] == height) {
-        profit -= i;
-        if (profit > 0) {
-          max_profit_index_per_height[height - 1] = i;
-          profit = 0;
-        }
-        profit -= i;
+      relative_profit += (height_array[i] >= height) ? 1 : -1;
+      if ((height_array[i] == height) && (interval->array[i] == SOURCE) &&
+          (relative_profit > 0)) {
+        relative_profit = 0;
+        max_profit_index_per_height[height - 1] = i;
       }
     }
   }
@@ -55,7 +50,7 @@ static struct Mapping *solver_function(const struct Interval *const interval) {
   return mapping;
 }
 
-const struct Solver karp_li_solver = {
+const struct Solver iterative_solver_naive = {
     .solve = solver_function,
-    .name = "Karp-Li solver",
+    .name = "Naive Iterative solver",
 };
