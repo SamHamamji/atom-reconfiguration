@@ -8,13 +8,12 @@ static int *get_exclusion_array(const struct Interval *interval,
                                 const int *height_array) {
   const int imbalance = height_array[interval->size - 1];
   int max_profit_index_per_height[imbalance];
-  int i = interval->size - 1;
 
   for (int height = imbalance; height >= 1; height--) {
     int relative_profit = 0;
     max_profit_index_per_height[height - 1] = INT_MAX;
 
-    for (; i >= 0; i--) {
+    for (int i = interval->size - 1; i >= 0; i--) {
       relative_profit += (height_array[i] >= height) ? 1 : -1;
       if ((height_array[i] == height) && (interval->array[i] == SOURCE) &&
           (relative_profit > 0)) {
@@ -22,8 +21,6 @@ static int *get_exclusion_array(const struct Interval *interval,
         max_profit_index_per_height[height - 1] = i;
       }
     }
-
-    i = max_profit_index_per_height[height - 1] - 1;
   }
 
   int *exclusion_array = calloc(interval->size, sizeof(int));
@@ -53,7 +50,7 @@ static struct Mapping *solver_function(const struct Interval *const interval) {
   return mapping;
 }
 
-const struct Solver iterative_solver = {
+const struct Solver iterative_solver_naive = {
     .solve = solver_function,
-    .name = "Iterative solver",
+    .name = "Naive Iterative solver",
 };

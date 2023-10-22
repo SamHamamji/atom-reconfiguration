@@ -12,13 +12,25 @@
 const char output_dir_name[] = "performance_results";
 const char output_file_format[] = "./%s/%u.csv";
 
+static struct Interval *interval_generator_binomial(const int size) {
+  return interval_factory.generate_randomized_interval(size);
+}
+
+static struct Interval *interval_generator_uniform_imbalance(const int size) {
+  int target_num = rand() % (size / 2);
+  int imbalance = rand() % (size - 2 * target_num);
+  return interval_factory.generate_interval(size, target_num,
+                                            target_num + imbalance);
+}
+
 const static int sizes[] = {
-    16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384,
+    128, 256, 512, 1024, 2048, 4096, 8192, 16384,
 };
 const static struct PerformanceTestCasesConfig config = {
     .sizes_num = sizeof(sizes) / sizeof(sizes[0]),
     .interval_sizes = sizes,
     .tests_per_size = 100,
+    .interval_generator = interval_generator_binomial,
 };
 
 int main() {

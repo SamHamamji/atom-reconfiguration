@@ -8,7 +8,6 @@ main-file := src/main.c
 source-files := $(shell find src -name "*.c" -not -path $(main-file))
 unit-test-files := $(shell find test/unit_test -name "*.c")
 performance-test-files := $(shell find test/performance_test -name "*.c")
-unity-file := unity/unity.c
 
 libraries-flags := -lm
 install-path := ~/.local/bin/$(exec:.out=)
@@ -25,9 +24,9 @@ build-main: $(main-file) $(source-files)
 	make check-build-folder
 	clang -o $(exec) $(main-file) $(source-files) $(libraries-flags)
 
-build-unit-tests: $(source-files) $(unit-test-files) $(unity-file)
+build-unit-tests: $(source-files) $(unit-test-files)
 	make check-build-folder
-	clang -o $(exec-unit-tests) $(source-files) $(unit-test-files) $(unity-file) $(libraries-flags)
+	clang -o $(exec-unit-tests) $(source-files) $(unit-test-files) $(libraries-flags)
 
 build-performance-tests: $(source-files) $(performance-test-files)
 	make check-build-folder

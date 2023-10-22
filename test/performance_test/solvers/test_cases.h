@@ -4,6 +4,7 @@ struct PerformanceTestCasesConfig {
   const int *const interval_sizes;
   const int sizes_num;
   const int tests_per_size;
+  struct Interval *(*const interval_generator)(const int size);
 };
 
 struct PerformanceTestCases {
