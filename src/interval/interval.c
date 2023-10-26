@@ -1,27 +1,42 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "interval.h"
 
 static struct Interval *generate_randomized_interval(const int size) {
   struct Interval *interval = malloc(sizeof(struct Interval));
   interval->size = size;
-  interval->array = calloc(size, sizeof(Point));
+  interval->array = calloc(size, sizeof(struct Point));
   for (int i = 0; i < size; i++) {
-    interval->array[i] = rand() % NUM_POINT_TYPES;
+    int random_result = rand() % 3;
+    if (random_result == 0) {
+      interval->array[i] = (struct Point){
+          .is_source = false,
+          .is_target = false,
+      };
+    } else if (random_result == 1) {
+      interval->array[i] = (struct Point){
+          .is_source = true,
+          .is_target = false,
+      };
+    } else if (random_result == 2) {
+      interval->array[i] = (struct Point){
+          .is_source = false,
+          .is_target = true,
+      };
+    }
   }
   return interval;
 }
 
-static struct Interval *new_interval(const Point *const points,
+static struct Interval *new_interval(const struct Point *const points,
                                      const int size) {
   struct Interval *interval = malloc(sizeof(struct Interval));
-  interval->array = malloc(size * sizeof(Point));
+  interval->array = malloc(size * sizeof(struct Point));
   interval->size = size;
 
-  for (int i = 0; i < size; i++) {
-    interval->array[i] = points[i];
-  }
+  memcpy(interval->array, points, size * sizeof(struct Point));
 
   return interval;
 }
@@ -29,7 +44,7 @@ static struct Interval *new_interval(const Point *const points,
 static void interval_shuffle(struct Interval *const interval) {
   for (int i = 0; i < interval->size; i++) {
     int j = rand() % interval->size;
-    int temp = interval->array[j];
+    struct Point temp = interval->array[j];
     interval->array[j] = interval->array[i];
     interval->array[i] = temp;
   }
@@ -39,7 +54,7 @@ static struct Interval *generate_interval(const int size, const int target_num,
                                           const int source_num) {
   struct Interval *interval = malloc(sizeof(struct Interval));
   interval->size = size;
-  interval->array = malloc(interval->size * sizeof(Point));
+  interval->array = malloc(interval->size * sizeof(struct Point));
 
   if (size < target_num + source_num) {
     printf("Invalid interval parameters (size %d, targets %d, sources %d)\n",
@@ -49,13 +64,22 @@ static struct Interval *generate_interval(const int size, const int target_num,
 
   int i = 0;
   for (; i < target_num; i++) {
-    interval->array[i] = TARGET;
+    interval->array[i] = (struct Point){
+        .is_source = false,
+        .is_target = true,
+    };
   }
   for (; i < target_num + source_num; i++) {
-    interval->array[i] = SOURCE;
+    interval->array[i] = (struct Point){
+        .is_source = true,
+        .is_target = false,
+    };
   }
   for (; i < interval->size; i++) {
-    interval->array[i] = EMPTY;
+    interval->array[i] = (struct Point){
+        .is_source = false,
+        .is_target = false,
+    };
   }
   interval_shuffle(interval);
   return interval;

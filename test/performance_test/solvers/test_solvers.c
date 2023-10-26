@@ -7,15 +7,9 @@
 #include "./test_solvers.h"
 
 static int interval_get_imbalance(const struct Interval *const interval) {
-  static const int point_to_imbalance[NUM_POINT_TYPES] = {
-      [EMPTY] = 0,
-      [SOURCE] = 1,
-      [TARGET] = -1,
-  };
-
   int sum = 0;
   for (int i = 0; i < interval->size; i++) {
-    sum += point_to_imbalance[interval->array[i]];
+    sum += interval->array[i].is_source - interval->array[i].is_target;
   }
   return sum;
 }

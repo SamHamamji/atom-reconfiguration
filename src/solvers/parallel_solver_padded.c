@@ -27,7 +27,7 @@ static void *get_exclusion_for_height_thread(void *const args) {
   for (int i = input->interval.size - 1; i >= 0; i--) {
     relative_profit += (input->height_array[i] >= input->height) ? 1 : -1;
     if ((input->height_array[i] == input->height) &&
-        (input->interval.array[i] == SOURCE) && (relative_profit > 0)) {
+        (input->interval.array[i].is_source) && (relative_profit > 0)) {
       relative_profit = 0;
       max_profit_index = i;
     }
@@ -37,8 +37,8 @@ static void *get_exclusion_for_height_thread(void *const args) {
   pthread_exit(NULL);
 }
 
-static int *get_exclusion_array(const struct Interval *interval,
-                                const int *height_array) {
+static bool *get_exclusion_array(const struct Interval *interval,
+                                 const int *height_array) {
   const int imbalance = height_array[interval->size - 1];
   struct ThreadOutput *output = malloc(imbalance * sizeof(struct ThreadOutput));
   pthread_t thread_array[imbalance];
@@ -55,10 +55,10 @@ static int *get_exclusion_array(const struct Interval *interval,
                    (void *)&inputs[height - 1]);
   }
 
-  int *exclusion_array = calloc(interval->size, sizeof(int));
+  bool *exclusion_array = calloc(interval->size, sizeof(bool));
   for (int height = 1; height <= imbalance; height++) {
     pthread_join(thread_array[height - 1], NULL);
-    exclusion_array[output[height - 1].excluded_index] = 1;
+    exclusion_array[output[height - 1].excluded_index] = true;
   }
 
   free(output);
@@ -77,7 +77,7 @@ parallel_solver_test_function(const struct Interval *const interval) {
     return mapping_get_null();
   }
 
-  int *exclusion_array = get_exclusion_array(interval, height_array);
+  bool *exclusion_array = get_exclusion_array(interval, height_array);
   struct Mapping *mapping = solve_neutral_interval(interval, exclusion_array);
 
   free(height_array);

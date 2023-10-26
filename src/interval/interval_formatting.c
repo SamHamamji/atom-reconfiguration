@@ -3,16 +3,15 @@
 
 #include "interval.h"
 
-static const char point_to_char[NUM_POINT_TYPES] = {
-    [EMPTY] = '.',
-    [SOURCE] = 'S',
-    [TARGET] = 'T',
-};
+static char point_to_char(const struct Point point) {
+  return (point.is_source) ? ((point.is_target) ? 'B' : 'S')
+                           : ((point.is_target) ? 'T' : '.');
+}
 
 static char *interval_to_string(const struct Interval *interval) {
   char *string = (char *)malloc(2 * interval->size * sizeof(char));
   for (int i = 0; i < interval->size; i++) {
-    string[2 * i] = point_to_char[interval->array[i]];
+    string[2 * i] = point_to_char(interval->array[i]);
     string[2 * i + 1] = ' ';
   }
   string[2 * interval->size - 1] = '\0';

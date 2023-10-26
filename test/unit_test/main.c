@@ -13,9 +13,9 @@ int main(void) {
   }
 
   if (failed_tests == 0) {
-    printf("\n🟢 All tests passed\n");
+    printf("🟢 All tests passed\n");
   } else {
-    printf("\n🔴 %d/%d tests failed\n", failed_tests, solvers_num);
+    printf("🔴 %d/%d tests failed\n", failed_tests, solvers_num);
     exit(EXIT_FAILURE);
   }
   return 0;

@@ -24,7 +24,7 @@ int test_solver(struct Solver solver) {
 
   for (int i = 0; i < solver_test_cases_num; i++) {
     struct Mapping *mapping = solver.solve(&solver_test_cases[i].input);
-    int mappings_are_equal =
+    bool mappings_are_equal =
         mapping_equals(mapping, &solver_test_cases[i].expected_output);
     if (!mappings_are_equal) {
       if (failed_tests_num == 0) {
@@ -37,7 +37,7 @@ int test_solver(struct Solver solver) {
   }
 
   if (failed_tests_num != 0) {
-    printf("Failed %d/%d test cases\n", failed_tests_num,
+    printf("Failed %d/%d test cases\n\n", failed_tests_num,
            solver_test_cases_num);
   }
 

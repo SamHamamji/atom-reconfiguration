@@ -4,14 +4,20 @@
 
 #include "mapping.h"
 
-static int max_mapping_index(const struct Mapping *mapping) {
-  unsigned int max = 0;
-  for (unsigned int i = 0; i < mapping->pair_count; i++) {
-    if (mapping->pairs[i].target > max) {
-      max = mapping->pairs[i].target;
+static int integer_length(const int num) {
+  return (int)log10((double)abs(num)) + 1 + (num <= 0);
+}
+
+static int max_mapping_index_length(const struct Mapping *mapping) {
+  int max = 1;
+  for (int i = 0; i < mapping->pair_count; i++) {
+    int target_length = integer_length(mapping->pairs[i].target);
+    int source_length = integer_length(mapping->pairs[i].source);
+    if (source_length > max) {
+      max = source_length;
     }
-    if (mapping->pairs[i].source > max) {
-      max = mapping->pairs[i].source;
+    if (target_length > max) {
+      max = target_length;
     }
   }
   return max;
@@ -23,10 +29,11 @@ static char *mapping_to_string(const struct Mapping *mapping) {
     sprintf(string, (mapping->pairs == NULL) ? "NULL" : "EMPTY");
     return string;
   }
-  int max_index_length = (int)log10((double)max_mapping_index(mapping)) + 1;
+  const int max_index_length = max_mapping_index_length(mapping);
   const int line_length = 5 + max_index_length * 2;
+
   char *string = malloc(line_length * mapping->pair_count * sizeof(char));
-  for (unsigned int i = 0; i < mapping->pair_count; i++) {
+  for (int i = 0; i < mapping->pair_count; i++) {
     sprintf(&string[line_length * i], "%-*d -> %*d", max_index_length,
             mapping->pairs[i].source, max_index_length,
             mapping->pairs[i].target);

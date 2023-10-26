@@ -3,6 +3,9 @@
 extern const struct Solver iterative_solver;
 extern const struct Solver iterative_solver_naive;
 extern const struct Solver karp_li_solver;
+extern const struct Solver karp_li_solver_optimized;
+extern const struct Solver karp_li_solver_naive;
+extern const struct Solver karp_li_solver_optimized_naive;
 extern const struct Solver parallel_solver;
 extern const struct Solver parallel_solver_padded;
 extern const struct Solver parallel_solver_fixed_threads;
