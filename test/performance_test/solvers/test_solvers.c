@@ -21,17 +21,21 @@ test_solvers_performance(const struct PerformanceTestCases *const test_cases) {
 
   for (int i = 0; i < test_cases->intervals_num; i++) {
     for (int solver_index = 0; solver_index < solvers_num; solver_index++) {
-      clock_t t = clock();
+      struct timespec start;
+      struct timespec finish;
+      clock_gettime(CLOCK_MONOTONIC, &start);
       struct Mapping *const mapping =
           solvers[solver_index]->solve(test_cases->intervals[i]);
-      t = clock() - t;
+      clock_gettime(CLOCK_MONOTONIC, &finish);
+
       mapping_free(mapping);
 
       performances[i * solvers_num + solver_index] = (struct Performance){
           .solver = solvers[solver_index],
           .interval_size = test_cases->intervals[i]->size,
           .imbalance = interval_get_imbalance(test_cases->intervals[i]),
-          .time_taken = ((double)t) / CLOCKS_PER_SEC,
+          .time_taken = (finish.tv_sec - start.tv_sec) +
+                        (finish.tv_nsec - start.tv_nsec) / 1000000000.0,
       };
     }
   }
