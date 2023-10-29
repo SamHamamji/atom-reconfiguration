@@ -6,7 +6,7 @@
 
 static bool *get_exclusion_array(const struct Interval *interval,
                                  const int *height_array) {
-  int imbalance = height_array[interval->size - 1];
+  const int imbalance = get_imbalance(interval, height_array);
   int max_profit_index_per_height[imbalance];
 
   for (int height = imbalance; height >= 1; height--) {
@@ -14,7 +14,7 @@ static bool *get_exclusion_array(const struct Interval *interval,
     int profit = INT_MAX;
 
     for (int i = interval->size - 1; i >= 0; i--) {
-      if (height_array[i] == height - (int)interval->array[i].is_target) {
+      if (height_array[i] == height) {
         if (interval->array[i].is_source) {
           profit -= i;
           if (profit > 0) {
@@ -44,7 +44,7 @@ static struct Mapping *solver_function(const struct Interval *const interval) {
   }
 
   int *height_array = get_height_array(interval);
-  if (height_array[interval->size - 1] < 0) {
+  if (get_imbalance(interval, height_array) < 0) {
     free(height_array);
     return mapping_get_null();
   }

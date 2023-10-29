@@ -15,15 +15,22 @@ struct ThreadInput {
 static void *get_exclusion_for_height_thread(void *const args) {
   struct ThreadInput *input = (struct ThreadInput *)args;
 
-  int relative_profit = 0;
+  int relative_profit = INT_MAX;
   int max_profit_index = INT_MAX;
 
   for (int i = input->interval.size - 1; i >= 0; i--) {
-    relative_profit += (input->height_array[i] >= input->height) ? 1 : -1;
-    if ((input->height_array[i] == input->height) &&
-        (input->interval.array[i].is_source) && (relative_profit > 0)) {
-      relative_profit = 0;
-      max_profit_index = i;
+    if (input->height_array[i] == input->height) {
+      if (input->interval.array[i].is_source) {
+        relative_profit -= i;
+        if (relative_profit > 0) {
+          max_profit_index = i;
+          relative_profit = 0;
+        }
+        relative_profit -= i;
+      }
+      if (input->interval.array[i].is_target) {
+        relative_profit += 2 * i;
+      }
     }
   }
 
@@ -33,7 +40,7 @@ static void *get_exclusion_for_height_thread(void *const args) {
 
 static bool *get_exclusion_array(const struct Interval *interval,
                                  const int *height_array) {
-  const int imbalance = height_array[interval->size - 1];
+  const int imbalance = get_imbalance(interval, height_array);
   int exclusion_per_height[imbalance];
   pthread_t thread_array[imbalance];
   struct ThreadInput inputs[imbalance];
@@ -58,14 +65,13 @@ static bool *get_exclusion_array(const struct Interval *interval,
   return exclusion_array;
 }
 
-static struct Mapping *
-parallel_solver_function(const struct Interval *const interval) {
+static struct Mapping *solver_function(const struct Interval *const interval) {
   if (interval->size <= 0) {
     return mapping_get_null();
   }
 
   int *height_array = get_height_array(interval);
-  if (height_array[interval->size - 1] < 0) {
+  if (get_imbalance(interval, height_array) < 0) {
     free(height_array);
     return mapping_get_null();
   }
@@ -79,6 +85,6 @@ parallel_solver_function(const struct Interval *const interval) {
 }
 
 const struct Solver parallel_solver = {
-    .solve = parallel_solver_function,
+    .solve = solver_function,
     .name = "Parallel solver",
 };

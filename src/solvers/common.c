@@ -2,10 +2,6 @@
 
 #include "common.h"
 
-static int point_to_imbalance(const struct Point point) {
-  return (int)point.is_source - (int)point.is_target;
-};
-
 struct Mapping *solve_neutral_interval(const struct Interval *interval,
                                        const bool *exclusion_array) {
   unsigned int target_num = 0;
@@ -38,14 +34,23 @@ struct Mapping *solve_neutral_interval(const struct Interval *interval,
 }
 
 int *get_height_array(const struct Interval *interval) {
-  int *height_array = malloc(interval->size * sizeof(int));
-  if (interval->size > 0) {
-    height_array[0] = point_to_imbalance(interval->array[0]);
+  if (interval->size <= 0) {
+    return NULL;
   }
 
+  int *height_array = malloc(interval->size * sizeof(int));
+  height_array[0] = (int)interval->array[0].is_source;
+
   for (unsigned int i = 1; i < interval->size; i++) {
-    height_array[i] =
-        height_array[i - 1] + point_to_imbalance(interval->array[i]);
+    height_array[i] = height_array[i - 1] + (int)interval->array[i].is_source -
+                      (int)interval->array[i - 1].is_target;
   }
+
   return height_array;
+}
+
+int inline get_imbalance(const struct Interval *interval,
+                         const int *height_array) {
+  return height_array[interval->size - 1] -
+         (int)interval->array[interval->size - 1].is_target;
 }
