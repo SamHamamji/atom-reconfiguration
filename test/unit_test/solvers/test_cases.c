@@ -1,84 +1,104 @@
 #include "test_cases.h"
 
+#define EMPTY                                                                  \
+  (struct Point) { .is_target = false, .is_source = false }
+#define SOURCE                                                                 \
+  (struct Point) { .is_target = false, .is_source = true }
+#define TARGET                                                                 \
+  (struct Point) { .is_target = true, .is_source = false }
+#define BOTH                                                                   \
+  (struct Point) { .is_target = true, .is_source = true }
+
 // Test 1
-static Point interval_1[] = {EMPTY,  EMPTY,  SOURCE, TARGET, TARGET, SOURCE,
-                             SOURCE, SOURCE, EMPTY,  TARGET, TARGET, EMPTY};
+static struct Point interval_1[] = {
+    EMPTY,  EMPTY,  SOURCE, TARGET, TARGET, SOURCE,
+    SOURCE, SOURCE, EMPTY,  TARGET, TARGET, EMPTY,
+};
 static struct Pair mapping_1[] = {{2, 3}, {5, 4}, {6, 9}, {7, 10}};
 
 // Test 2
-static Point interval_2[] = {EMPTY,  EMPTY,  SOURCE, SOURCE, TARGET, TARGET,
-                             TARGET, SOURCE, TARGET, SOURCE, SOURCE, EMPTY,
-                             TARGET, SOURCE, SOURCE, SOURCE, SOURCE, EMPTY,
-                             TARGET, TARGET, EMPTY};
+static struct Point interval_2[] = {
+    EMPTY,  EMPTY,  SOURCE, SOURCE, TARGET, TARGET, TARGET,
+    SOURCE, TARGET, SOURCE, SOURCE, EMPTY,  TARGET, SOURCE,
+    SOURCE, SOURCE, SOURCE, EMPTY,  TARGET, TARGET, EMPTY,
+};
 static struct Pair mapping_2[] = {
     {13, 12}, {3, 5}, {7, 6}, {16, 19}, {9, 8}, {2, 4}, {15, 18},
 };
 
 // Test 3
-static Point interval_3[] = {EMPTY,  TARGET, TARGET, EMPTY,  EMPTY,  SOURCE,
-                             SOURCE, SOURCE, SOURCE, TARGET, EMPTY,  SOURCE,
-                             SOURCE, TARGET, SOURCE, TARGET, TARGET, TARGET,
-                             SOURCE, SOURCE, EMPTY};
+static struct Point interval_3[] = {
+    EMPTY,  TARGET, TARGET, EMPTY,  EMPTY,  SOURCE, SOURCE,
+    SOURCE, SOURCE, TARGET, EMPTY,  SOURCE, SOURCE, TARGET,
+    SOURCE, TARGET, TARGET, TARGET, SOURCE, SOURCE, EMPTY,
+};
 static struct Pair mapping_3[] = {
     {5, 1}, {6, 2}, {8, 9}, {12, 13}, {14, 15}, {18, 16}, {19, 17},
 };
 
 // Test 4
-static Point interval_4[] = {SOURCE, TARGET, SOURCE, TARGET, SOURCE,
-                             TARGET, SOURCE, TARGET, SOURCE, TARGET,
-                             SOURCE, TARGET, SOURCE, TARGET};
+static struct Point interval_4[] = {
+    SOURCE, TARGET, SOURCE, TARGET, SOURCE, TARGET, SOURCE,
+    TARGET, SOURCE, TARGET, SOURCE, TARGET, SOURCE, TARGET,
+};
 static struct Pair mapping_4[] = {
     {0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10, 11}, {12, 13},
 };
 
 // Test 5
-static Point interval_5[] = {TARGET, SOURCE, SOURCE, SOURCE, TARGET, SOURCE,
-                             TARGET, TARGET, TARGET, SOURCE, SOURCE};
+static struct Point interval_5[] = {
+    TARGET, SOURCE, SOURCE, SOURCE, TARGET, SOURCE,
+    TARGET, TARGET, TARGET, SOURCE, SOURCE,
+};
 static struct Pair mapping_5[] = {
     {1, 0}, {3, 4}, {5, 6}, {9, 7}, {10, 8},
 };
 
 // Test 6
-static Point interval_6[] = {TARGET, TARGET, SOURCE, SOURCE,
-                             SOURCE, SOURCE, SOURCE};
+static struct Point interval_6[] = {
+    TARGET, TARGET, SOURCE, SOURCE, SOURCE, SOURCE, SOURCE,
+};
 static struct Pair mapping_6[] = {{2, 0}, {3, 1}};
 
 // Test 7
-static Point interval_7[] = {TARGET, TARGET, EMPTY, EMPTY,
-                             EMPTY,  SOURCE, SOURCE};
+static struct Point interval_7[] = {
+    TARGET, TARGET, EMPTY, EMPTY, EMPTY, SOURCE, SOURCE,
+};
 static struct Pair mapping_7[] = {{5, 0}, {6, 1}};
 
 // Test 8
-static Point interval_8[] = {SOURCE, SOURCE, TARGET, TARGET};
+static struct Point interval_8[] = {SOURCE, SOURCE, TARGET, TARGET};
 static struct Pair mapping_8[] = {{0, 2}, {1, 3}};
 
 // Test 9
-static Point interval_9[] = {SOURCE, SOURCE};
+static struct Point interval_9[] = {SOURCE, SOURCE};
 static struct Pair mapping_9[] = {};
 
 // Test 10
-static Point interval_10[] = {EMPTY};
+static struct Point interval_10[] = {EMPTY};
 static struct Pair mapping_10[] = {};
 
 // Test 11
-static Point interval_11[] = {};
+static struct Point interval_11[] = {};
 static struct Pair mapping_11[] = {};
 
 // Test 12
-static Point interval_12[] = {TARGET};
+static struct Point interval_12[] = {TARGET};
 static struct Pair mapping_12[] = {};
 
 // Test 13
-static Point interval_13[] = {TARGET, EMPTY,  SOURCE, EMPTY, TARGET, SOURCE,
-                              TARGET, TARGET, EMPTY,  EMPTY, SOURCE};
+static struct Point interval_13[] = {
+    TARGET, EMPTY,  SOURCE, EMPTY, TARGET, SOURCE,
+    TARGET, TARGET, EMPTY,  EMPTY, SOURCE,
+};
 static struct Pair mapping_13[] = {};
 
 // Test 14
-static Point interval_14[] = {TARGET, EMPTY, TARGET};
+static struct Point interval_14[] = {TARGET, EMPTY, TARGET};
 static struct Pair mapping_14[] = {};
 
 // Test 15
-static Point interval_15[] = {
+static struct Point interval_15[] = {
     TARGET, SOURCE, SOURCE, TARGET, SOURCE, SOURCE, SOURCE, SOURCE, SOURCE,
     TARGET, SOURCE, SOURCE, SOURCE, EMPTY,  TARGET, EMPTY,  TARGET, TARGET,
     TARGET, EMPTY,  EMPTY,  EMPTY,  EMPTY,  EMPTY,  SOURCE, SOURCE, TARGET,
@@ -90,7 +110,7 @@ static struct Pair mapping_15[] = {
 };
 
 // Test 16
-static Point interval_16[] = {
+static struct Point interval_16[] = {
     SOURCE, EMPTY,  SOURCE, TARGET, SOURCE, SOURCE, SOURCE, EMPTY,  SOURCE,
     TARGET, TARGET, SOURCE, EMPTY,  SOURCE, TARGET, TARGET, TARGET, SOURCE,
     SOURCE, SOURCE, SOURCE, EMPTY,  SOURCE, SOURCE, SOURCE,
@@ -100,7 +120,7 @@ static struct Pair mapping_16[] = {
 };
 
 // Test 17
-static Point interval_17[] = {
+static struct Point interval_17[] = {
     SOURCE, EMPTY, TARGET, EMPTY,  SOURCE, EMPTY,  SOURCE, TARGET, TARGET,
     SOURCE, EMPTY, SOURCE, TARGET, TARGET, TARGET, SOURCE, EMPTY,  SOURCE,
 };
@@ -109,7 +129,7 @@ static struct Pair mapping_17[] = {
 };
 
 // Test 18
-static Point interval_18[] = {
+static struct Point interval_18[] = {
     SOURCE, EMPTY,  EMPTY,  SOURCE, EMPTY,  TARGET, TARGET, TARGET,
     EMPTY,  TARGET, EMPTY,  EMPTY,  SOURCE, TARGET, TARGET, EMPTY,
     TARGET, SOURCE, SOURCE, EMPTY,  SOURCE, EMPTY,  EMPTY,  SOURCE,
@@ -118,6 +138,63 @@ static Point interval_18[] = {
 static struct Pair mapping_18[] = {
     {0, 5}, {3, 6}, {12, 7}, {17, 9}, {18, 13}, {20, 14}, {23, 16}, {26, 28},
 };
+
+// Test 19
+static struct Point interval_19[] = {BOTH};
+static struct Pair mapping_19[] = {{0, 0}};
+
+// Test 20
+static struct Point interval_20[] = {BOTH, BOTH, BOTH};
+static struct Pair mapping_20[] = {{0, 0}, {1, 1}, {2, 2}};
+
+// Test 21
+static struct Point interval_21[] = {
+    EMPTY, BOTH, TARGET, BOTH,   EMPTY,  SOURCE, EMPTY,  SOURCE,
+    EMPTY, BOTH, TARGET, SOURCE, SOURCE, EMPTY,  TARGET, EMPTY,
+};
+static struct Pair mapping_21[] = {
+    {1, 1}, {3, 2}, {5, 3}, {9, 9}, {11, 10}, {12, 14},
+};
+
+// Test 22
+static struct Point interval_22[] = {
+    BOTH, SOURCE, SOURCE, TARGET, BOTH, EMPTY, BOTH, BOTH, SOURCE,
+};
+static struct Pair mapping_22[] = {
+    {0, 0}, {2, 3}, {4, 4}, {6, 6}, {7, 7},
+};
+
+// Test 23
+static struct Point interval_23[] = {
+    SOURCE, SOURCE, SOURCE, SOURCE, SOURCE, SOURCE, SOURCE,
+    SOURCE, SOURCE, SOURCE, SOURCE, SOURCE, SOURCE, SOURCE,
+    SOURCE, SOURCE, SOURCE, SOURCE, SOURCE, SOURCE, BOTH,
+};
+static struct Pair mapping_23[] = {{20, 20}};
+
+// Test 24
+static struct Point interval_24[] = {
+    TARGET, BOTH, SOURCE, TARGET, BOTH,   SOURCE, SOURCE,
+    SOURCE, BOTH, TARGET, SOURCE, SOURCE, SOURCE, BOTH,
+};
+static struct Pair mapping_24[] = {
+    {1, 0}, {2, 1}, {4, 3}, {5, 4}, {8, 8}, {10, 9}, {13, 13},
+};
+
+// Test 25
+static struct Point interval_25[] = {
+    BOTH,   TARGET, BOTH, SOURCE, SOURCE, SOURCE, SOURCE, SOURCE,
+    SOURCE, SOURCE, BOTH, SOURCE, SOURCE, BOTH,   TARGET, BOTH,
+};
+static struct Pair mapping_25[] = {
+    {0, 0}, {2, 1}, {3, 2}, {10, 10}, {12, 13}, {13, 14}, {15, 15},
+};
+
+// Test 26
+static struct Point interval_26[] = {
+    SOURCE, SOURCE, EMPTY, TARGET, BOTH, SOURCE,
+};
+static struct Pair mapping_26[] = {{1, 3}, {4, 4}};
 
 #define NEW_SOLVER_TEST_CASE(interval, mapping)                                \
   ((struct SolverTestCase){                                                    \
@@ -146,6 +223,14 @@ const struct SolverTestCase solver_test_cases[] = {
     NEW_SOLVER_TEST_CASE(interval_16, mapping_16),
     NEW_SOLVER_TEST_CASE(interval_17, mapping_17),
     NEW_SOLVER_TEST_CASE(interval_18, mapping_18),
+    NEW_SOLVER_TEST_CASE(interval_19, mapping_19),
+    NEW_SOLVER_TEST_CASE(interval_20, mapping_20),
+    NEW_SOLVER_TEST_CASE(interval_21, mapping_21),
+    NEW_SOLVER_TEST_CASE(interval_22, mapping_22),
+    NEW_SOLVER_TEST_CASE(interval_23, mapping_23),
+    NEW_SOLVER_TEST_CASE(interval_24, mapping_24),
+    NEW_SOLVER_TEST_CASE(interval_25, mapping_25),
+    NEW_SOLVER_TEST_CASE(interval_26, mapping_26),
 };
 
 const int solver_test_cases_num =

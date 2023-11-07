@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../../../src/interval/interval.h"
 #include "../../../src/mapping/mapping.h"
 

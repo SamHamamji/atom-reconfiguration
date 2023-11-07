@@ -1,14 +1,20 @@
 from enum import Enum
 
-class CsvHeader(Enum):
+class RawCsvHeader(Enum):
     IMBALANCE = "imbalance"
     SIZE = "size"
     SOLVER = "solver"
     TIME_TAKEN = "time_taken"
 
-header_to_string: dict[CsvHeader, str] = {
-    CsvHeader.IMBALANCE: "Imbalance",
-    CsvHeader.SIZE: "Size",
-    CsvHeader.SOLVER: "Solver",
-    CsvHeader.TIME_TAKEN: "Time taken",
+class CsvHeader(Enum):
+    IMBALANCE_PERCENT = "Imbalance percentage"
+    SIZE = "Size"
+    SOLVER = "Solver"
+    TIME_TAKEN = "Time taken"
+
+raw_csv_to_parsed: dict[str, str] = {
+    RawCsvHeader.IMBALANCE.value: CsvHeader.IMBALANCE_PERCENT.value,
+    RawCsvHeader.SIZE.value: CsvHeader.SIZE.value,
+    RawCsvHeader.SOLVER.value: CsvHeader.SOLVER.value,
+    RawCsvHeader.TIME_TAKEN.value: CsvHeader.TIME_TAKEN.value,
 }

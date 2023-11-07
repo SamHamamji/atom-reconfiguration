@@ -1,14 +1,8 @@
 import argparse
-import pandas as pd
 
-from CsvHeader import CsvHeader
 from app import PerformanceVisualizationApp
-
-def read_data(file_path: str):
-    file_content = pd.read_csv(file_path).groupby(
-        [CsvHeader.IMBALANCE.value, CsvHeader.SOLVER.value, CsvHeader.SIZE.value]
-    ).mean().reset_index()
-    return file_content
+from data_processing import read_data
+from grid import HeatMapGrid, ImbalanceGrid, SolverGrid, SizeGrid
 
 parser = argparse.ArgumentParser(
     description="Visualize linear assignment solvers performance results",
@@ -30,5 +24,5 @@ parser.add_argument(
 if __name__== "__main__":
     args = parser.parse_args()
     dataframe = read_data(args.file)
-    app = PerformanceVisualizationApp(dataframe)
+    app = PerformanceVisualizationApp(dataframe, [HeatMapGrid, ImbalanceGrid, SolverGrid, SizeGrid])
     app.run(debug=True, port=args.port)

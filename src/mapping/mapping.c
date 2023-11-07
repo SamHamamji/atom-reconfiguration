@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,28 +15,29 @@ static int pair_equals(const struct Pair a, const struct Pair b) {
   return !((diff == 0) ? a.source - b.source : diff);
 }
 
-int mapping_equals(const struct Mapping *a, const struct Mapping *b) {
+bool mapping_equals(const struct Mapping *a, const struct Mapping *b) {
   if (a->pair_count != b->pair_count) {
     return 0;
   }
 
-  int used[a->pair_count];
-  memset(used, 0, sizeof(used));
+  bool *const used = calloc(a->pair_count, sizeof(bool));
 
   for (int i = 0; i < a->pair_count; i++) {
-    int found = 0;
+    bool found = false;
     for (int j = 0; j < b->pair_count; j++) {
       if (!used[j] && pair_equals(a->pairs[i], b->pairs[j])) {
-        used[j] = 1;
-        found = 1;
+        used[j] = true;
+        found = true;
         break;
       }
     }
     if (!found) {
+      free(used);
       return 0;
     }
   }
 
+  free(used);
   return 1;
 }
 

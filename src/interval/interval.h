@@ -1,14 +1,16 @@
 #pragma once
 
+#include <stdbool.h>
+
 #define NUM_POINT_TYPES 3
-typedef enum {
-  EMPTY,
-  TARGET,
-  SOURCE,
-} Point;
+
+struct Point {
+  bool is_target;
+  bool is_source;
+};
 
 struct Interval {
-  Point *array;
+  struct Point *array;
   int size;
 };
 
@@ -21,7 +23,7 @@ struct IntervalFactory {
                                               const int target_num,
                                               const int source_num);
   struct Interval *(*const generate_randomized_interval)(const int size);
-  struct Interval *(*const new_interval)(const Point *const points,
+  struct Interval *(*const new_interval)(const struct Point *const points,
                                          const int size);
 };
 

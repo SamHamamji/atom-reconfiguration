@@ -8,13 +8,12 @@ static bool *get_exclusion_array(const struct Interval *interval,
                                  const int *height_array) {
   const int imbalance = get_imbalance(interval, height_array);
   int max_profit_index_per_height[imbalance];
-  int i = interval->size - 1;
 
   for (int height = imbalance; height >= 1; height--) {
     max_profit_index_per_height[height - 1] = INT_MAX;
     int profit = INT_MAX;
 
-    for (; i >= 0; i--) {
+    for (int i = interval->size - 1; i >= 0; i--) {
       if (height_array[i] == height) {
         if (interval->array[i].is_source) {
           profit -= i;
@@ -29,8 +28,6 @@ static bool *get_exclusion_array(const struct Interval *interval,
         }
       }
     }
-
-    i = max_profit_index_per_height[height - 1] - 1;
   }
 
   bool *exclusion_array = calloc(interval->size, sizeof(bool));
@@ -60,7 +57,7 @@ static struct Mapping *solver_function(const struct Interval *const interval) {
   return mapping;
 }
 
-const struct Solver karp_li_solver = {
+const struct Solver karp_li_solver_naive = {
     .solve = solver_function,
-    .name = "Karp-Li solver",
+    .name = "Naive Karp-Li solver",
 };
