@@ -1,14 +1,7 @@
 import argparse
-import pandas as pd
 
-from CsvHeader import CsvHeader
 from app import PerformanceVisualizationApp
-
-def read_data(file_path: str):
-    file_content = pd.read_csv(file_path).groupby(
-        [CsvHeader.IMBALANCE.value, CsvHeader.SOLVER.value, CsvHeader.SIZE.value]
-    ).mean().reset_index()
-    return file_content
+from data_processing import read_data
 
 parser = argparse.ArgumentParser(
     description="Visualize linear assignment solvers performance results",
