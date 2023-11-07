@@ -105,3 +105,5 @@ class ImbalanceGrid(html.Div):
             className="grid"
         )
         html.Div.__init__(self, [html.H3("Performance by imbalance:"), grid])
+
+Grid = typing.Union[HeatMapGrid, ImbalanceGrid, SolverGrid, SizeGrid]
