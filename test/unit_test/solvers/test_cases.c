@@ -1,14 +1,5 @@
 #include "test_cases.h"
 
-#define EMPTY                                                                  \
-  (struct Point) { .is_target = false, .is_source = false }
-#define SOURCE                                                                 \
-  (struct Point) { .is_target = false, .is_source = true }
-#define TARGET                                                                 \
-  (struct Point) { .is_target = true, .is_source = false }
-#define BOTH                                                                   \
-  (struct Point) { .is_target = true, .is_source = true }
-
 // Test 1
 static struct Point interval_1[] = {
     EMPTY,  EMPTY,  SOURCE, TARGET, TARGET, SOURCE,

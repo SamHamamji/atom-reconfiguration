@@ -5,15 +5,22 @@
 
 struct PerformanceTestCases
 generate_performance_tests(const struct PerformanceTestCasesConfig config) {
-  int intervals_num = config.sizes_num * config.tests_per_size;
+  int intervals_num = config.sizes_num * config.imbalance_percentages_num *
+                      config.repetitions_per_test_case;
   struct Interval **intervals = calloc(intervals_num, sizeof(struct Interval));
 
   for (int i = 0; i < config.sizes_num; i++) {
-    for (int j = 0; j < config.tests_per_size; j++) {
-      intervals[i * config.tests_per_size + j] =
-          config.interval_generator(config.interval_sizes[i]);
+    for (int j = 0; j < config.imbalance_percentages_num; j++) {
+      for (int k = 0; k < config.repetitions_per_test_case; k++) {
+        const int imbalance = (int)(config.interval_sizes[i] *
+                                    config.imbalance_percentages[j] / 100);
+        intervals[k + config.repetitions_per_test_case *
+                          (i * config.imbalance_percentages_num + j)] =
+            config.interval_generator(config.interval_sizes[i], imbalance);
+      }
     }
   }
+
   struct PerformanceTestCases test_cases = {
       .intervals = intervals,
       .intervals_num = intervals_num,

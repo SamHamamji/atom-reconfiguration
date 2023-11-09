@@ -12,25 +12,28 @@
 const char output_dir_name[] = "performance_results";
 const char output_file_format[] = "./%s/%u.csv";
 
-static struct Interval *interval_generator_binomial(const int size) {
-  return interval_factory.generate_randomized_interval(size);
-}
-
-static struct Interval *interval_generator_uniform_imbalance(const int size) {
-  int target_num = rand() % (size / 2);
-  int imbalance = rand() % (size - 2 * target_num);
-  return interval_factory.generate_interval(size, target_num,
-                                            target_num + imbalance);
+static struct Interval *interval_generator(const int size,
+                                           const int imbalance) {
+  return interval_factory.generate_interval_by_imbalance(size, imbalance);
 }
 
 const static int sizes[] = {
-    128, 256, 512, 1024, 2048, 4096, 8192, 16384,
+    200,  400,  600,  800,  1000, 1200, 1400, 1600, 1800, 2000,
+    2200, 2400, 2600, 2800, 3000, 3200, 3400, 3600, 3800, 4000,
+    4200, 4400, 4600, 4800, 5000, 5200, 5400, 5600, 5800, 6000,
 };
+const static double imbalance_percentages[] = {
+    0, 1, 2, 3, 5, 7, 10, 20, 50, 100,
+};
+
 const static struct PerformanceTestCasesConfig config = {
     .sizes_num = sizeof(sizes) / sizeof(sizes[0]),
     .interval_sizes = sizes,
-    .tests_per_size = 100,
-    .interval_generator = interval_generator_binomial,
+    .imbalance_percentages = imbalance_percentages,
+    .imbalance_percentages_num =
+        sizeof(imbalance_percentages) / sizeof(imbalance_percentages[0]),
+    .repetitions_per_test_case = 5,
+    .interval_generator = interval_generator,
 };
 
 int main() {
