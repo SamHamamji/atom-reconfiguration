@@ -6,21 +6,13 @@
 #include "../../../src/solvers/solvers.h"
 #include "./test_solvers.h"
 
-static int interval_get_imbalance(const struct Interval *const interval) {
-  int sum = 0;
-  for (int i = 0; i < interval->size; i++) {
-    sum += interval->array[i].is_source - interval->array[i].is_target;
-  }
-  return sum;
-}
-
 struct Performance *
 test_solvers_performance(const struct PerformanceTestCases *const test_cases) {
   struct Performance *const performances = calloc(
       test_cases->intervals_num * solvers_num, sizeof(struct Performance));
 
-  for (int i = 0; i < test_cases->intervals_num; i++) {
-    for (int solver_index = 0; solver_index < solvers_num; solver_index++) {
+  for (int solver_index = 0; solver_index < solvers_num; solver_index++) {
+    for (int i = 0; i < test_cases->intervals_num; i++) {
       struct timespec start;
       struct timespec finish;
       clock_gettime(CLOCK_MONOTONIC, &start);

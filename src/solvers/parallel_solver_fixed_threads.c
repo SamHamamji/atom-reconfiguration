@@ -3,7 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "common.h"
+#include "common/height_array.h"
+#include "common/solve_neutral_interval.h"
 #include "solver.h"
 
 #define THREAD_NUMBER 8
@@ -65,7 +66,7 @@ static void *get_exclusion_for_height_range_thread(void *const args) {
 
 static bool *get_exclusion_array(const struct Interval *interval,
                                  const int *height_array) {
-  const int imbalance = get_imbalance(interval, height_array);
+  const int imbalance = get_imbalance_from_height_array(interval, height_array);
   int *excluded_indexes = malloc(imbalance * sizeof(int));
   pthread_t *thread_array = malloc(THREAD_NUMBER * sizeof(pthread_t));
   struct ThreadInput *thread_inputs =
@@ -113,7 +114,7 @@ static struct Mapping *solver_function(const struct Interval *const interval) {
   }
 
   int *height_array = get_height_array(interval);
-  if (get_imbalance(interval, height_array) < 0) {
+  if (get_imbalance_from_height_array(interval, height_array) < 0) {
     free(height_array);
     return mapping_get_null();
   }

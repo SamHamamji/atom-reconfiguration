@@ -25,6 +25,8 @@ struct Interval {
 
 void interval_free(struct Interval *interval);
 
+int interval_get_imbalance(const struct Interval *const interval);
+
 void interval_print(const struct Interval *interval);
 
 struct IntervalFactory {

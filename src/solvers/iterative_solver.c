@@ -1,7 +1,8 @@
 #include <limits.h>
 #include <stdlib.h>
 
-#include "common.h"
+#include "common/height_array.h"
+#include "common/solve_neutral_interval.h"
 #include "solver.h"
 
 static bool *get_exclusion_array(const struct Interval *interval,
@@ -40,7 +41,7 @@ static struct Mapping *solver_function(const struct Interval *const interval) {
   }
 
   int *iterative_height_array = get_height_array(interval);
-  if (get_imbalance(interval, iterative_height_array) < 0) {
+  if (get_imbalance_from_height_array(interval, iterative_height_array) < 0) {
     free(iterative_height_array);
     return mapping_get_null();
   }

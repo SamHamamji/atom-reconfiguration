@@ -27,14 +27,22 @@ static void interval_shuffle(struct Interval *const interval) {
   }
 }
 
+int interval_get_imbalance(const struct Interval *const interval) {
+  int sum = 0;
+  for (int i = 0; i < interval->size; i++) {
+    sum += interval->array[i].is_source - interval->array[i].is_target;
+  }
+  return sum;
+}
+
 static struct Interval *generate_randomized_interval(const int size) {
   struct Interval *interval = malloc(sizeof(struct Interval));
   interval->size = size;
   interval->array = calloc(size, sizeof(struct Point));
   for (int i = 0; i < size; i++) {
     interval->array[i] = (struct Point){
-        .is_source = (bool)rand() % 2,
-        .is_target = (bool)rand() % 2,
+        .is_source = (bool)(rand() % 2),
+        .is_target = (bool)(rand() % 2),
     };
   }
   return interval;

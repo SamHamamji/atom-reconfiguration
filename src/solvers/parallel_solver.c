@@ -2,7 +2,8 @@
 #include <pthread.h>
 #include <stdlib.h>
 
-#include "common.h"
+#include "common/height_array.h"
+#include "common/solve_neutral_interval.h"
 #include "solver.h"
 
 struct ThreadInput {
@@ -40,7 +41,7 @@ static void *get_exclusion_for_height_thread(void *const args) {
 
 static bool *get_exclusion_array(const struct Interval *interval,
                                  const int *height_array) {
-  const int imbalance = get_imbalance(interval, height_array);
+  const int imbalance = get_imbalance_from_height_array(interval, height_array);
   int exclusion_per_height[imbalance];
   pthread_t thread_array[imbalance];
   struct ThreadInput inputs[imbalance];
@@ -71,7 +72,7 @@ static struct Mapping *solver_function(const struct Interval *const interval) {
   }
 
   int *height_array = get_height_array(interval);
-  if (get_imbalance(interval, height_array) < 0) {
+  if (get_imbalance_from_height_array(interval, height_array) < 0) {
     free(height_array);
     return mapping_get_null();
   }
