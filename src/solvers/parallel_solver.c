@@ -1,68 +1,110 @@
 #include <limits.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "common/height_array.h"
 #include "common/solve_neutral_interval.h"
 #include "solver.h"
 
-struct ThreadInput {
-  int height;
-  struct Interval interval;
+#define THREAD_NUMBER 8
+
+struct ThreadInputContext {
   const int *height_array;
+  const struct Interval *interval;
   int *output;
 };
 
-static void *get_exclusion_for_height_thread(void *const args) {
-  struct ThreadInput *input = (struct ThreadInput *)args;
+struct ThreadInput {
+  struct {
+    int min_height;
+    int max_height;
+  } height_range;
+  struct ThreadInputContext context;
+};
 
-  int relative_profit = INT_MAX;
-  int max_profit_index = INT_MAX;
+static void *get_exclusion_for_height_range_thread(void *const args) {
+  const struct ThreadInput *const input = (struct ThreadInput *)args;
+  const int output_length =
+      input->height_range.max_height - input->height_range.min_height;
+  int *excluded_indexes = malloc(output_length * sizeof(int));
 
-  for (int i = input->interval.size - 1; i >= 0; i--) {
-    if (input->height_array[i] == input->height) {
-      if (input->interval.array[i].is_source) {
-        relative_profit -= i;
-        if (relative_profit > 0) {
-          max_profit_index = i;
-          relative_profit = 0;
+  int i = input->context.interval->size - 1;
+
+  for (int height = input->height_range.max_height - 1;
+       height >= input->height_range.min_height; height--) {
+    int max_profit_index = INT_MAX;
+    int profit = INT_MAX;
+
+    for (; i >= 0; i--) {
+      if (input->context.height_array[i] == height) {
+        if (input->context.interval->array[i].is_source) {
+          profit -= i;
+          if (profit > 0) {
+            max_profit_index = i;
+            profit = 0;
+          }
+          profit -= i;
         }
-        relative_profit -= i;
-      }
-      if (input->interval.array[i].is_target) {
-        relative_profit += 2 * i;
+        if (input->context.interval->array[i].is_target) {
+          profit += 2 * i;
+        }
       }
     }
+
+    i = max_profit_index - 1;
+    excluded_indexes[height - input->height_range.min_height] =
+        max_profit_index;
   }
 
-  *input->output = max_profit_index;
+  memcpy(&input->context.output[input->height_range.min_height - 1],
+         excluded_indexes, output_length * sizeof(int));
+
+  free(excluded_indexes);
   pthread_exit(NULL);
 }
 
 static bool *get_exclusion_array(const struct Interval *interval,
                                  const int *height_array) {
   const int imbalance = get_imbalance_from_height_array(interval, height_array);
-  int exclusion_per_height[imbalance];
-  pthread_t thread_array[imbalance];
-  struct ThreadInput inputs[imbalance];
+  int *excluded_indexes = malloc(imbalance * sizeof(int));
+  pthread_t *thread_array = malloc(THREAD_NUMBER * sizeof(pthread_t));
+  struct ThreadInput *thread_inputs =
+      malloc(THREAD_NUMBER * sizeof(struct ThreadInput));
 
-  for (int height = 1; height <= imbalance; height++) {
-    inputs[height - 1].height = height;
-    inputs[height - 1].interval = *interval;
-    inputs[height - 1].height_array = height_array;
-    inputs[height - 1].output = &exclusion_per_height[height - 1];
+  const int heights_per_thread = imbalance / THREAD_NUMBER;
+  const int remaining_heights = imbalance % THREAD_NUMBER;
+  const struct ThreadInputContext context = {
+      .height_array = height_array,
+      .interval = interval,
+      .output = excluded_indexes,
+  };
 
-    pthread_create(&thread_array[height - 1], NULL,
-                   get_exclusion_for_height_thread,
-                   (void *)&inputs[height - 1]);
+  for (int i = 0; i < THREAD_NUMBER; i++) {
+    thread_inputs[i].height_range.min_height =
+        (i == 0 ? 1 : thread_inputs[i - 1].height_range.max_height);
+    thread_inputs[i].height_range.max_height =
+        thread_inputs[i].height_range.min_height + heights_per_thread +
+        (int)(i < remaining_heights);
+    thread_inputs[i].context = context;
+
+    pthread_create(&thread_array[i], NULL,
+                   get_exclusion_for_height_range_thread,
+                   (void *)&thread_inputs[i]);
   }
 
-  bool *exclusion_array = calloc(interval->size, sizeof(bool));
-  for (int height = 1; height <= imbalance; height++) {
-    pthread_join(thread_array[height - 1], NULL);
-    exclusion_array[exclusion_per_height[height - 1]] = true;
+  bool *exclusion_array = calloc(interval->size, sizeof(int));
+  for (int i = 0; i < THREAD_NUMBER; i++) {
+    pthread_join(thread_array[i], NULL);
+    for (int height = thread_inputs[i].height_range.min_height;
+         height < thread_inputs[i].height_range.max_height; height++) {
+      exclusion_array[excluded_indexes[height - 1]] = true;
+    }
   }
 
+  free(thread_inputs);
+  free(thread_array);
+  free(excluded_indexes);
   return exclusion_array;
 }
 
@@ -85,7 +127,7 @@ static struct Mapping *solver_function(const struct Interval *const interval) {
   return mapping;
 }
 
-const struct Solver parallel_solver = {
+const struct Solver parallel_solver_fixed_threads = {
     .solve = solver_function,
-    .name = "Parallel solver",
+    .name = "Parallel solver with fixed threads",
 };
