@@ -1,4 +1,3 @@
-#include <limits.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,67 +8,6 @@
 #include "solver.h"
 
 #define NO_PARTNER -1
-#define TARGET_END_OF_CHAIN -2
-#define SOURCE_END_OF_CHAIN -3
-
-// struct TargetPartners {
-//   unsigned int target_index;
-//   unsigned int left_partner_index;
-//   unsigned int right_partner_index;
-// };
-// struct PartnerArray {
-//   struct TargetPartners *array;
-//   int length;
-// };
-// static void partner_array_print(const struct PartnerArray *p) {
-//   for (int i = 0; i < p->length; i++) {
-//     printf("target_index: %11d | left: %11d | right: %11d\n",
-//            p->array[i].target_index, p->array[i].left_partner_index,
-//            p->array[i].right_partner_index);
-//   }
-//   printf("total length: %d\n\n", p->length);
-// }
-// static struct PartnerArray *
-// get_partner_array(const struct Interval *const interval) {
-//   int target_num = interval_get_targets(interval);
-//   struct PartnerArray *partners = malloc(sizeof(struct PartnerArray));
-//   partners->array = malloc(sizeof(struct TargetPartners) * target_num);
-//   partners->length = target_num;
-//   int c = 0;
-//   for (int i = 0; i < interval->size; i++) {
-//     if (interval->array[i].is_target) {
-//       partners->array[c].target_index = i;
-//       partners->array[c].left_partner_index = NO_PARTNER;
-//       partners->array[c].right_partner_index = NO_PARTNER;
-//       c++;
-//     }
-//   }
-//   struct StackElement *target_index_stack_head = NULL;
-//   struct StackElement *source_stack_head = NULL;
-//   int target_counter = 0;
-//   for (int i = 0; i < interval->size; i++) {
-//     if (interval->array[i].is_source) {
-//       source_stack_head = stack_push(source_stack_head, i);
-//       if (!stack_is_empty(target_index_stack_head)) {
-//         partners->array[target_index_stack_head->value].right_partner_index =
-//         i; target_index_stack_head = stack_pop(target_index_stack_head);
-//       }
-//     }
-//     if (interval->array[i].is_target) {
-//       target_index_stack_head =
-//           stack_push(target_index_stack_head, target_counter);
-//       if (!stack_is_empty(source_stack_head)) {
-//         partners->array[target_counter].left_partner_index =
-//             source_stack_head->value;
-//         source_stack_head = stack_pop(source_stack_head);
-//       }
-//       target_counter++;
-//     }
-//   }
-//   stack_free(target_index_stack_head);
-//   stack_free(source_stack_head);
-//   return partners;
-// }
 
 struct AlternatingChains {
   int *source_right_partners;
@@ -219,7 +157,7 @@ static struct Mapping *solver_function(const struct Interval *const interval) {
   return mapping;
 }
 
-const struct Solver aggarwal_test = {
+const struct Solver aggarwal_solver = {
     .solve = solver_function,
     .name = "Aggarwal solver",
 };
