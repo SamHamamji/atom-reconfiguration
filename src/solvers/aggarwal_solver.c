@@ -23,20 +23,16 @@ static int get_initial_exclusion_cost(const struct AlternatingChains *chains,
 static int get_exclusion_from_chain(const struct AlternatingChains *chains,
                                     int chain_start_index) {
   int best_exclusion_index = chain_start_index;
-  int best_exclusion_cost =
-      get_initial_exclusion_cost(chains, chain_start_index);
+  int best_exclusion_cost = 0;
 
   int current_exclusion_cost = best_exclusion_cost;
   int current_exclusion_index = chain_start_index;
 
-  while (true) {
-    if (chains->source_right_partners[current_exclusion_index] ==
-        NO_RIGHT_PARTNER) {
-      break;
-    }
-    current_exclusion_cost =
-        current_exclusion_cost - current_exclusion_index +
+  while (chains->source_right_partners[current_exclusion_index] !=
+         NO_RIGHT_PARTNER) {
+    current_exclusion_cost +=
         chains->source_right_partners[current_exclusion_index] * 2 -
+        current_exclusion_index -
         chains->target_right_partners
             [chains->source_right_partners[current_exclusion_index]];
 
