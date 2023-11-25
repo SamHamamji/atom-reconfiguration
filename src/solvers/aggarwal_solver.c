@@ -1,78 +1,17 @@
-#include <stdbool.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "../interval/interval.h"
+#include "common/alternating_chains.h"
 #include "common/solve_neutral_interval.h"
 #include "common/stack.h"
 #include "solver.h"
-
-#define NO_PARTNER -1
-
-struct AlternatingChains {
-  int *source_right_partners;
-  int *target_right_partners;
-  int *chain_start_indexes;
-};
-
-static void alternating_chains_free(struct AlternatingChains *chains) {
-  free(chains->chain_start_indexes);
-  free(chains->source_right_partners);
-  free(chains->target_right_partners);
-  free(chains);
-}
-
-static struct AlternatingChains *
-get_alternating_chains(const struct Interval *const interval, int imbalance) {
-  int *source_right_partners = malloc(interval->size * sizeof(int));
-  int *target_right_partners = malloc(interval->size * sizeof(int));
-  int *chain_start_indexes = malloc(imbalance * sizeof(int));
-
-  memset(target_right_partners, NO_PARTNER, interval->size * sizeof(int));
-  memset(source_right_partners, NO_PARTNER, interval->size * sizeof(int));
-
-  struct StackElement *target_index_stack_head = NULL;
-  struct StackElement *source_index_stack_head = NULL;
-
-  int chain_counter = 0;
-  for (int i = 0; i < interval->size; i++) {
-    if (interval->array[i].is_source) {
-      source_index_stack_head = stack_push(source_index_stack_head, i);
-      if (!stack_is_empty(target_index_stack_head)) {
-        target_right_partners[target_index_stack_head->value] = i;
-
-        target_index_stack_head = stack_pop(target_index_stack_head);
-      } else if (chain_counter < imbalance) {
-        chain_start_indexes[chain_counter] = i;
-        chain_counter++;
-      }
-    }
-    if (interval->array[i].is_target) {
-      target_index_stack_head = stack_push(target_index_stack_head, i);
-      if (!stack_is_empty(source_index_stack_head)) {
-        source_right_partners[source_index_stack_head->value] = i;
-        source_index_stack_head = stack_pop(source_index_stack_head);
-      }
-    }
-  }
-
-  stack_free(target_index_stack_head);
-  stack_free(source_index_stack_head);
-
-  struct AlternatingChains *alternating_chains =
-      malloc(sizeof(struct AlternatingChains));
-  alternating_chains->target_right_partners = target_right_partners;
-  alternating_chains->source_right_partners = source_right_partners;
-  alternating_chains->chain_start_indexes = chain_start_indexes;
-  return alternating_chains;
-}
 
 static int get_initial_exclusion_cost(const struct AlternatingChains *chains,
                                       int chain_start_index) {
   int initial_exclusion_cost = -chain_start_index;
   for (int i = chain_start_index;;
        i = chains->target_right_partners[chains->source_right_partners[i]]) {
-    if (chains->source_right_partners[i] == NO_PARTNER) {
+    if (chains->source_right_partners[i] == NO_RIGHT_PARTNER) {
       initial_exclusion_cost += i;
       break;
     }
@@ -91,7 +30,8 @@ static int get_exclusion_from_chain(const struct AlternatingChains *chains,
   int current_exclusion_index = chain_start_index;
 
   while (true) {
-    if (chains->source_right_partners[current_exclusion_index] == NO_PARTNER) {
+    if (chains->source_right_partners[current_exclusion_index] ==
+        NO_RIGHT_PARTNER) {
       break;
     }
     current_exclusion_cost =
