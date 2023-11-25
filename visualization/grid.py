@@ -4,7 +4,6 @@ import plotly.express as px
 
 from dash import dcc, html
 from CsvHeader import CsvHeader
-from data_processing import compute_mean_for_duplicates
 
 class GraphConfig(typing.NamedTuple):
     x: CsvHeader
@@ -96,14 +95,10 @@ class ImbalanceGrid(html.Div):
         title_generator=lambda x: f"{x}%",
     )
     def __init__(self, dataframe: pd.DataFrame):
-        dataframe[CsvHeader.IMBALANCE_PERCENT.value] = dataframe[CsvHeader.IMBALANCE_PERCENT.value].apply(round) # type: ignore
-        dataframe = compute_mean_for_duplicates(dataframe)
-        imbalance_percentages = dataframe[CsvHeader.IMBALANCE_PERCENT.value].unique()
+        imbalance_percentages = dataframe[CsvHeader.IMBALANCE_PERCENT.value].sort_values().unique()
 
         grid = html.Div(
             [GridElement(dataframe, self.graphConfig, imbalance) for imbalance in imbalance_percentages],
             className="grid"
         )
         html.Div.__init__(self, [html.H3("Performance by imbalance:"), grid])
-
-Grid = typing.Union[HeatMapGrid, ImbalanceGrid, SolverGrid, SizeGrid]

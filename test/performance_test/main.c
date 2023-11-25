@@ -8,6 +8,7 @@
 #include "./main.h"
 #include "./solvers/test_cases.h"
 #include "./solvers/test_solvers.h"
+#include "solvers/performance.h"
 
 const char output_dir_name[] = "performance_results";
 const char output_file_format[] = "./%s/%u.csv";
@@ -18,23 +19,39 @@ static struct Interval *interval_generator(const int size,
 }
 
 const static int sizes[] = {
-    200,  400,  600,  800,  1000, 1200, 1400, 1600, 1800, 2000,
-    2200, 2400, 2600, 2800, 3000, 3200, 3400, 3600, 3800, 4000,
-    4200, 4400, 4600, 4800, 5000, 5200, 5400, 5600, 5800, 6000,
+    50,  100, 150, 200, 250, 300, 350, 400, 450, 500,
+    550, 600, 650, 700, 750, 800, 850, 900, 950, 1000,
 };
 const static double imbalance_percentages[] = {
     0, 1, 2, 3, 5, 7, 10, 20, 50, 100,
 };
 
+const static struct Solver *config_solvers[] = {
+    &iterative_solver,
+    &parallel_solver,
+    &karp_li_solver,
+    &aggarwal_solver,
+};
+
 const static struct PerformanceTestCasesConfig config = {
-    .sizes_num = sizeof(sizes) / sizeof(sizes[0]),
     .interval_sizes = sizes,
     .imbalance_percentages = imbalance_percentages,
+    .solvers = config_solvers,
+    .interval_generator = interval_generator,
+    .sizes_num = sizeof(sizes) / sizeof(sizes[0]),
     .imbalance_percentages_num =
         sizeof(imbalance_percentages) / sizeof(imbalance_percentages[0]),
+    .solvers_num = sizeof(config_solvers) / sizeof(config_solvers[0]),
     .repetitions_per_test_case = 5,
-    .interval_generator = interval_generator,
 };
+
+char *get_output_file_name(unsigned int seed) {
+  char *const output_file_name =
+      malloc(sizeof(output_dir_name) + sizeof(output_file_format) +
+             (int)log10(seed) + 1);
+  sprintf(output_file_name, output_file_format, output_dir_name, seed);
+  return output_file_name;
+}
 
 int main() {
   printf("RUNNING PERFORMANCE TESTS\n");
@@ -42,24 +59,15 @@ int main() {
   srand(seed);
   printf("Seed set to %u\n", seed);
 
-  const struct PerformanceTestCases test_cases =
-      generate_performance_tests(config);
-  struct Performance *const result = test_solvers_performance(&test_cases);
-  const int result_size = test_cases.intervals_num * solvers_num;
+  struct PerformanceArray *const results = test_solvers_performance(&config);
 
+  char *const output_file_name = get_output_file_name(seed);
   mkdir(output_dir_name, S_IRWXU | S_IRWXG | S_IRWXO);
-  char *const output_file_name =
-      malloc(sizeof(output_dir_name) + sizeof(output_file_format) +
-             (int)log10(seed) + 1);
-  sprintf(output_file_name, output_file_format, output_dir_name, seed);
 
-  FILE *output_file = fopen(output_file_name, "w");
-  performance_write_to_csv(result, result_size, output_file);
-  fclose(output_file);
+  performance_write_to_csv(results, output_file_name);
   printf("Output written to %s\n", output_file_name);
 
   free(output_file_name);
-  free(result);
-  performance_test_cases_free(test_cases);
+  performance_array_free(results);
   return 0;
 };

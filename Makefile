@@ -9,7 +9,8 @@ source-files := $(shell find src -name "*.c" -not -path $(main-file))
 unit-test-files := $(shell find test/unit_test -name "*.c")
 performance-test-files := $(shell find test/performance_test -name "*.c")
 
-libraries-flags := -lm
+libraries-flags := -lm -lpthread
+extra-flags := -pg # -fsanitize=address # -fsanitize=thread
 install-path := ~/.local/bin/$(exec:.out=)
 
 default-visualization-port := 8050
@@ -22,15 +23,15 @@ check-build-folder:
 
 build-main: $(main-file) $(source-files)
 	make check-build-folder
-	clang -o $(exec) $(main-file) $(source-files) $(libraries-flags)
+	clang -o $(exec) $(main-file) $(source-files) $(libraries-flags) $(extra-flags)
 
 build-unit-tests: $(source-files) $(unit-test-files)
 	make check-build-folder
-	clang -o $(exec-unit-tests) $(source-files) $(unit-test-files) $(libraries-flags)
+	clang -o $(exec-unit-tests) $(source-files) $(unit-test-files) $(libraries-flags) $(extra-flags)
 
 build-performance-tests: $(source-files) $(performance-test-files)
 	make check-build-folder
-	clang -o $(exec-performance-tests) $(source-files) $(performance-test-files) $(libraries-flags)
+	clang -o $(exec-performance-tests) $(source-files) $(performance-test-files) $(libraries-flags) $(extra-flags)
 
 run-main: $(exec)
 	./$(exec)

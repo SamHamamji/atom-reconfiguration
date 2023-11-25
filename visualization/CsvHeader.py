@@ -1,7 +1,7 @@
 from enum import Enum
 
 class RawCsvHeader(Enum):
-    IMBALANCE = "imbalance"
+    IMBALANCE = "imbalance_percentage"
     SIZE = "size"
     SOLVER = "solver"
     TIME_TAKEN = "time_taken"
