@@ -127,7 +127,7 @@ static struct Mapping *solver_function(const struct Interval *const interval) {
   return mapping;
 }
 
-const struct Solver parallel_solver = {
+const struct Solver karp_li_parallel_solver = {
     .solve = solver_function,
-    .name = "Parallel solver with fixed threads",
+    .name = "Karp-Li solver parallel",
 };

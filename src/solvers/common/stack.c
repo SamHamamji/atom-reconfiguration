@@ -1,5 +1,4 @@
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "stack.h"
@@ -22,20 +21,10 @@ void stack_copy(struct StackElement *stack, int *array, int value) {
     array[stack->value] = value;
     stack = stack->next;
   }
-  printf("\n");
 }
 
 inline bool stack_is_empty(const struct StackElement *stack_head) {
   return stack_head == NULL;
-}
-
-void stack_print(struct StackElement *stack_head) {
-  struct StackElement *current = stack_head;
-  while (current != NULL) {
-    printf("%d ", current->value);
-    current = current->next;
-  }
-  printf("\n");
 }
 
 void stack_free(struct StackElement *stack_element) {

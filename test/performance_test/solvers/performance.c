@@ -1,5 +1,7 @@
-#include "./performance.h"
+#include <stdio.h>
 #include <stdlib.h>
+
+#include "./performance.h"
 
 const static char csv_header[] =
     "solver,size,imbalance_percentage,time_taken\n";

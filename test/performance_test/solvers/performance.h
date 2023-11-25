@@ -1,7 +1,5 @@
 #pragma once
 
-#include <stdio.h>
-
 #include "../../../src/solvers/solver.h"
 
 struct Performance {

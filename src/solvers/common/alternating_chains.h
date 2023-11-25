@@ -9,6 +9,7 @@ struct AlternatingChains {
   int *source_right_partners;
   int *target_right_partners;
   int *chain_start_indexes;
+  int interval_size;
 };
 
 void alternating_chains_free(struct AlternatingChains *chains);

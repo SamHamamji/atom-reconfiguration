@@ -55,6 +55,7 @@ get_alternating_chains(const struct Interval *const interval, int imbalance) {
   alternating_chains->target_right_partners = target_right_partners;
   alternating_chains->source_right_partners = source_right_partners;
   alternating_chains->chain_start_indexes = chain_start_indexes;
+  alternating_chains->interval_size = interval->size;
 
   return alternating_chains;
 }
