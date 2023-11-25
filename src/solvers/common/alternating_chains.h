@@ -6,8 +6,7 @@
 #include "../../../src/interval/interval.h"
 
 struct AlternatingChains {
-  int *source_right_partners;
-  int *target_right_partners;
+  int *right_partners;
   int *chain_start_indexes;
   int interval_size;
 };
@@ -16,3 +15,6 @@ void alternating_chains_free(struct AlternatingChains *chains);
 
 struct AlternatingChains *
 get_alternating_chains(const struct Interval *const interval, int imbalance);
+
+int get_exclusion_from_chain(const struct AlternatingChains *chains,
+                             int chain_index, int max_index);

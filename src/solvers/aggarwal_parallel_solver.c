@@ -24,36 +24,6 @@ struct ThreadInput {
   } chain_range;
 };
 
-static int get_exclusion_from_chain(const struct AlternatingChains *chains,
-                                    int chain_index, int max_index) {
-  int current_exclusion_cost = 0;
-  int current_exclusion_index = chains->chain_start_indexes[chain_index];
-
-  int best_exclusion_cost = current_exclusion_cost;
-  int best_exclusion_index = current_exclusion_index;
-
-  while (chains->source_right_partners[current_exclusion_index] !=
-             NO_RIGHT_PARTNER &&
-         current_exclusion_index < max_index) {
-    current_exclusion_cost +=
-        chains->source_right_partners[current_exclusion_index] * 2 -
-        current_exclusion_index -
-        chains->target_right_partners
-            [chains->source_right_partners[current_exclusion_index]];
-
-    current_exclusion_index =
-        chains->target_right_partners
-            [chains->source_right_partners[current_exclusion_index]];
-
-    if (current_exclusion_cost <= best_exclusion_cost) {
-      best_exclusion_cost = current_exclusion_cost;
-      best_exclusion_index = current_exclusion_index;
-    }
-  }
-
-  return best_exclusion_index;
-}
-
 static void *get_exclusion_from_chain_range(void *const args) {
   const struct ThreadInput *const input = (struct ThreadInput *)args;
   const int output_length =
