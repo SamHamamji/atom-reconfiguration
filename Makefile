@@ -10,7 +10,7 @@ unit-test-files := $(shell find test/unit_test -name "*.c")
 performance-test-files := $(shell find test/performance_test -name "*.c")
 
 libraries-flags := -lm -lpthread
-extra-flags := -pg # -fsanitize=address # -fsanitize=thread
+extra-flags := # -pg # -fsanitize=address # -fsanitize=thread
 install-path := ~/.local/bin/$(exec:.out=)
 
 default-visualization-port := 8050

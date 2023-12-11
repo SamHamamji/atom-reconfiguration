@@ -25,7 +25,7 @@ get_alternating_chains(const struct Interval *const interval, int imbalance) {
 
   for (int i = 0; i < interval->size; i++) {
     current_chain = current_chain + (int)interval->array[i].is_source -
-                    ((i != 0) ? (int)interval->array[i - 1].is_target : 0);
+                    (int)(i != 0 && interval->array[i - 1].is_target);
 
     if (interval->array[i].is_source == interval->array[i].is_target ||
         current_chain < 0 || current_chain >= imbalance) {
@@ -34,10 +34,7 @@ get_alternating_chains(const struct Interval *const interval, int imbalance) {
 
     if (chain_start_indexes[current_chain] == NO_CHAIN_START) {
       chain_start_indexes[current_chain] = i;
-    } else if (interval->array[i].is_source) {
-      right_partners[current_chain_node[current_chain]] = i;
-    }
-    if (interval->array[i].is_target) {
+    } else {
       right_partners[current_chain_node[current_chain]] = i;
     }
     current_chain_node[current_chain] = i;

@@ -6,9 +6,7 @@ struct Mapping *solve_neutral_interval(const struct Interval *interval,
                                        const bool *exclusion_array) {
   unsigned int target_num = 0;
   for (unsigned int i = 0; i < interval->size; i++) {
-    if (interval->array[i].is_target) {
-      target_num++;
-    }
+    target_num += (bool)interval->array[i].is_target;
   }
 
   struct Pair *pairs = malloc(target_num * sizeof(struct Pair));

@@ -6,7 +6,6 @@
 #include "../interval/interval.h"
 #include "common/alternating_chains.h"
 #include "common/solve_neutral_interval.h"
-#include "common/stack.h"
 #include "solver.h"
 
 #define THREAD_NUMBER 8

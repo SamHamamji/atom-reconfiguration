@@ -3,7 +3,6 @@
 #include "../interval/interval.h"
 #include "common/alternating_chains.h"
 #include "common/solve_neutral_interval.h"
-#include "common/stack.h"
 #include "solver.h"
 
 static bool *get_exclusion_from_chains(const struct AlternatingChains *chains,
