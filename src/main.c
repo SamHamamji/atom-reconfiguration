@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "interval/interval.h"
+#include "./lib/interval/interval.h"
+#include "./lib/mapping/mapping.h"
+#include "./lib/solvers/solvers.h"
 #include "main.h"
-#include "mapping/mapping.h"
-#include "solvers/solvers.h"
 
 int main() {
   unsigned int seed = (unsigned int)time(NULL);
@@ -16,7 +16,7 @@ int main() {
       interval_factory.generate_interval_by_imbalance(20, 16);
   interval_print(interval);
 
-  struct Mapping *mapping = aggarwal_parallel_solver.solve(interval);
+  struct Mapping *mapping = karp_li_solver.solve(interval);
   mapping_print(mapping);
 
   interval_free(interval);
