@@ -48,7 +48,7 @@ class SolverGrid(html.Div):
             [GridElement(new_dataframe, self.graphConfig, solver_name) for solver_name in solver_names],
             className="grid"
         )
-        grid_title = html.H3("Performance by solver")
+        grid_title = html.H1("Performance by solver")
         html.Div.__init__(self, [grid_title, grid])
 
 class HeatMapGrid(html.Div):
@@ -66,7 +66,7 @@ class HeatMapGrid(html.Div):
             [GridElement(dataframe, self.graphConfig, solver_name) for solver_name in solver_names],
             className="grid"
         )
-        grid_title = html.H3("Performance map by solver")
+        grid_title = html.H1("Performance map by solver")
         html.Div.__init__(self, [grid_title, grid])
 
 class SizeGrid(html.Div):
@@ -83,7 +83,7 @@ class SizeGrid(html.Div):
             [GridElement(dataframe, self.graphConfig, size) for size in sizes],
             className="grid"
         )
-        grid_title = html.H3("Performance by size")
+        grid_title = html.H1("Performance by size")
         html.Div.__init__(self, [grid_title, grid])
 
 class ImbalanceGrid(html.Div):
@@ -101,4 +101,4 @@ class ImbalanceGrid(html.Div):
             [GridElement(dataframe, self.graphConfig, imbalance) for imbalance in imbalance_percentages],
             className="grid"
         )
-        html.Div.__init__(self, [html.H3("Performance by imbalance:"), grid])
+        html.Div.__init__(self, [html.H1("Performance by imbalance"), grid])

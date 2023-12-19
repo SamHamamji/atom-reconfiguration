@@ -1,10 +1,35 @@
 import pandas as pd
-from dash import Dash, html
+from dash import Dash, html, Output, Input, dcc
+
+from grid import HeatMapGrid, ImbalanceGrid, SolverGrid, SizeGrid
 
 class PerformanceVisualizationApp(Dash):
-    def __init__(self, dataframe: pd.DataFrame, grid_types: list[html.Div]):
+    tab_content_types: dict[str, type[html.Div]] = {
+        "Imbalance Grid": ImbalanceGrid,
+        "Solver Grid": SolverGrid,
+        "HeatMap Grid": HeatMapGrid,
+        "Size Grid": SizeGrid,
+    }
+    tabs : list[dcc.Tab] = list(map(lambda name: dcc.Tab(label=name, value=name), tab_content_types.keys()))
+
+    def __init__(self, dataframe: pd.DataFrame):
         Dash.__init__(self, __name__, external_stylesheets=["./style.css"])
         self.layout = html.Div([
-            html.H1("Performance results"),
-            *map(lambda grid: grid(dataframe), grid_types),
+            dcc.Tabs(
+                id='tabs',
+                value=PerformanceVisualizationApp.tab_content_types.keys().__iter__().__next__(),
+                children=PerformanceVisualizationApp.tabs,
+            ),
+            html.Div(id='tab-content'),
         ], className="app")
+
+        self.title = "Performance results"
+
+        @self.callback(
+            Output('tab-content', 'children'),
+            Input('tabs', 'value'),
+        )
+        def switch_tab(tab_content_type):
+            return [
+                PerformanceVisualizationApp.tab_content_types[tab_content_type](dataframe),
+            ]

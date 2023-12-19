@@ -2,7 +2,6 @@ import argparse
 
 from app import PerformanceVisualizationApp
 from data_processing import read_data
-from grid import HeatMapGrid, ImbalanceGrid, SolverGrid, SizeGrid
 
 parser = argparse.ArgumentParser(
     description="Visualize linear assignment solvers performance results",
@@ -24,10 +23,5 @@ parser.add_argument(
 if __name__== "__main__":
     args = parser.parse_args()
     dataframe = read_data(args.file)
-    app = PerformanceVisualizationApp(dataframe, [
-        # HeatMapGrid,
-        ImbalanceGrid,
-        # SolverGrid,
-        # SizeGrid,
-    ])
+    app = PerformanceVisualizationApp(dataframe)
     app.run(debug=True, port=args.port)
