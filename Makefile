@@ -9,9 +9,9 @@ endif
 
 # Compiler flags
 library-flags := -lm -lpthread
-debugging-flags := -Wall -Wextra # -pedantic -fsanitize=undefined,address -pg
+debugging-flags := -Wall -Wextra -fsanitize=undefined,address -pg
 optimization-flags := -O3
-all-flags := $(library-flags) $(debugging-flags) $(optimization-flags)
+default-flags := $(library-flags) $(debugging-flags)
 
 # Folders
 source-folder := src
@@ -38,20 +38,39 @@ lib-objects := $(patsubst $(source-folder)/%.c, $(object-folder)/%.o, $(lib-file
 unit-test-objects := $(patsubst $(source-folder)/%.c, $(object-folder)/%.o, $(unit-test-files))
 performance-test-objects := $(patsubst $(source-folder)/%.c, $(object-folder)/%.o, $(performance-test-files))
 
-# Build all executables
+# Building executables
+.PHONY: all
 all: $(exec-main) $(exec-unit-tests) $(exec-performance-tests)
+
+.PHONY: pedantic-build
+pedantic-build: default-flags += -pedantic
+pedantic-build: $(exec-main) $(exec-unit-tests) $(exec-performance-tests) | $(exec-folder)
+	@$(c-compiler) $(lib-files) $(main-file) -o $(exec-main) $(default-flags)
+	@$(c-compiler) $(lib-files) $(unit-test-files) -o $(exec-unit-tests) $(default-flags)
+	@$(c-compiler) $(lib-files) $(performance-test-files) -o $(exec-performance-tests) $(default-flags)
+
+.PHONY: scan-build
+scan-build: c-compiler := scan-build $(c-compiler)
+scan-build: $(exec-main) $(exec-unit-tests) $(exec-performance-tests)
+
+.PHONY: release-build
+release-build: default-flags = $(library-flags) $(optimization-flags)
+release-build: $(exec-main) $(exec-unit-tests) $(exec-performance-tests)
 
 # Build main executable
 $(exec-main): $(lib-objects) $(main-file) | $(exec-folder)
-	@$(c-compiler) $^ -o $@ $(all-flags)
+	@echo "Building main..."
+	@$(c-compiler) $^ -o $@ $(default-flags)
 
 # Build unit tests
 $(exec-unit-tests): $(lib-objects) $(unit-test-objects) | $(exec-folder)
-	@$(c-compiler) $^ -o $@ $(all-flags)
+	@echo "Building unit tests..."
+	@$(c-compiler) $^ -o $@ $(default-flags)
 
 # Build performance tests
 $(exec-performance-tests): $(lib-objects) $(performance-test-objects) | $(exec-folder)
-	@$(c-compiler) $^ -o $@ $(all-flags)
+	@echo "Building performance tests..."
+	@$(c-compiler) $^ -o $@ $(default-flags)
 
 # Create folders
 $(object-folder) $(exec-folder):
@@ -62,9 +81,11 @@ $(object-folder)/%.o: $(source-folder)/%.c | $(object-folder)
 	@mkdir -p $(@D)
 	@$(c-compiler) -c $< -o $@
 
-.PHONY: clean visualize
-
-visualize: $(file) $(visualize-performance-file) | $(python-venv)
+.PHONY: visualize
+visualize: $(file) $(visualize-performance-file)
+	@if [ ! -d "$(python-venv)" ]; then \
+		$(MAKE) $(python-venv); \
+	fi
 	@$(python-venv)/bin/python $(visualize-performance-file) --file $(file) --port $(port)
 
 $(python-venv): requirements.txt
@@ -73,5 +94,6 @@ $(python-venv): requirements.txt
 	@$(python-venv)/bin/pip install -r requirements.txt
 	@echo -e "Virtual environment created successfully.\\n"
 
+.PHONY: clean
 clean:
-	rm -rdf $(exec-folder) $(object-folder)
+	@rm -rdf $(exec-folder) $(object-folder)

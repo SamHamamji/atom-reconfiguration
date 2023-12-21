@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "../../lib/solvers/solvers.h"
+#include "../../lib/solver/solver.h"
 #include "test_cases.h"
 
 struct PerformanceTestCases *
@@ -11,7 +11,7 @@ generate_performance_tests(const struct PerformanceTestCasesConfig *config) {
                               config->imbalance_percentages_num *
                               config->repetitions_per_test_case;
   test_cases->intervals =
-      malloc(test_cases->intervals_num * sizeof(struct Interval **));
+      malloc(test_cases->intervals_num * sizeof(struct Interval *));
   test_cases->imbalance_percentages =
       malloc(test_cases->intervals_num * sizeof(double));
 

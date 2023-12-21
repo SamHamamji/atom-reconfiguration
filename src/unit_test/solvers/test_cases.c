@@ -188,12 +188,12 @@ static struct Point interval_26[] = {
 static struct Pair mapping_26[] = {{1, 3}, {4, 4}};
 
 #define NEW_SOLVER_TEST_CASE(interval, mapping)                                \
-  ((struct SolverTestCase){                                                    \
-      .input = {.array = interval,                                             \
-                .size = sizeof(interval) / sizeof(interval[0])},               \
-      .expected_output = {.pairs = mapping,                                    \
-                          .pair_count = sizeof(mapping) / sizeof(mapping[0])}, \
-  })
+  {                                                                            \
+    .input = {.array = interval,                                               \
+              .size = sizeof(interval) / sizeof(interval[0])},                 \
+    .expected_output = {.pairs = mapping,                                      \
+                        .pair_count = sizeof(mapping) / sizeof(mapping[0])},   \
+  }
 
 const struct SolverTestCase solver_test_cases[] = {
     NEW_SOLVER_TEST_CASE(interval_1, mapping_1),

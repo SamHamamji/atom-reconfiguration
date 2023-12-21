@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../lib/solvers/solvers.h"
+#include "../lib/solver/solver.h"
 #include "./solvers/test_solvers.h"
 
 int main(void) {

@@ -1,9 +1,9 @@
 #include <limits.h>
 #include <stdlib.h>
 
-#include "common/height_array.h"
-#include "common/solve_neutral_interval.h"
-#include "solver.h"
+#include "../common/height_array.h"
+#include "../common/solve_neutral_interval.h"
+#include "../solver.h"
 
 static bool *get_exclusion_array(const struct Interval *interval,
                                  const int *iterative_height_array) {
@@ -53,7 +53,8 @@ static struct Mapping *solver_function(const struct Interval *const interval) {
   }
 
   bool *exclusion_array = get_exclusion_array(interval, iterative_height_array);
-  struct Mapping *mapping = solve_neutral_interval(interval, exclusion_array);
+  struct Mapping *mapping = solve_neutral_interval(
+      interval, exclusion_array, interval_get_counts(interval).target_num);
 
   free(iterative_height_array);
   free(exclusion_array);

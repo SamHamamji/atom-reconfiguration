@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "common/height_array.h"
-#include "common/solve_neutral_interval.h"
-#include "solver.h"
+#include "../common/height_array.h"
+#include "../common/solve_neutral_interval.h"
+#include "../solver.h"
 
 #define THREAD_NUMBER 8
 
@@ -23,8 +23,8 @@ struct ThreadInput {
   struct ThreadInputContext context;
 };
 
-static void *get_exclusion_for_height_range_thread(void *const args) {
-  const struct ThreadInput *const input = (struct ThreadInput *)args;
+static void *get_exclusion_for_height_range_thread(void *args) {
+  const struct ThreadInput *input = (struct ThreadInput *)args;
   const int output_length =
       input->height_range.max_height - input->height_range.min_height;
   int *excluded_indexes = malloc(output_length * sizeof(int));
@@ -108,7 +108,7 @@ static bool *get_exclusion_array(const struct Interval *interval,
   return exclusion_array;
 }
 
-static struct Mapping *solver_function(const struct Interval *const interval) {
+static struct Mapping *solver_function(const struct Interval *interval) {
   if (interval->size <= 0) {
     return mapping_get_null();
   }
@@ -120,7 +120,8 @@ static struct Mapping *solver_function(const struct Interval *const interval) {
   }
 
   bool *exclusion_array = get_exclusion_array(interval, height_array);
-  struct Mapping *mapping = solve_neutral_interval(interval, exclusion_array);
+  struct Mapping *mapping = solve_neutral_interval(
+      interval, exclusion_array, interval_get_counts(interval).target_num);
 
   free(height_array);
   free(exclusion_array);

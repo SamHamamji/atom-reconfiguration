@@ -18,7 +18,7 @@ bool mapping_equals(const struct Mapping *a, const struct Mapping *b) {
     return 0;
   }
 
-  bool *const used = calloc(a->pair_count, sizeof(bool));
+  bool *used = calloc(a->pair_count, sizeof(bool));
 
   for (int i = 0; i < a->pair_count; i++) {
     bool found = false;

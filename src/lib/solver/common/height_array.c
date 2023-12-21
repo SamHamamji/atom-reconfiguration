@@ -3,7 +3,7 @@
 #include "height_array.h"
 
 int *get_height_array(const struct Interval *interval) {
-  if (interval->size <= 0) {
+  if (interval->size < 0) {
     return NULL;
   }
 

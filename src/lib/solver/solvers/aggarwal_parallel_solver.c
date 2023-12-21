@@ -3,16 +3,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../interval/interval.h"
-#include "common/alternating_chains.h"
-#include "common/solve_neutral_interval.h"
-#include "solver.h"
+#include "../../interval/interval.h"
+#include "../common/alternating_chains.h"
+#include "../common/solve_neutral_interval.h"
+#include "../solver.h"
 
 #define THREAD_NUMBER 8
 
 struct ThreadInputContext {
   const struct AlternatingChains *chains;
   int *output;
+  int interval_size;
 };
 
 struct ThreadInput {
@@ -23,13 +24,13 @@ struct ThreadInput {
   } chain_range;
 };
 
-static void *get_exclusion_from_chain_range(void *const args) {
-  const struct ThreadInput *const input = (struct ThreadInput *)args;
+static void *get_exclusion_from_chain_range(void *args) {
+  const struct ThreadInput *input = (struct ThreadInput *)args;
   const int output_length =
       input->chain_range.max_chain - input->chain_range.min_chain;
   int *excluded_indexes = malloc(output_length * sizeof(int));
 
-  int max_exclusion_index = input->context.chains->interval_size - 1;
+  int max_exclusion_index = input->context.interval_size - 1;
 
   for (int height = input->chain_range.max_chain - 1;
        height >= input->chain_range.min_chain; height--) {
@@ -46,7 +47,7 @@ static void *get_exclusion_from_chain_range(void *const args) {
 }
 
 static bool *get_exclusion_from_chains(const struct AlternatingChains *chains,
-                                       int imbalance) {
+                                       int interval_size, int imbalance) {
   int *excluded_indexes = malloc(sizeof(int) * imbalance);
   pthread_t *thread_array = malloc(THREAD_NUMBER * sizeof(pthread_t));
   struct ThreadInput *thread_inputs =
@@ -57,6 +58,7 @@ static bool *get_exclusion_from_chains(const struct AlternatingChains *chains,
   const struct ThreadInputContext context = {
       .chains = chains,
       .output = excluded_indexes,
+      .interval_size = interval_size,
   };
 
   for (int i = 0; i < THREAD_NUMBER; i++) {
@@ -71,7 +73,7 @@ static bool *get_exclusion_from_chains(const struct AlternatingChains *chains,
                    &thread_inputs[i]);
   }
 
-  bool *exclusion_array = calloc(chains->interval_size, sizeof(bool));
+  bool *exclusion_array = calloc(interval_size, sizeof(bool));
   for (int i = 0; i < THREAD_NUMBER; i++) {
     pthread_join(thread_array[i], NULL);
     for (int height = thread_inputs[i].chain_range.min_chain;
@@ -86,12 +88,14 @@ static bool *get_exclusion_from_chains(const struct AlternatingChains *chains,
   return exclusion_array;
 }
 
-static struct Mapping *solver_function(const struct Interval *const interval) {
+static struct Mapping *solver_function(const struct Interval *interval) {
   if (interval->size <= 0) {
     return mapping_get_null();
   }
 
-  int imbalance = interval_get_imbalance(interval);
+  struct IntervalCounts counts = interval_get_counts(interval);
+  int imbalance = get_imbalance_from_counts(counts);
+
   if (imbalance < 0) {
     return mapping_get_null();
   }
@@ -99,16 +103,18 @@ static struct Mapping *solver_function(const struct Interval *const interval) {
   struct AlternatingChains *chains =
       get_alternating_chains(interval, imbalance);
 
-  bool *exclusion_array = get_exclusion_from_chains(chains, imbalance);
+  bool *exclusion_array =
+      get_exclusion_from_chains(chains, interval->size, imbalance);
   alternating_chains_free(chains);
 
-  struct Mapping *mapping = solve_neutral_interval(interval, exclusion_array);
+  struct Mapping *mapping =
+      solve_neutral_interval(interval, exclusion_array, counts.target_num);
   free(exclusion_array);
 
   return mapping;
 }
 
-const struct Solver aggarwal_parallel_solver = {
+const struct Solver aggarwal_parallel_solver_on_chains = {
     .solve = solver_function,
-    .name = "Aggarwal solver parallel",
+    .name = "Aggarwal solver parallel on chains",
 };

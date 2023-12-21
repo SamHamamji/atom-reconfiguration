@@ -1,14 +1,13 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "../../lib/solvers/solver.h"
-#include "../../lib/solvers/solvers.h"
+#include "../../lib/solver/solver.h"
 #include "./test_solvers.h"
 #include "performance.h"
 #include "test_cases.h"
 
-struct PerformanceArray *test_solvers_performance(
-    const struct PerformanceTestCasesConfig *const config) {
+struct PerformanceArray *
+test_solvers_performance(const struct PerformanceTestCasesConfig *config) {
   struct PerformanceTestCases *test_cases = generate_performance_tests(config);
 
   struct PerformanceArray *performance_array =
@@ -23,7 +22,7 @@ struct PerformanceArray *test_solvers_performance(
       struct timespec start;
       struct timespec finish;
       clock_gettime(CLOCK_MONOTONIC, &start);
-      struct Mapping *const mapping =
+      struct Mapping *mapping =
           config->solvers[solver_index]->solve(test_cases->intervals[i]);
       clock_gettime(CLOCK_MONOTONIC, &finish);
 

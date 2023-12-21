@@ -6,4 +6,5 @@
 #include "../../mapping/mapping.h"
 
 struct Mapping *solve_neutral_interval(const struct Interval *interval,
-                                       const bool *exclusion_array);
+                                       const bool *exclusion_array,
+                                       int target_num);

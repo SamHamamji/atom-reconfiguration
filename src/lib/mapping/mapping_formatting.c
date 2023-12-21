@@ -4,7 +4,7 @@
 
 #include "mapping.h"
 
-static int integer_length(const int num) {
+static int integer_length(int num) {
   return (int)log10((double)abs(num)) + 1 + (num <= 0);
 }
 
@@ -26,7 +26,8 @@ static int max_mapping_index_length(const struct Mapping *mapping) {
 static char *mapping_to_string(const struct Mapping *mapping) {
   if (mapping->pair_count == 0) {
     char *string = malloc(6);
-    sprintf(string, (mapping->pairs == NULL) ? "NULL" : "EMPTY");
+    if (string)
+      sprintf(string, (mapping->pairs == NULL) ? "NULL" : "EMPTY");
     return string;
   }
   const int max_index_length = max_mapping_index_length(mapping);

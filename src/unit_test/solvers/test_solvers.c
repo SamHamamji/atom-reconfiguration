@@ -2,13 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../../lib/solvers/solvers.h"
+#include "../../lib/solver/solver.h"
 #include "./test_cases.h"
 #include "./test_solvers.h"
 
 static void print_failed_test_case(const struct SolverTestCase test_case,
                                    const int test_case_index,
-                                   const struct Mapping *const result) {
+                                   const struct Mapping *result) {
   printf("Failed test case %d\n", test_case_index);
   printf("Interval:\n");
   interval_print(&test_case.input);
@@ -23,6 +23,7 @@ int test_solver(struct Solver solver) {
   int failed_tests_num = 0;
 
   for (int i = 0; i < solver_test_cases_num; i++) {
+    // printf("TESTCASE %d\n", i + 1);
     struct Mapping *mapping = solver.solve(&solver_test_cases[i].input);
     bool mappings_are_equal =
         mapping_equals(mapping, &solver_test_cases[i].expected_output);

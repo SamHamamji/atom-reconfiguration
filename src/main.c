@@ -4,8 +4,7 @@
 
 #include "./lib/interval/interval.h"
 #include "./lib/mapping/mapping.h"
-#include "./lib/solvers/solvers.h"
-#include "main.h"
+#include "./lib/solver/solver.h"
 
 int main() {
   unsigned int seed = (unsigned int)time(NULL);

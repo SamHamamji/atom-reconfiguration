@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../lib/solvers/solver.h"
+#include "../../lib/solver/solver.h"
 #include "./performance.h"
 #include "./test_cases.h"
 
