@@ -6,12 +6,25 @@ default-visualization-port := 8050
 ifndef $(port)
 	port := $(default-visualization-port)
 endif
+build-type := dev
 
 # Compiler flags
 library-flags := -lm -lpthread
 debugging-flags := -Wall -Wextra -fsanitize=undefined,address -pg
 optimization-flags := -O3
-default-flags := $(library-flags) $(debugging-flags)
+default-flags := $(library-flags)
+
+ifeq ($(build-type), dev)
+	default-flags += $(debugging-flags)
+else ifeq ($(build-type), release)
+	default-flags += $(optimization-flags)
+else ifeq ($(build-type), pedantic)
+	default-flags += $(debugging-flags) -pedantic
+else ifeq ($(build-type), scan-build)
+	c-compiler := scan-build $(c-compiler)
+else
+	$(error "Invalid build type. Valid options are: dev, release, pedantic, scan-build")
+endif
 
 # Folders
 source-folder := src
@@ -41,21 +54,6 @@ performance-test-objects := $(patsubst $(source-folder)/%.c, $(object-folder)/%.
 # Building executables
 .PHONY: all
 all: $(exec-main) $(exec-unit-tests) $(exec-performance-tests)
-
-.PHONY: pedantic-build
-pedantic-build: default-flags += -pedantic
-pedantic-build: $(exec-main) $(exec-unit-tests) $(exec-performance-tests) | $(exec-folder)
-	@$(c-compiler) $(lib-files) $(main-file) -o $(exec-main) $(default-flags)
-	@$(c-compiler) $(lib-files) $(unit-test-files) -o $(exec-unit-tests) $(default-flags)
-	@$(c-compiler) $(lib-files) $(performance-test-files) -o $(exec-performance-tests) $(default-flags)
-
-.PHONY: scan-build
-scan-build: c-compiler := scan-build $(c-compiler)
-scan-build: $(exec-main) $(exec-unit-tests) $(exec-performance-tests)
-
-.PHONY: release-build
-release-build: default-flags = $(library-flags) $(optimization-flags)
-release-build: $(exec-main) $(exec-unit-tests) $(exec-performance-tests)
 
 # Build main executable
 $(exec-main): $(lib-objects) $(main-file) | $(exec-folder)

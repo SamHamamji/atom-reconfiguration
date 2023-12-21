@@ -1,27 +1,30 @@
 # Linear assignment problem
 Algorithms solving the 1d transportation problem on a line
 
-## Usage:
+## Usage
 
-### Main file
+### Compiling
+Default build type is `dev`.
 ```sh
-make build/main.out
+make all <build-type=dev|release|pedantic|scan-build>
+```
+
+### Running main file
+```sh
 ./build/main.out
 ```
 
-### Unit tests
+### Running unit tests
 ```sh
-make build/unit-test.out
 ./build/unit-test.out
 ```
 
-### Performance tests
+### Running performance tests
 ```sh
-make build/performance-test.out
 ./build/performance-test.out
 ```
 
-### Performance visualization
+### Visualizing performance results
 Note that `file` is a required argument, while `port` is optional. 
 ```sh
 make visualize file=<path-to-performance-results> port=<any-unused-port>
