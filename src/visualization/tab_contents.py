@@ -4,6 +4,7 @@ import plotly.express as px
 
 from dash import dcc, html
 from CsvHeader import CsvHeader
+from data_processing import compute_mean_for_duplicates
 
 class GraphConfig(typing.NamedTuple):
     x: CsvHeader
@@ -102,3 +103,20 @@ class ImbalanceGrid(html.Div):
             className="grid"
         )
         html.Div.__init__(self, [html.H1("Performance by imbalance"), grid])
+
+class OverviewElement(html.Div):
+    def __init__(self, dataframe: pd.DataFrame):
+        new_dataframe = compute_mean_for_duplicates(dataframe.drop(CsvHeader.IMBALANCE_PERCENT.value, axis=1), CsvHeader.TIME_TAKEN.value)
+        figure = px.scatter(
+            new_dataframe,            
+            x = CsvHeader.SIZE.value,
+            y = CsvHeader.TIME_TAKEN.value,
+            color = new_dataframe[CsvHeader.SOLVER.value],
+            color_continuous_scale=px.colors.sequential.Turbo_r,
+            trendline="lowess",
+            trendline_options={"frac":0.3},
+        )
+        html.Div.__init__(self, [
+            html.H1("Performance overview"),
+            dcc.Graph(figure=figure, className="overview-graph"),
+        ])

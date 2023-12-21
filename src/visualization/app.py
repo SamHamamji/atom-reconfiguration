@@ -1,10 +1,11 @@
 import pandas as pd
 from dash import Dash, html, Output, Input, dcc
 
-from grid import HeatMapGrid, ImbalanceGrid, SolverGrid, SizeGrid
+from tab_contents import HeatMapGrid, ImbalanceGrid, SolverGrid, SizeGrid, OverviewElement
 
 class PerformanceVisualizationApp(Dash):
     tab_content_types: dict[str, type[html.Div]] = {
+        "Overview": OverviewElement,
         "Imbalance Grid": ImbalanceGrid,
         "Solver Grid": SolverGrid,
         "HeatMap Grid": HeatMapGrid,
