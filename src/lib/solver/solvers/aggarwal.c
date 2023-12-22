@@ -5,21 +5,6 @@
 #include "../common/solve_neutral_interval.h"
 #include "../solver.h"
 
-static bool *get_exclusion_from_chains(const struct AlternatingChains *chains,
-                                       int interval_size, int imbalance) {
-  bool *exclusion_array = calloc(sizeof(bool), interval_size);
-  int max_exclusion_index = interval_size;
-
-  for (int chain_index = imbalance - 1; chain_index >= 0; chain_index--) {
-    int excluded =
-        get_exclusion_from_chain(chains, chain_index, max_exclusion_index);
-    exclusion_array[excluded] = true;
-    max_exclusion_index = excluded;
-  }
-
-  return exclusion_array;
-}
-
 static struct Mapping *solver_function(const struct Interval *interval) {
   if (interval->size <= 0) {
     return mapping_get_null();
@@ -32,10 +17,10 @@ static struct Mapping *solver_function(const struct Interval *interval) {
   }
 
   struct AlternatingChains *chains =
-      get_alternating_chains(interval, imbalance);
+      alternating_chains_get(interval, imbalance);
 
   bool *exclusion_array =
-      get_exclusion_from_chains(chains, interval->size, imbalance);
+      alternating_chains_get_exclusion_array(chains, interval->size, imbalance);
   alternating_chains_free(chains);
 
   struct Mapping *mapping =

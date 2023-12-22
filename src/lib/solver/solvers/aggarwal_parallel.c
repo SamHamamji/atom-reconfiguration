@@ -1,4 +1,3 @@
-#include <limits.h>
 #include <pthread.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,111 +9,165 @@
 
 #define THREAD_NUMBER 8
 
+static pthread_barrier_t barrier;
+static pthread_mutex_t mutex;
+
 struct ThreadInputContext {
-  const struct AlternatingChains *chains;
-  int *output;
-  int interval_size;
+  const struct Interval *interval;
+  struct AlternatingChains *chains;
+  struct Mapping *mapping;
+  bool *exclusion_array;
+  struct IntervalCounts *counts;
 };
 
 struct ThreadInput {
   struct ThreadInputContext context;
-  struct {
-    int min_chain;
-    int max_chain;
-  } chain_range;
+  int thread_index;
 };
 
-static void *get_exclusion_from_chain_range(void *args) {
+struct ThreadsConfig {
+  pthread_t *ids;
+  struct ThreadInput *inputs;
+};
+
+static void thread_config_free(struct ThreadsConfig config) {
+  free(config.ids);
+  free(config.inputs);
+}
+
+inline static int get_min_chain(int thread_index, int imbalance) {
+  int remaining_heights = imbalance % THREAD_NUMBER;
+  return thread_index * (imbalance / THREAD_NUMBER) +
+         (thread_index < remaining_heights ? thread_index : remaining_heights);
+}
+
+inline static int get_interval_start_index(int thread_index,
+                                           int interval_size) {
+  int remaining_size = interval_size % THREAD_NUMBER;
+  return thread_index * (interval_size / THREAD_NUMBER) +
+         (thread_index < remaining_size ? thread_index : remaining_size);
+}
+
+static void *solve_interval_range(void *args) {
   const struct ThreadInput *input = (struct ThreadInput *)args;
-  const int output_length =
-      input->chain_range.max_chain - input->chain_range.min_chain;
-  int *excluded_indexes = malloc(output_length * sizeof(int));
 
-  int max_exclusion_index = input->context.interval_size - 1;
+  struct IntervalCounts slice_counts = interval_get_counts_from_slice(
+      input->context.interval,
+      get_interval_start_index(input->thread_index,
+                               input->context.interval->size),
+      get_interval_start_index(input->thread_index + 1,
+                               input->context.interval->size));
 
-  for (int height = input->chain_range.max_chain - 1;
-       height >= input->chain_range.min_chain; height--) {
-    excluded_indexes[height - input->chain_range.min_chain] =
-        get_exclusion_from_chain(input->context.chains, height,
-                                 max_exclusion_index);
+  pthread_mutex_lock(&mutex);
+  input->context.counts->source_num += slice_counts.source_num;
+  input->context.counts->target_num += slice_counts.target_num;
+  pthread_mutex_unlock(&mutex);
+
+  pthread_barrier_wait(&barrier);
+
+  const int imbalance = get_imbalance_from_counts(*input->context.counts);
+  if (imbalance < 0) {
+    if (input->thread_index == 0) {
+      input->context.mapping->pairs = malloc(0);
+      input->context.mapping->pair_count = 0;
+
+      input->context.chains->chain_start_indexes = malloc(0);
+      input->context.chains->right_partners = malloc(0);
+    }
+
+    pthread_exit(NULL);
   }
 
-  memcpy(&input->context.output[input->chain_range.min_chain], excluded_indexes,
-         output_length * sizeof(int));
+  if (input->thread_index == 0) {
+    input->context.chains->chain_start_indexes =
+        malloc(imbalance * sizeof(int));
+    input->context.chains->right_partners =
+        malloc(input->context.interval->size * sizeof(int));
+  }
+
+  pthread_barrier_wait(&barrier);
+
+  const struct ChainRange chain_range = {
+      .min_chain = get_min_chain(input->thread_index, imbalance),
+      .max_chain_exclusive = get_min_chain(input->thread_index + 1, imbalance),
+  };
+
+  alternating_chains_compute_range(input->context.interval,
+                                   input->context.chains, chain_range);
+
+  const int chain_range_length =
+      chain_range.max_chain_exclusive - chain_range.min_chain;
+  int *excluded_indexes = alternating_chains_get_exclusion_from_range(
+      input->context.chains, chain_range, input->context.interval->size);
+
+  for (int i = 0; i < chain_range_length; i++) {
+    input->context.exclusion_array[excluded_indexes[i]] = true;
+  }
+
+  pthread_barrier_wait(&barrier);
+
+  if (input->thread_index == 0) {
+    struct Mapping *mapping = solve_neutral_interval(
+        input->context.interval, input->context.exclusion_array,
+        input->context.counts->target_num);
+
+    input->context.mapping->pairs = mapping->pairs;
+    input->context.mapping->pair_count = mapping->pair_count;
+
+    free(mapping);
+  }
 
   free(excluded_indexes);
   pthread_exit(NULL);
-}
-
-static bool *get_exclusion_from_chains(const struct AlternatingChains *chains,
-                                       int interval_size, int imbalance) {
-  int *excluded_indexes = malloc(sizeof(int) * imbalance);
-  pthread_t *thread_array = malloc(THREAD_NUMBER * sizeof(pthread_t));
-  struct ThreadInput *thread_inputs =
-      malloc(THREAD_NUMBER * sizeof(struct ThreadInput));
-
-  const int heights_per_thread = imbalance / THREAD_NUMBER;
-  const int remaining_heights = imbalance % THREAD_NUMBER;
-  const struct ThreadInputContext context = {
-      .chains = chains,
-      .output = excluded_indexes,
-      .interval_size = interval_size,
-  };
-
-  for (int i = 0; i < THREAD_NUMBER; i++) {
-    thread_inputs[i].chain_range.min_chain =
-        (i == 0 ? 0 : thread_inputs[i - 1].chain_range.max_chain);
-    thread_inputs[i].chain_range.max_chain =
-        thread_inputs[i].chain_range.min_chain + heights_per_thread +
-        (int)(i < remaining_heights);
-    thread_inputs[i].context = context;
-
-    pthread_create(&thread_array[i], NULL, get_exclusion_from_chain_range,
-                   &thread_inputs[i]);
-  }
-
-  bool *exclusion_array = calloc(interval_size, sizeof(bool));
-  for (int i = 0; i < THREAD_NUMBER; i++) {
-    pthread_join(thread_array[i], NULL);
-    for (int height = thread_inputs[i].chain_range.min_chain;
-         height < thread_inputs[i].chain_range.max_chain; height++) {
-      exclusion_array[excluded_indexes[height]] = true;
-    }
-  }
-
-  free(thread_inputs);
-  free(thread_array);
-  free(excluded_indexes);
-  return exclusion_array;
 }
 
 static struct Mapping *solver_function(const struct Interval *interval) {
   if (interval->size <= 0) {
     return mapping_get_null();
   }
+  pthread_barrier_init(&barrier, NULL, THREAD_NUMBER);
+  pthread_mutex_init(&mutex, NULL);
 
-  struct IntervalCounts counts = interval_get_counts(interval);
-  int imbalance = get_imbalance_from_counts(counts);
+  const struct ThreadInputContext context = {
+      .interval = interval,
+      .mapping = malloc(sizeof(struct Mapping)),
+      .chains = malloc(sizeof(struct AlternatingChains)),
+      .exclusion_array = malloc(interval->size * sizeof(bool)),
+      .counts = malloc(sizeof(struct IntervalCounts)),
+  };
 
-  if (imbalance < 0) {
-    return mapping_get_null();
+  context.counts->source_num = 0;
+  context.counts->target_num = 0;
+  memset(context.exclusion_array, 0, context.interval->size);
+
+  struct ThreadsConfig thread_config = {
+      .ids = malloc(THREAD_NUMBER * sizeof(pthread_t)),
+      .inputs = malloc(THREAD_NUMBER * sizeof(struct ThreadInput)),
+  };
+  for (int i = 0; i < THREAD_NUMBER; i++) {
+    thread_config.inputs[i].context = context;
+    thread_config.inputs[i].thread_index = i;
+    pthread_create(&thread_config.ids[i], NULL, solve_interval_range,
+                   &thread_config.inputs[i]);
   }
 
-  struct AlternatingChains *chains =
-      get_alternating_chains(interval, imbalance);
+  for (int i = 0; i < THREAD_NUMBER; i++) {
+    pthread_join(thread_config.ids[i], NULL);
+  }
 
-  bool *exclusion_array =
-      get_exclusion_from_chains(chains, interval->size, imbalance);
-  alternating_chains_free(chains);
+  thread_config_free(thread_config);
+  alternating_chains_free(context.chains);
 
-  struct Mapping *mapping =
-      solve_neutral_interval(interval, exclusion_array, counts.target_num);
-  free(exclusion_array);
+  free(context.exclusion_array);
+  free(context.counts);
 
-  return mapping;
+  pthread_barrier_destroy(&barrier);
+  pthread_mutex_destroy(&mutex);
+
+  return context.mapping;
 }
 
-const struct Solver aggarwal_parallel_solver_on_chains = {
+const struct Solver aggarwal_parallel_solver = {
     .solve = solver_function,
-    .name = "Aggarwal solver parallel on chains",
+    .name = "Aggarwal solver parallel",
 };
