@@ -10,7 +10,7 @@ build-type := dev
 
 # Compiler flags
 library-flags := -lm -lpthread
-debugging-flags := -Wall -Wextra -fsanitize=undefined,address -pg
+debugging-flags := -Wall -Wextra -fsanitize=undefined,address -g
 optimization-flags := -O3
 default-flags := $(library-flags)
 
@@ -38,7 +38,7 @@ performance-test-folder := $(source-folder)/performance_test
 exec-main := $(exec-folder)/main.out
 exec-unit-tests := $(exec-folder)/unit-test.out
 exec-performance-tests := $(exec-folder)/performance-test.out
-visualize-performance-file := $(source-folder)/visualization/visualize_performance.py
+visualize-performance-file := $(source-folder)/visualization/main.py
 
 # Source files
 main-file := $(source-folder)/main.c

@@ -2,10 +2,16 @@ import pandas as pd
 
 from CsvHeader import CsvHeader, raw_csv_to_parsed
 
-def compute_mean_for_duplicates(dataframe: pd.DataFrame, grouped_column: str) -> pd.DataFrame:
-    return dataframe.groupby(
-        dataframe.columns.drop(grouped_column).to_list()
-    ).mean().reset_index()
+
+def compute_mean_for_duplicates(
+    dataframe: pd.DataFrame, grouped_column: str
+) -> pd.DataFrame:
+    return (
+        dataframe.groupby(dataframe.columns.drop(grouped_column).to_list())
+        .mean()
+        .reset_index()
+    )
+
 
 def read_data(file_path: str):
     file_content = pd.read_csv(file_path)

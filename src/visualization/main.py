@@ -5,7 +5,7 @@ from data_processing import read_data
 
 parser = argparse.ArgumentParser(
     description="Visualize linear assignment solvers performance results",
-    prog="visualize_performance"
+    prog="visualize_performance",
 )
 parser.add_argument(
     "--file",
@@ -20,7 +20,7 @@ parser.add_argument(
     default=8050,
 )
 
-if __name__== "__main__":
+if __name__ == "__main__":
     args = parser.parse_args()
     dataframe = read_data(args.file)
     app = PerformanceVisualizationApp(dataframe)
