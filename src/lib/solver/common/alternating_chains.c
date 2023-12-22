@@ -16,9 +16,6 @@ get_alternating_chains(const struct Interval *interval, int imbalance) {
   int *chain_start_indexes = malloc(imbalance * sizeof(int));
   int *current_chain_node = malloc(imbalance * sizeof(int));
 
-  for (int i = 0; i < interval->size; i++) {
-    right_partners[i] = NO_RIGHT_PARTNER;
-  }
   for (int i = 0; i < imbalance; i++) {
     chain_start_indexes[i] = NO_CHAIN_START;
   }
@@ -38,6 +35,10 @@ get_alternating_chains(const struct Interval *interval, int imbalance) {
       right_partners[current_chain_node[current_chain]] = i;
     }
     current_chain_node[current_chain] = i;
+  }
+
+  for (int i = 0; i < imbalance; i++) {
+    right_partners[current_chain_node[i]] = NO_RIGHT_PARTNER;
   }
 
   free(current_chain_node);
