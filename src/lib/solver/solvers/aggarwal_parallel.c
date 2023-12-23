@@ -83,6 +83,10 @@ static void *solve_interval_range(void *args) {
         malloc(imbalance * sizeof(int));
     input->context.chains->right_partners =
         malloc(input->context.interval->size * sizeof(int));
+
+    input->context.mapping->pairs =
+        malloc(input->context.counts->target_num * sizeof(struct Pair));
+    input->context.mapping->pair_count = input->context.counts->target_num;
   }
 
   pthread_barrier_wait(&barrier);
@@ -106,18 +110,15 @@ static void *solve_interval_range(void *args) {
 
   pthread_barrier_wait(&barrier);
 
-  if (input->thread_index == 0) {
-    struct Mapping *mapping = solve_neutral_interval(
+  free(excluded_indexes);
+
+  if (input->thread_index < 4) {
+    solve_neutral_interval_slice(
         input->context.interval, input->context.exclusion_array,
-        input->context.counts->target_num);
-
-    input->context.mapping->pairs = mapping->pairs;
-    input->context.mapping->pair_count = mapping->pair_count;
-
-    free(mapping);
+        input->context.mapping, (bool)(input->thread_index % 2),
+        (bool)(input->thread_index / 2));
   }
 
-  free(excluded_indexes);
   pthread_exit(NULL);
 }
 

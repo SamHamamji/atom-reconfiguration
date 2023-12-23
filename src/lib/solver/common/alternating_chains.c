@@ -10,8 +10,6 @@ void alternating_chains_free(struct AlternatingChains *chains) {
 
 struct AlternatingChains *
 alternating_chains_get(const struct Interval *interval, int imbalance) {
-  int current_chain = -1;
-
   struct AlternatingChains *alternating_chains =
       malloc(sizeof(struct AlternatingChains));
   alternating_chains->right_partners = malloc(interval->size * sizeof(int));

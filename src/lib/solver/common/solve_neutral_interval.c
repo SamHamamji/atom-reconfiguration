@@ -24,3 +24,36 @@ struct Mapping *solve_neutral_interval(const struct Interval *interval,
 
   return mapping;
 }
+
+void solve_neutral_interval_slice(const struct Interval *interval,
+                                  const bool *exclusion_array,
+                                  struct Mapping *mapping, bool solve_source,
+                                  bool solve_first_half) {
+  int counter, start, increment;
+  int middle = interval->size / 2 + (int)solve_first_half;
+  if (solve_first_half) {
+    counter = 0;
+    start = 0;
+    increment = 1;
+  } else {
+    counter = mapping->pair_count - 1;
+    start = interval->size - 1;
+    increment = -1;
+  }
+
+  if (solve_source) {
+    for (int i = start; i != middle; i += increment) {
+      if (interval->array[i].is_source && !exclusion_array[i]) {
+        mapping->pairs[counter].source = i;
+        counter += increment;
+      }
+    }
+  } else {
+    for (int i = start; i != middle; i += increment) {
+      if (interval->array[i].is_target) {
+        mapping->pairs[counter].target = i;
+        counter += increment;
+      }
+    }
+  }
+}
