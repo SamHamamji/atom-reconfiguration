@@ -7,5 +7,6 @@ const struct Solver *const solvers[] = {
     &aggarwal_solver,
     &aggarwal_parallel_solver_on_chains,
     &aggarwal_parallel_solver,
+    &aggarwal_parallel_solver_on_neutral,
 };
 const int solvers_num = sizeof(solvers) / sizeof(solvers[0]);

@@ -17,8 +17,9 @@ static const struct Config config = {
     .size = 10000000,
     .imbalance_percentage = 15,
     .solvers = {&aggarwal_solver, &aggarwal_parallel_solver,
-                &aggarwal_parallel_solver_on_chains},
-    .solver_num = 3,
+                &aggarwal_parallel_solver_on_chains,
+                &aggarwal_parallel_solver_on_neutral},
+    .solver_num = 4,
 };
 
 int main() {
