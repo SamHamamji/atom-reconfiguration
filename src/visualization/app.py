@@ -5,7 +5,7 @@ from tab_contents import (
     HeatMapGrid,
     ImbalanceGrid,
     SolverGrid,
-    SizeGrid,
+    LengthGrid,
     OverviewElement,
 )
 
@@ -16,7 +16,7 @@ class PerformanceVisualizationApp(Dash):
         "Imbalance Grid": ImbalanceGrid,
         "Solver Grid": SolverGrid,
         "HeatMap Grid": HeatMapGrid,
-        "Size Grid": SizeGrid,
+        "Length Grid": LengthGrid,
     }
     tabs: list[dcc.Tab] = list(
         map(lambda name: dcc.Tab(label=name, value=name), tab_content_types.keys())

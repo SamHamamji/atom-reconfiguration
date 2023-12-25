@@ -7,7 +7,7 @@
 #include "./lib/solver/solver.h"
 
 struct Config {
-  int interval_size;
+  int interval_length;
   int imbalance;
   const struct Solver **solvers;
   const struct Solver **params;
@@ -38,7 +38,7 @@ static const struct Solver *solvers[] = {
 };
 
 static const struct Config config = {
-    .interval_size = 1000,
+    .interval_length = 1000,
     .imbalance = 10,
     .solvers = solvers,
     .solver_num = sizeof(solvers) / sizeof(solvers[0]),
@@ -48,12 +48,12 @@ int main() {
   unsigned int seed = (unsigned int)time(NULL);
   srand(seed);
   printf("Seed set to %u\n", seed);
-  printf("Interval size: %d\nImbalance: %d\n", config.interval_size,
+  printf("Interval length: %d\nImbalance: %d\n", config.interval_length,
          config.imbalance);
 
   struct timespec start, finish;
   struct Interval *interval = interval_factory.generate_interval_by_imbalance(
-      config.interval_size, config.imbalance);
+      config.interval_length, config.imbalance);
 
   for (int solver_index = 0; solver_index < config.solver_num; solver_index++) {
     const struct Solver *solver = config.solvers[solver_index];

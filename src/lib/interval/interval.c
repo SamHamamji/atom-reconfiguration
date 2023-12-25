@@ -3,12 +3,12 @@
 
 #include "interval.h"
 
-static struct Interval *new_interval(const struct Point *points, int size) {
+static struct Interval *new_interval(const struct Point *points, int length) {
   struct Interval *interval = malloc(sizeof(struct Interval));
-  interval->array = malloc(size * sizeof(struct Point));
-  interval->size = size;
+  interval->array = malloc(length * sizeof(struct Point));
+  interval->length = length;
 
-  memcpy(interval->array, points, size * sizeof(struct Point));
+  memcpy(interval->array, points, length * sizeof(struct Point));
 
   return interval;
 }
@@ -26,7 +26,7 @@ interval_get_counts_from_slice(const struct Interval *interval, int start,
 
 inline struct IntervalCounts
 interval_get_counts(const struct Interval *interval) {
-  return interval_get_counts_from_slice(interval, 0, interval->size);
+  return interval_get_counts_from_slice(interval, 0, interval->length);
 }
 
 inline int get_imbalance_from_counts(struct IntervalCounts counts) {
@@ -46,19 +46,19 @@ static void interval_swap_target(struct Interval *interval, int a, int b) {
 }
 
 static void interval_shuffle(struct Interval *interval) {
-  for (int i = 0; i < interval->size; i++) {
-    int source_index = random() % interval->size;
-    int target_index = random() % interval->size;
+  for (int i = 0; i < interval->length; i++) {
+    int source_index = random() % interval->length;
+    int target_index = random() % interval->length;
     interval_swap_source(interval, i, source_index);
     interval_swap_target(interval, i, target_index);
   }
 }
 
-static struct Interval *generate_randomized_interval(int size) {
+static struct Interval *generate_randomized_interval(int length) {
   struct Interval *interval = malloc(sizeof(struct Interval));
-  interval->size = size;
-  interval->array = calloc(size, sizeof(struct Point));
-  for (int i = 0; i < size; i++) {
+  interval->length = length;
+  interval->array = calloc(length, sizeof(struct Point));
+  for (int i = 0; i < length; i++) {
     interval->array[i] = (struct Point){
         .is_source = (bool)(random() % 2),
         .is_target = (bool)(random() % 2),
@@ -67,21 +67,21 @@ static struct Interval *generate_randomized_interval(int size) {
   return interval;
 }
 
-static struct Interval *generate_interval_by_imbalance(int size,
+static struct Interval *generate_interval_by_imbalance(int length,
                                                        int imbalance) {
   struct Interval *interval = malloc(sizeof(struct Interval));
-  interval->size = size;
-  interval->array = malloc(interval->size * sizeof(struct Point));
+  interval->length = length;
+  interval->array = malloc(interval->length * sizeof(struct Point));
 
   int i = 0;
   for (; i < imbalance; i++) {
     interval->array[i] = (struct Point)SOURCE;
   }
 
-  while (i < size) {
+  while (i < length) {
     switch (random() % 3) {
     case 0:
-      if (i == size - 1) {
+      if (i == length - 1) {
         interval->array[i] = (struct Point)EMPTY;
       } else {
         interval->array[i] = (struct Point)SOURCE;

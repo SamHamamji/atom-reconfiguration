@@ -28,8 +28,8 @@ int alternating_chains_get_exclusion(const struct AlternatingChains *chains,
 
 int *alternating_chains_get_exclusion_from_range(
     const struct AlternatingChains *chains, struct ChainRange range,
-    int interval_size);
+    int interval_length);
 
 bool *
 alternating_chains_get_exclusion_array(const struct AlternatingChains *chains,
-                                       int interval_size, int imbalance);
+                                       int interval_length, int imbalance);

@@ -9,18 +9,18 @@ static char point_to_char(const struct Point point) {
 }
 
 static char *interval_to_string(const struct Interval *interval) {
-  if (interval->size == 0) {
+  if (interval->length == 0) {
     char *string = malloc(sizeof(char) * 15);
     sprintf(string, "Empty interval");
     return string;
   }
 
-  char *string = malloc(2 * interval->size * sizeof(char));
-  for (int i = 0; i < interval->size; i++) {
+  char *string = malloc(2 * interval->length * sizeof(char));
+  for (int i = 0; i < interval->length; i++) {
     string[2 * i] = point_to_char(interval->array[i]);
     string[2 * i + 1] = ' ';
   }
-  string[2 * interval->size - 1] = '\0';
+  string[2 * interval->length - 1] = '\0';
   return string;
 }
 

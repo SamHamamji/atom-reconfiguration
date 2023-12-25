@@ -44,7 +44,7 @@ class SolverGrid(html.Div):
     graphConfig = GraphConfig(
         x=CsvHeader.IMBALANCE_PERCENT,
         y=CsvHeader.TIME_TAKEN,
-        color=CsvHeader.SIZE,
+        color=CsvHeader.LENGTH,
         header=CsvHeader.SOLVER,
     )
 
@@ -53,10 +53,10 @@ class SolverGrid(html.Div):
 
         new_dataframe = dataframe.copy()
         new_dataframe.sort_values(
-            by=CsvHeader.SIZE.value, ascending=False, inplace=True
+            by=CsvHeader.LENGT.value, ascending=False, inplace=True
         )
-        new_dataframe[CsvHeader.SIZE.value] = new_dataframe[
-            CsvHeader.SIZE.value
+        new_dataframe[CsvHeader.LENGT.value] = new_dataframe[
+            CsvHeader.LENGT.value
         ].astype(str)
 
         grid = html.Div(
@@ -72,7 +72,7 @@ class SolverGrid(html.Div):
 
 class HeatMapGrid(html.Div):
     graphConfig = GraphConfig(
-        x=CsvHeader.SIZE,
+        x=CsvHeader.LENGTH,
         y=CsvHeader.IMBALANCE_PERCENT,
         color=CsvHeader.TIME_TAKEN,
         header=CsvHeader.SOLVER,
@@ -93,32 +93,32 @@ class HeatMapGrid(html.Div):
         html.Div.__init__(self, [grid_title, grid])
 
 
-class SizeGrid(html.Div):
+class LengthGrid(html.Div):
     graphConfig = GraphConfig(
         x=CsvHeader.IMBALANCE_PERCENT,
         y=CsvHeader.TIME_TAKEN,
         color=CsvHeader.SOLVER,
-        header=CsvHeader.SIZE,
+        header=CsvHeader.LENGTH,
     )
 
     def __init__(self, dataframe: pd.DataFrame):
-        sizes = (
-            dataframe[CsvHeader.SIZE.value]
+        lengths = (
+            dataframe[CsvHeader.LENGTH.value]
             .sort_values(key=lambda x: x.astype(int))
             .unique()
         )
 
         grid = html.Div(
-            [GridElement(dataframe, self.graphConfig, size) for size in sizes],
+            [GridElement(dataframe, self.graphConfig, length) for length in lengths],
             className="grid",
         )
-        grid_title = html.H1("Performance by size")
+        grid_title = html.H1("Performance by length")
         html.Div.__init__(self, [grid_title, grid])
 
 
 class ImbalanceGrid(html.Div):
     graphConfig = GraphConfig(
-        x=CsvHeader.SIZE,
+        x=CsvHeader.LENGTH,
         y=CsvHeader.TIME_TAKEN,
         color=CsvHeader.SOLVER,
         header=CsvHeader.IMBALANCE_PERCENT,
@@ -148,7 +148,7 @@ class OverviewElement(html.Div):
         )
         figure = px.scatter(
             new_dataframe,
-            x=CsvHeader.SIZE.value,
+            x=CsvHeader.LENGTH.value,
             y=CsvHeader.TIME_TAKEN.value,
             color=new_dataframe[CsvHeader.SOLVER.value],
             color_continuous_scale=px.colors.sequential.Turbo_r,

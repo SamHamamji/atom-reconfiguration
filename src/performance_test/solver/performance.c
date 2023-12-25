@@ -4,7 +4,7 @@
 #include "./performance.h"
 
 static const char csv_header[] =
-    "solver,size,imbalance_percentage,time_taken\n";
+    "solver,length,imbalance_percentage,time_taken\n";
 
 void performance_write_to_csv(const struct PerformanceArray *performance,
                               const char *file_name) {
@@ -12,7 +12,7 @@ void performance_write_to_csv(const struct PerformanceArray *performance,
   fprintf(file, csv_header);
   for (int i = 0; i < performance->length; i++) {
     fprintf(file, "%s,%d,%f,%f\n", performance->performances[i].solver->name,
-            performance->performances[i].interval_size,
+            performance->performances[i].interval_length,
             performance->performances[i].imbalance_percentage,
             performance->performances[i].time_taken);
   }

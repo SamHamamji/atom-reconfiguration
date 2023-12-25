@@ -11,7 +11,7 @@ struct Mapping *solve_neutral_interval(const struct Interval *interval,
 
   unsigned int source_counter = 0;
   unsigned int target_counter = 0;
-  for (int i = 0; i < interval->size; i++) {
+  for (int i = 0; i < interval->length; i++) {
     if (interval->array[i].is_source && !exclusion_array[i]) {
       mapping->pairs[source_counter].source = i;
       source_counter++;
@@ -30,14 +30,14 @@ void solve_neutral_interval_slice(const struct Interval *interval,
                                   struct Mapping *mapping, bool solve_source,
                                   bool solve_first_half) {
   int counter, start, increment;
-  int middle = interval->size / 2 + (int)solve_first_half;
+  int middle = interval->length / 2 + (int)solve_first_half;
   if (solve_first_half) {
     counter = 0;
     start = 0;
     increment = 1;
   } else {
     counter = mapping->pair_count - 1;
-    start = interval->size - 1;
+    start = interval->length - 1;
     increment = -1;
   }
 

@@ -12,7 +12,7 @@ struct AlternatingChains *
 alternating_chains_get(const struct Interval *interval, int imbalance) {
   struct AlternatingChains *alternating_chains =
       malloc(sizeof(struct AlternatingChains));
-  alternating_chains->right_partners = malloc(interval->size * sizeof(int));
+  alternating_chains->right_partners = malloc(interval->length * sizeof(int));
   alternating_chains->chain_start_indexes = malloc(imbalance * sizeof(int));
 
   alternating_chains_compute_range(interval, alternating_chains,
@@ -32,7 +32,7 @@ void alternating_chains_compute_range(const struct Interval *interval,
     chains->chain_start_indexes[i] = NO_CHAIN_START;
   }
 
-  for (int i = 0; i < interval->size; i++) {
+  for (int i = 0; i < interval->length; i++) {
     current_chain = current_chain + (int)interval->array[i].is_source -
                     (int)(i != 0 && interval->array[i - 1].is_target);
 
@@ -89,11 +89,11 @@ int alternating_chains_get_exclusion(const struct AlternatingChains *chains,
 
 int *alternating_chains_get_exclusion_from_range(
     const struct AlternatingChains *chains, struct ChainRange range,
-    int interval_size) {
+    int interval_length) {
   const int chain_range_length = range.max_chain_exclusive - range.min_chain;
   int *excluded_indexes = malloc(chain_range_length * sizeof(int));
 
-  int max_exclusion_index = interval_size - 1; // For early stopping
+  int max_exclusion_index = interval_length - 1; // For early stopping
   for (int height = range.max_chain_exclusive - 1; height >= range.min_chain;
        height--) {
     excluded_indexes[height - range.min_chain] =
@@ -105,9 +105,9 @@ int *alternating_chains_get_exclusion_from_range(
 
 bool *
 alternating_chains_get_exclusion_array(const struct AlternatingChains *chains,
-                                       int interval_size, int imbalance) {
-  bool *exclusion_array = calloc(sizeof(bool), interval_size);
-  int max_exclusion_index = interval_size;
+                                       int interval_length, int imbalance) {
+  bool *exclusion_array = calloc(sizeof(bool), interval_length);
+  int max_exclusion_index = interval_length;
 
   for (int chain_index = imbalance - 1; chain_index >= 0; chain_index--) {
     int excluded = alternating_chains_get_exclusion(chains, chain_index,

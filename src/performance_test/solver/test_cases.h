@@ -3,11 +3,11 @@
 #include "../../lib/solver/solver.h"
 
 struct PerformanceTestCasesConfig {
-  const int *interval_sizes;
+  const int *interval_lengths;
   const double *imbalance_percentages;
   const struct Solver **solvers;
-  struct Interval *(*interval_generator)(int size, int imbalance);
-  const int sizes_num;
+  struct Interval *(*interval_generator)(int length, int imbalance);
+  const int lengths_num;
   const int imbalance_percentages_num;
   const int solvers_num;
   const int repetitions_per_test_case;

@@ -7,9 +7,9 @@
 
 static bool *get_exclusion_array(const struct Interval *interval,
                                  const int *iterative_height_array) {
-  const int imbalance = iterative_height_array[interval->size - 1];
+  const int imbalance = iterative_height_array[interval->length - 1];
   int max_profit_index_per_height[imbalance];
-  int i = interval->size - 1;
+  int i = interval->length - 1;
 
   for (int height = imbalance; height >= 1; height--) {
     int relative_profit = 0;
@@ -27,7 +27,7 @@ static bool *get_exclusion_array(const struct Interval *interval,
     i = max_profit_index_per_height[height - 1] - 1;
   }
 
-  bool *exclusion_array = calloc(interval->size, sizeof(bool));
+  bool *exclusion_array = calloc(interval->length, sizeof(bool));
   for (int height = 1; height <= imbalance; height++) {
     exclusion_array[max_profit_index_per_height[height - 1]] = true;
   }
@@ -37,7 +37,7 @@ static bool *get_exclusion_array(const struct Interval *interval,
 
 struct Mapping *iterative_solver_function(const struct Interval *const interval,
                                           const void *params) {
-  if (interval->size <= 0) {
+  if (interval->length <= 0) {
     return mapping_get_null();
   }
 
@@ -47,7 +47,7 @@ struct Mapping *iterative_solver_function(const struct Interval *const interval,
     return mapping_get_null();
   }
 
-  for (int i = 0; i < interval->size; i++) {
+  for (int i = 0; i < interval->length; i++) {
     if (interval->array[i].is_target) {
       iterative_height_array[i] -= 1;
     }

@@ -12,12 +12,12 @@
 const char output_dir_name[] = "performance_results";
 const char output_file_format[] = "./%s/%u.csv";
 
-static struct Interval *interval_generator(const int size,
+static struct Interval *interval_generator(const int length,
                                            const int imbalance) {
-  return interval_factory.generate_interval_by_imbalance(size, imbalance);
+  return interval_factory.generate_interval_by_imbalance(length, imbalance);
 }
 
-static const int sizes[] = {
+static const int lengths[] = {
     // 25,  50,  75,  100, 125, 150, 175, 200, 225, 250, 275, 300,  325, 350,
     // 375, 400, 425, 450, 475, 500, 525, 550, 575, 600, 625, 650,  675, 700,
     // 725, 750, 775, 800, 825, 850, 875, 900, 925, 950, 975, 1000,
@@ -70,11 +70,11 @@ static const struct Solver *config_solvers[] = {
 };
 
 static const struct PerformanceTestCasesConfig config = {
-    .interval_sizes = sizes,
+    .interval_lengths = lengths,
     .imbalance_percentages = imbalance_percentages,
     .solvers = config_solvers,
     .interval_generator = interval_generator,
-    .sizes_num = sizeof(sizes) / sizeof(sizes[0]),
+    .lengths_num = sizeof(lengths) / sizeof(lengths[0]),
     .imbalance_percentages_num =
         sizeof(imbalance_percentages) / sizeof(imbalance_percentages[0]),
     .solvers_num = sizeof(config_solvers) / sizeof(config_solvers[0]),

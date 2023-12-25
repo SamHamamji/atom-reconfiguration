@@ -67,7 +67,7 @@ aggarwal_parallel_on_neutral_solver_function(const struct Interval *interval,
                                              const void *params) {
   assert(params != NULL);
   int thread_num = ((AggarwalParallelOnNeutralParams *)params)->thread_num;
-  if (interval->size <= 0) {
+  if (interval->length <= 0) {
     return mapping_get_null();
   }
 
@@ -80,8 +80,8 @@ aggarwal_parallel_on_neutral_solver_function(const struct Interval *interval,
   struct AlternatingChains *chains =
       alternating_chains_get(interval, imbalance);
 
-  bool *exclusion_array =
-      alternating_chains_get_exclusion_array(chains, interval->size, imbalance);
+  bool *exclusion_array = alternating_chains_get_exclusion_array(
+      chains, interval->length, imbalance);
   alternating_chains_free(chains);
 
   struct Mapping *mapping = get_mapping_from_exclusion_array(

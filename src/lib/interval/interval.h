@@ -18,7 +18,7 @@ struct Point {
 
 struct Interval {
   struct Point *array;
-  int size;
+  int length;
 };
 
 struct IntervalCounts {
@@ -37,9 +37,9 @@ int get_imbalance_from_counts(struct IntervalCounts counts);
 void interval_print(const struct Interval *interval);
 
 struct IntervalFactory {
-  struct Interval *(*generate_interval_by_imbalance)(int size, int imbalance);
-  struct Interval *(*generate_randomized_interval)(int size);
-  struct Interval *(*new_interval)(const struct Point *points, int size);
+  struct Interval *(*generate_interval_by_imbalance)(int length, int imbalance);
+  struct Interval *(*generate_randomized_interval)(int length);
+  struct Interval *(*new_interval)(const struct Point *points, int length);
 };
 
 extern const struct IntervalFactory interval_factory;

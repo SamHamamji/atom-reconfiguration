@@ -28,7 +28,7 @@ static void *get_exclusion_for_height_range_thread(void *args) {
       input->height_range.max_height - input->height_range.min_height;
   int *excluded_indexes = malloc(output_length * sizeof(int));
 
-  int i = input->context.interval->size - 1;
+  int i = input->context.interval->length - 1;
 
   for (int height = input->height_range.max_height - 1;
        height >= input->height_range.min_height; height--) {
@@ -92,7 +92,7 @@ static bool *get_exclusion_array(const struct Interval *interval,
                    (void *)&thread_inputs[i]);
   }
 
-  bool *exclusion_array = calloc(interval->size, sizeof(bool));
+  bool *exclusion_array = calloc(interval->length, sizeof(bool));
   for (int i = 0; i < thread_num; i++) {
     pthread_join(thread_array[i], NULL);
     for (int height = thread_inputs[i].height_range.min_height;
@@ -112,7 +112,7 @@ karp_li_parallel_solver_function(const struct Interval *interval,
                                  const void *params) {
   assert(params != NULL);
   int thread_num = ((KarpLiParallelParams *)params)->thread_num;
-  if (interval->size <= 0) {
+  if (interval->length <= 0) {
     return mapping_get_null();
   }
 

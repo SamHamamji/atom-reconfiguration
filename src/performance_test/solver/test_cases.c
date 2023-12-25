@@ -7,7 +7,7 @@ struct PerformanceTestCases *
 generate_performance_tests(const struct PerformanceTestCasesConfig *config) {
   struct PerformanceTestCases *test_cases =
       malloc(sizeof(struct PerformanceTestCases));
-  test_cases->intervals_num = config->sizes_num *
+  test_cases->intervals_num = config->lengths_num *
                               config->imbalance_percentages_num *
                               config->repetitions_per_test_case;
   test_cases->intervals =
@@ -15,16 +15,16 @@ generate_performance_tests(const struct PerformanceTestCasesConfig *config) {
   test_cases->imbalance_percentages =
       malloc(test_cases->intervals_num * sizeof(double));
 
-  for (int i = 0; i < config->sizes_num; i++) {
+  for (int i = 0; i < config->lengths_num; i++) {
     for (int j = 0; j < config->imbalance_percentages_num; j++) {
       for (int k = 0; k < config->repetitions_per_test_case; k++) {
         const int interval_index =
             k + config->repetitions_per_test_case *
                     (i * config->imbalance_percentages_num + j);
-        const int imbalance = (int)(config->interval_sizes[i] *
+        const int imbalance = (int)(config->interval_lengths[i] *
                                     config->imbalance_percentages[j] / 100);
         test_cases->intervals[interval_index] =
-            config->interval_generator(config->interval_sizes[i], imbalance);
+            config->interval_generator(config->interval_lengths[i], imbalance);
         test_cases->imbalance_percentages[interval_index] =
             config->imbalance_percentages[j];
       }

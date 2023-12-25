@@ -11,7 +11,7 @@
 struct ThreadInputContext {
   const struct AlternatingChains *chains;
   int *output;
-  int interval_size;
+  int interval_length;
 };
 
 struct ThreadInput {
@@ -22,7 +22,8 @@ struct ThreadInput {
 static void *get_exclusion_from_chain_range(void *args) {
   const struct ThreadInput *input = (struct ThreadInput *)args;
   int *excluded_indexes = alternating_chains_get_exclusion_from_range(
-      input->context.chains, input->chain_range, input->context.interval_size);
+      input->context.chains, input->chain_range,
+      input->context.interval_length);
 
   // Reduces false sharing
   memcpy(
@@ -35,7 +36,7 @@ static void *get_exclusion_from_chain_range(void *args) {
 }
 
 static bool *get_exclusion_from_chains(const struct AlternatingChains *chains,
-                                       int thread_num, int interval_size,
+                                       int thread_num, int interval_length,
                                        int imbalance) {
   int *excluded_indexes = malloc(sizeof(int) * imbalance);
   pthread_t *thread_array = malloc(thread_num * sizeof(pthread_t));
@@ -47,7 +48,7 @@ static bool *get_exclusion_from_chains(const struct AlternatingChains *chains,
   const struct ThreadInputContext context = {
       .chains = chains,
       .output = excluded_indexes,
-      .interval_size = interval_size,
+      .interval_length = interval_length,
   };
 
   for (int i = 0; i < thread_num; i++) {
@@ -62,7 +63,7 @@ static bool *get_exclusion_from_chains(const struct AlternatingChains *chains,
                    &thread_inputs[i]);
   }
 
-  bool *exclusion_array = calloc(interval_size, sizeof(bool));
+  bool *exclusion_array = calloc(interval_length, sizeof(bool));
   for (int i = 0; i < thread_num; i++) {
     pthread_join(thread_array[i], NULL);
     for (int height = thread_inputs[i].chain_range.min_chain;
@@ -82,7 +83,7 @@ aggarwal_parallel_on_chains_solver_function(const struct Interval *interval,
                                             const void *params) {
   assert(params != NULL);
   int thread_num = ((AggarwalParallelOnChainsParams *)params)->thread_num;
-  if (interval->size <= 0) {
+  if (interval->length <= 0) {
     return mapping_get_null();
   }
 
@@ -96,8 +97,8 @@ aggarwal_parallel_on_chains_solver_function(const struct Interval *interval,
   struct AlternatingChains *chains =
       alternating_chains_get(interval, imbalance);
 
-  bool *exclusion_array =
-      get_exclusion_from_chains(chains, thread_num, interval->size, imbalance);
+  bool *exclusion_array = get_exclusion_from_chains(
+      chains, thread_num, interval->length, imbalance);
   alternating_chains_free(chains);
 
   struct Mapping *mapping =

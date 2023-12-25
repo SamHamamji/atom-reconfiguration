@@ -9,7 +9,7 @@ static bool *get_exclusion_array(const struct Interval *interval,
                                  const int *height_array) {
   const int imbalance = get_imbalance_from_height_array(interval, height_array);
   int max_profit_index_per_height[imbalance];
-  int i = interval->size - 1;
+  int i = interval->length - 1;
 
   for (int height = imbalance; height >= 1; height--) {
     max_profit_index_per_height[height - 1] = INT_MAX;
@@ -34,7 +34,7 @@ static bool *get_exclusion_array(const struct Interval *interval,
     i = max_profit_index_per_height[height - 1] - 1;
   }
 
-  bool *exclusion_array = calloc(interval->size, sizeof(bool));
+  bool *exclusion_array = calloc(interval->length, sizeof(bool));
   for (int height = 1; height <= imbalance; height++) {
     exclusion_array[max_profit_index_per_height[height - 1]] = true;
   }
@@ -44,7 +44,7 @@ static bool *get_exclusion_array(const struct Interval *interval,
 
 struct Mapping *karp_li_solver_function(const struct Interval *interval,
                                         const void *params) {
-  if (interval->size <= 0) {
+  if (interval->length <= 0) {
     return mapping_get_null();
   }
 

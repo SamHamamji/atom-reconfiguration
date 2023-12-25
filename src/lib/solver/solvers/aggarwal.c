@@ -7,7 +7,7 @@
 
 struct Mapping *aggarwal_solver_function(const struct Interval *interval,
                                          const void *params) {
-  if (interval->size <= 0) {
+  if (interval->length <= 0) {
     return mapping_get_null();
   }
 
@@ -20,8 +20,8 @@ struct Mapping *aggarwal_solver_function(const struct Interval *interval,
   struct AlternatingChains *chains =
       alternating_chains_get(interval, imbalance);
 
-  bool *exclusion_array =
-      alternating_chains_get_exclusion_array(chains, interval->size, imbalance);
+  bool *exclusion_array = alternating_chains_get_exclusion_array(
+      chains, interval->length, imbalance);
   alternating_chains_free(chains);
 
   struct Mapping *mapping =

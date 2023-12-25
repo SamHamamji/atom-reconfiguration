@@ -37,7 +37,7 @@ test_solvers_performance(const struct PerformanceTestCasesConfig *config) {
       performance_array->performances[i * config->solvers_num + solver_index] =
           (struct Performance){
               .solver = config->solvers[solver_index],
-              .interval_size = test_cases->intervals[i]->size,
+              .interval_length = test_cases->intervals[i]->length,
               .imbalance_percentage = test_cases->imbalance_percentages[i],
               .time_taken = time_taken,
           };

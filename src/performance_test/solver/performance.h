@@ -4,7 +4,7 @@
 
 struct Performance {
   const struct Solver *solver;
-  int interval_size;
+  int interval_length;
   double imbalance_percentage;
   double time_taken;
 };

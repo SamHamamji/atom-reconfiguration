@@ -1,5 +1,20 @@
 #include "test_cases.h"
 
+#define INTERVAL(points_array)                                                 \
+  {                                                                            \
+    .array = points_array,                                                     \
+    .length = sizeof(points_array) / sizeof(points_array[0]),                  \
+  }
+
+#define MAPPING(pairs_array)                                                   \
+  {                                                                            \
+    .pairs = pairs_array,                                                      \
+    .pair_count = sizeof(pairs_array) / sizeof(pairs_array[0]),                \
+  }
+
+#define NEW_SOLVER_TEST_CASE(interval, mapping)                                \
+  { .input = INTERVAL(interval), .expected_output = MAPPING(mapping), }
+
 // Test 1
 static struct Point interval_1[] = {
     EMPTY,  EMPTY,  SOURCE, TARGET, TARGET, SOURCE,
@@ -186,14 +201,6 @@ static struct Point interval_26[] = {
     SOURCE, SOURCE, EMPTY, TARGET, BOTH, SOURCE,
 };
 static struct Pair mapping_26[] = {{1, 3}, {4, 4}};
-
-#define NEW_SOLVER_TEST_CASE(interval, mapping)                                \
-  {                                                                            \
-    .input = {.array = interval,                                               \
-              .size = sizeof(interval) / sizeof(interval[0])},                 \
-    .expected_output = {.pairs = mapping,                                      \
-                        .pair_count = sizeof(mapping) / sizeof(mapping[0])},   \
-  }
 
 const struct SolverTestCase solver_test_cases[] = {
     NEW_SOLVER_TEST_CASE(interval_1, mapping_1),
