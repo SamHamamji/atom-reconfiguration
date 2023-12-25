@@ -7,36 +7,61 @@
 #include "./lib/solver/solver.h"
 
 struct Config {
-  int size;
-  int imbalance_percentage;
+  int interval_size;
+  int imbalance;
+  const struct Solver **solvers;
+  const struct Solver **params;
   int solver_num;
-  const struct Solver *solvers[];
+};
+
+static const struct Solver *solvers[] = {
+    &(struct Solver){
+        .solve = aggarwal_solver_function,
+        .params = NULL,
+        .name = "Aggarwal solver",
+    },
+    &(struct Solver){
+        .solve = aggarwal_parallel_solver_function,
+        .params = &(AggarwalParallelOnChainsParams){.thread_num = 3},
+        .name = "Aggarwal solver parallel (3 threads)",
+    },
+    &(struct Solver){
+        .solve = aggarwal_parallel_on_chains_solver_function,
+        .params = &(AggarwalParallelOnChainsParams){.thread_num = 3},
+        .name = "Aggarwal solver parallel on chains (3 threads)",
+    },
+    &(struct Solver){
+        .solve = aggarwal_parallel_on_neutral_solver_function,
+        .params = &(AggarwalParallelOnNeutralParams){.thread_num = 3},
+        .name = "Aggarwal solver parallel on neutral (3 threads)",
+    },
 };
 
 static const struct Config config = {
-    .size = 10000000,
-    .imbalance_percentage = 15,
-    .solvers = {&aggarwal_solver, &aggarwal_parallel_solver,
-                &aggarwal_parallel_solver_on_chains,
-                &aggarwal_parallel_solver_on_neutral},
-    .solver_num = 4,
+    .interval_size = 1000,
+    .imbalance = 10,
+    .solvers = solvers,
+    .solver_num = sizeof(solvers) / sizeof(solvers[0]),
 };
 
 int main() {
   unsigned int seed = (unsigned int)time(NULL);
   srand(seed);
   printf("Seed set to %u\n", seed);
+  printf("Interval size: %d\nImbalance: %d\n", config.interval_size,
+         config.imbalance);
 
   struct timespec start, finish;
   struct Interval *interval = interval_factory.generate_interval_by_imbalance(
-      config.size, config.size * config.imbalance_percentage / 100);
+      config.interval_size, config.imbalance);
 
   for (int solver_index = 0; solver_index < config.solver_num; solver_index++) {
+    const struct Solver *solver = config.solvers[solver_index];
     clock_gettime(CLOCK_MONOTONIC, &start);
-    struct Mapping *mapping = config.solvers[solver_index]->solve(interval);
+    struct Mapping *mapping = solver->solve(interval, solver->params);
     clock_gettime(CLOCK_MONOTONIC, &finish);
     mapping_free(mapping);
-    printf("%s: %lf sec\n", config.solvers[solver_index]->name,
+    printf("%s: %lf sec\n", solver->name,
            (finish.tv_sec - start.tv_sec) +
                (finish.tv_nsec - start.tv_nsec) / 1000000000.0);
   }

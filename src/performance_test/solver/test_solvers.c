@@ -6,6 +6,18 @@
 #include "performance.h"
 #include "test_cases.h"
 
+static double test_solver_performance(const struct Solver *solver,
+                                      const struct Interval *interval) {
+  struct timespec start, finish;
+  clock_gettime(CLOCK_MONOTONIC, &start);
+  struct Mapping *mapping = solver->solve(interval, solver->params);
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  mapping_free(mapping);
+
+  return (finish.tv_sec - start.tv_sec) +
+         (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+}
+
 struct PerformanceArray *
 test_solvers_performance(const struct PerformanceTestCasesConfig *config) {
   struct PerformanceTestCases *test_cases = generate_performance_tests(config);
@@ -19,22 +31,15 @@ test_solvers_performance(const struct PerformanceTestCasesConfig *config) {
   for (int solver_index = 0; solver_index < config->solvers_num;
        solver_index++) {
     for (int i = 0; i < test_cases->intervals_num; i++) {
-      struct timespec start;
-      struct timespec finish;
-      clock_gettime(CLOCK_MONOTONIC, &start);
-      struct Mapping *mapping =
-          config->solvers[solver_index]->solve(test_cases->intervals[i]);
-      clock_gettime(CLOCK_MONOTONIC, &finish);
-
-      mapping_free(mapping);
+      double time_taken = test_solver_performance(config->solvers[solver_index],
+                                                  test_cases->intervals[i]);
 
       performance_array->performances[i * config->solvers_num + solver_index] =
           (struct Performance){
               .solver = config->solvers[solver_index],
               .interval_size = test_cases->intervals[i]->size,
               .imbalance_percentage = test_cases->imbalance_percentages[i],
-              .time_taken = (finish.tv_sec - start.tv_sec) +
-                            (finish.tv_nsec - start.tv_nsec) / 1000000000.0,
+              .time_taken = time_taken,
           };
     }
   }

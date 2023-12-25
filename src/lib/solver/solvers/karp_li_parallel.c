@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <limits.h>
 #include <pthread.h>
 #include <stdlib.h>
@@ -7,8 +8,6 @@
 #include "../common/solve_neutral_interval.h"
 #include "../solver.h"
 
-#define THREAD_NUMBER 8
-
 struct ThreadInputContext {
   const int *height_array;
   const struct Interval *interval;
@@ -16,11 +15,11 @@ struct ThreadInputContext {
 };
 
 struct ThreadInput {
+  struct ThreadInputContext context;
   struct {
     int min_height;
     int max_height;
   } height_range;
-  struct ThreadInputContext context;
 };
 
 static void *get_exclusion_for_height_range_thread(void *args) {
@@ -65,22 +64,22 @@ static void *get_exclusion_for_height_range_thread(void *args) {
 }
 
 static bool *get_exclusion_array(const struct Interval *interval,
-                                 const int *height_array) {
+                                 const int *height_array, int thread_num) {
   const int imbalance = get_imbalance_from_height_array(interval, height_array);
   int *excluded_indexes = malloc(imbalance * sizeof(int));
-  pthread_t *thread_array = malloc(THREAD_NUMBER * sizeof(pthread_t));
+  pthread_t *thread_array = malloc(thread_num * sizeof(pthread_t));
   struct ThreadInput *thread_inputs =
-      malloc(THREAD_NUMBER * sizeof(struct ThreadInput));
+      malloc(thread_num * sizeof(struct ThreadInput));
 
-  const int heights_per_thread = imbalance / THREAD_NUMBER;
-  const int remaining_heights = imbalance % THREAD_NUMBER;
+  const int heights_per_thread = imbalance / thread_num;
+  const int remaining_heights = imbalance % thread_num;
   const struct ThreadInputContext context = {
       .height_array = height_array,
       .interval = interval,
       .output = excluded_indexes,
   };
 
-  for (int i = 0; i < THREAD_NUMBER; i++) {
+  for (int i = 0; i < thread_num; i++) {
     thread_inputs[i].height_range.min_height =
         (i == 0 ? 1 : thread_inputs[i - 1].height_range.max_height);
     thread_inputs[i].height_range.max_height =
@@ -94,7 +93,7 @@ static bool *get_exclusion_array(const struct Interval *interval,
   }
 
   bool *exclusion_array = calloc(interval->size, sizeof(bool));
-  for (int i = 0; i < THREAD_NUMBER; i++) {
+  for (int i = 0; i < thread_num; i++) {
     pthread_join(thread_array[i], NULL);
     for (int height = thread_inputs[i].height_range.min_height;
          height < thread_inputs[i].height_range.max_height; height++) {
@@ -108,7 +107,11 @@ static bool *get_exclusion_array(const struct Interval *interval,
   return exclusion_array;
 }
 
-static struct Mapping *solver_function(const struct Interval *interval) {
+struct Mapping *
+karp_li_parallel_solver_function(const struct Interval *interval,
+                                 const void *params) {
+  assert(params != NULL);
+  int thread_num = ((KarpLiParallelParams *)params)->thread_num;
   if (interval->size <= 0) {
     return mapping_get_null();
   }
@@ -119,16 +122,13 @@ static struct Mapping *solver_function(const struct Interval *interval) {
     return mapping_get_null();
   }
 
-  bool *exclusion_array = get_exclusion_array(interval, height_array);
+  bool *exclusion_array =
+      get_exclusion_array(interval, height_array, thread_num);
+  free(height_array);
+
   struct Mapping *mapping = solve_neutral_interval(
       interval, exclusion_array, interval_get_counts(interval).target_num);
 
-  free(height_array);
   free(exclusion_array);
   return mapping;
 }
-
-const struct Solver karp_li_parallel_solver = {
-    .solve = solver_function,
-    .name = "Karp-Li solver parallel",
-};

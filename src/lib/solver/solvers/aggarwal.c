@@ -5,7 +5,8 @@
 #include "../common/solve_neutral_interval.h"
 #include "../solver.h"
 
-static struct Mapping *solver_function(const struct Interval *interval) {
+struct Mapping *aggarwal_solver_function(const struct Interval *interval,
+                                         const void *params) {
   if (interval->size <= 0) {
     return mapping_get_null();
   }
@@ -29,8 +30,3 @@ static struct Mapping *solver_function(const struct Interval *interval) {
 
   return mapping;
 }
-
-const struct Solver aggarwal_solver = {
-    .solve = solver_function,
-    .name = "Aggarwal solver",
-};

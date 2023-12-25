@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <pthread.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,8 +7,6 @@
 #include "../common/alternating_chains.h"
 #include "../common/solve_neutral_interval.h"
 #include "../solver.h"
-
-#define THREAD_NUMBER 8
 
 struct ThreadInputContext {
   const struct AlternatingChains *chains;
@@ -36,21 +35,22 @@ static void *get_exclusion_from_chain_range(void *args) {
 }
 
 static bool *get_exclusion_from_chains(const struct AlternatingChains *chains,
-                                       int interval_size, int imbalance) {
+                                       int thread_num, int interval_size,
+                                       int imbalance) {
   int *excluded_indexes = malloc(sizeof(int) * imbalance);
-  pthread_t *thread_array = malloc(THREAD_NUMBER * sizeof(pthread_t));
+  pthread_t *thread_array = malloc(thread_num * sizeof(pthread_t));
   struct ThreadInput *thread_inputs =
-      malloc(THREAD_NUMBER * sizeof(struct ThreadInput));
+      malloc(thread_num * sizeof(struct ThreadInput));
 
-  const int heights_per_thread = imbalance / THREAD_NUMBER;
-  const int remaining_heights = imbalance % THREAD_NUMBER;
+  const int heights_per_thread = imbalance / thread_num;
+  const int remaining_heights = imbalance % thread_num;
   const struct ThreadInputContext context = {
       .chains = chains,
       .output = excluded_indexes,
       .interval_size = interval_size,
   };
 
-  for (int i = 0; i < THREAD_NUMBER; i++) {
+  for (int i = 0; i < thread_num; i++) {
     thread_inputs[i].chain_range.min_chain =
         (i == 0 ? 0 : thread_inputs[i - 1].chain_range.max_chain_exclusive);
     thread_inputs[i].chain_range.max_chain_exclusive =
@@ -63,7 +63,7 @@ static bool *get_exclusion_from_chains(const struct AlternatingChains *chains,
   }
 
   bool *exclusion_array = calloc(interval_size, sizeof(bool));
-  for (int i = 0; i < THREAD_NUMBER; i++) {
+  for (int i = 0; i < thread_num; i++) {
     pthread_join(thread_array[i], NULL);
     for (int height = thread_inputs[i].chain_range.min_chain;
          height < thread_inputs[i].chain_range.max_chain_exclusive; height++) {
@@ -77,7 +77,11 @@ static bool *get_exclusion_from_chains(const struct AlternatingChains *chains,
   return exclusion_array;
 }
 
-static struct Mapping *solver_function(const struct Interval *interval) {
+struct Mapping *
+aggarwal_parallel_on_chains_solver_function(const struct Interval *interval,
+                                            const void *params) {
+  assert(params != NULL);
+  int thread_num = ((AggarwalParallelOnChainsParams *)params)->thread_num;
   if (interval->size <= 0) {
     return mapping_get_null();
   }
@@ -93,7 +97,7 @@ static struct Mapping *solver_function(const struct Interval *interval) {
       alternating_chains_get(interval, imbalance);
 
   bool *exclusion_array =
-      get_exclusion_from_chains(chains, interval->size, imbalance);
+      get_exclusion_from_chains(chains, thread_num, interval->size, imbalance);
   alternating_chains_free(chains);
 
   struct Mapping *mapping =
@@ -102,8 +106,3 @@ static struct Mapping *solver_function(const struct Interval *interval) {
 
   return mapping;
 }
-
-const struct Solver aggarwal_parallel_solver_on_chains = {
-    .solve = solver_function,
-    .name = "Aggarwal solver parallel on chains",
-};

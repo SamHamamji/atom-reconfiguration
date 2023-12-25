@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <pthread.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,10 +8,8 @@
 #include "../common/solve_neutral_interval.h"
 #include "../solver.h"
 
-#define THREAD_NUMBER 8
-
 static pthread_barrier_t barrier;
-static pthread_mutex_t mutex;
+static pthread_mutex_t counts_mutex;
 
 struct ThreadInputContext {
   const struct Interval *interval;
@@ -18,6 +17,7 @@ struct ThreadInputContext {
   struct Mapping *mapping;
   bool *exclusion_array;
   struct IntervalCounts *counts;
+  int thread_num;
 };
 
 struct ThreadInput {
@@ -35,16 +35,17 @@ static void thread_config_free(struct ThreadsConfig config) {
   free(config.inputs);
 }
 
-inline static int get_min_chain(int thread_index, int imbalance) {
-  int remaining_heights = imbalance % THREAD_NUMBER;
-  return thread_index * (imbalance / THREAD_NUMBER) +
+inline static int get_min_chain(int thread_index, int thread_num,
+                                int imbalance) {
+  int remaining_heights = imbalance % thread_num;
+  return thread_index * (imbalance / thread_num) +
          (thread_index < remaining_heights ? thread_index : remaining_heights);
 }
 
-inline static int get_interval_start_index(int thread_index,
+inline static int get_interval_start_index(int thread_index, int thread_num,
                                            int interval_size) {
-  int remaining_size = interval_size % THREAD_NUMBER;
-  return thread_index * (interval_size / THREAD_NUMBER) +
+  int remaining_size = interval_size % thread_num;
+  return thread_index * (interval_size / thread_num) +
          (thread_index < remaining_size ? thread_index : remaining_size);
 }
 
@@ -53,15 +54,16 @@ static void *solve_interval_range(void *args) {
 
   struct IntervalCounts slice_counts = interval_get_counts_from_slice(
       input->context.interval,
-      get_interval_start_index(input->thread_index,
+      get_interval_start_index(input->thread_index, input->context.thread_num,
                                input->context.interval->size),
       get_interval_start_index(input->thread_index + 1,
+                               input->context.thread_num,
                                input->context.interval->size));
 
-  pthread_mutex_lock(&mutex);
+  pthread_mutex_lock(&counts_mutex);
   input->context.counts->source_num += slice_counts.source_num;
   input->context.counts->target_num += slice_counts.target_num;
-  pthread_mutex_unlock(&mutex);
+  pthread_mutex_unlock(&counts_mutex);
 
   pthread_barrier_wait(&barrier);
 
@@ -92,8 +94,10 @@ static void *solve_interval_range(void *args) {
   pthread_barrier_wait(&barrier);
 
   const struct ChainRange chain_range = {
-      .min_chain = get_min_chain(input->thread_index, imbalance),
-      .max_chain_exclusive = get_min_chain(input->thread_index + 1, imbalance),
+      .min_chain = get_min_chain(input->thread_index, input->context.thread_num,
+                                 imbalance),
+      .max_chain_exclusive = get_min_chain(
+          input->thread_index + 1, input->context.thread_num, imbalance),
   };
 
   alternating_chains_compute_range(input->context.interval,
@@ -122,12 +126,17 @@ static void *solve_interval_range(void *args) {
   pthread_exit(NULL);
 }
 
-static struct Mapping *solver_function(const struct Interval *interval) {
+struct Mapping *
+aggarwal_parallel_solver_function(const struct Interval *interval,
+                                  const void *params) {
+  assert(params != NULL);
+  int thread_num = ((AggarwalParallelParams *)params)->thread_num;
+
   if (interval->size <= 0) {
     return mapping_get_null();
   }
-  pthread_barrier_init(&barrier, NULL, THREAD_NUMBER);
-  pthread_mutex_init(&mutex, NULL);
+  pthread_barrier_init(&barrier, NULL, thread_num);
+  pthread_mutex_init(&counts_mutex, NULL);
 
   const struct ThreadInputContext context = {
       .interval = interval,
@@ -135,6 +144,7 @@ static struct Mapping *solver_function(const struct Interval *interval) {
       .chains = malloc(sizeof(struct AlternatingChains)),
       .exclusion_array = malloc(interval->size * sizeof(bool)),
       .counts = malloc(sizeof(struct IntervalCounts)),
+      .thread_num = thread_num,
   };
 
   context.counts->source_num = 0;
@@ -142,17 +152,17 @@ static struct Mapping *solver_function(const struct Interval *interval) {
   memset(context.exclusion_array, 0, context.interval->size);
 
   struct ThreadsConfig thread_config = {
-      .ids = malloc(THREAD_NUMBER * sizeof(pthread_t)),
-      .inputs = malloc(THREAD_NUMBER * sizeof(struct ThreadInput)),
+      .ids = malloc(thread_num * sizeof(pthread_t)),
+      .inputs = malloc(thread_num * sizeof(struct ThreadInput)),
   };
-  for (int i = 0; i < THREAD_NUMBER; i++) {
+  for (int i = 0; i < thread_num; i++) {
     thread_config.inputs[i].context = context;
     thread_config.inputs[i].thread_index = i;
     pthread_create(&thread_config.ids[i], NULL, solve_interval_range,
                    &thread_config.inputs[i]);
   }
 
-  for (int i = 0; i < THREAD_NUMBER; i++) {
+  for (int i = 0; i < thread_num; i++) {
     pthread_join(thread_config.ids[i], NULL);
   }
 
@@ -163,12 +173,7 @@ static struct Mapping *solver_function(const struct Interval *interval) {
   free(context.counts);
 
   pthread_barrier_destroy(&barrier);
-  pthread_mutex_destroy(&mutex);
+  pthread_mutex_destroy(&counts_mutex);
 
   return context.mapping;
 }
-
-const struct Solver aggarwal_parallel_solver = {
-    .solve = solver_function,
-    .name = "Aggarwal solver parallel",
-};

@@ -42,7 +42,8 @@ static bool *get_exclusion_array(const struct Interval *interval,
   return exclusion_array;
 }
 
-static struct Mapping *solver_function(const struct Interval *interval) {
+struct Mapping *karp_li_solver_function(const struct Interval *interval,
+                                        const void *params) {
   if (interval->size <= 0) {
     return mapping_get_null();
   }
@@ -54,15 +55,10 @@ static struct Mapping *solver_function(const struct Interval *interval) {
   }
 
   bool *exclusion_array = get_exclusion_array(interval, height_array);
+  free(height_array);
+
   struct Mapping *mapping = solve_neutral_interval(
       interval, exclusion_array, interval_get_counts(interval).target_num);
-
-  free(height_array);
   free(exclusion_array);
   return mapping;
 }
-
-const struct Solver karp_li_solver = {
-    .solve = solver_function,
-    .name = "Karp-Li solver",
-};

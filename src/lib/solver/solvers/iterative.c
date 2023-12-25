@@ -35,7 +35,8 @@ static bool *get_exclusion_array(const struct Interval *interval,
   return exclusion_array;
 }
 
-static struct Mapping *solver_function(const struct Interval *const interval) {
+struct Mapping *iterative_solver_function(const struct Interval *const interval,
+                                          const void *params) {
   if (interval->size <= 0) {
     return mapping_get_null();
   }
@@ -53,15 +54,10 @@ static struct Mapping *solver_function(const struct Interval *const interval) {
   }
 
   bool *exclusion_array = get_exclusion_array(interval, iterative_height_array);
+  free(iterative_height_array);
+
   struct Mapping *mapping = solve_neutral_interval(
       interval, exclusion_array, interval_get_counts(interval).target_num);
-
-  free(iterative_height_array);
   free(exclusion_array);
   return mapping;
 }
-
-const struct Solver iterative_solver = {
-    .solve = solver_function,
-    .name = "Iterative solver",
-};
