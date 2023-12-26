@@ -116,18 +116,18 @@ static void *solve_interval_range(void *args) {
 
   pthread_barrier_wait(&barrier);
 
+  pthread_mutex_lock(&mutex);
   for (int i = 0; i < chain_range_length; i++) {
     int excluded_source_range =
         get_range_index(excluded_indexes[i], input->context.thread_num,
                         input->context.interval->length);
 
-    pthread_mutex_lock(&mutex);
     for (int j = excluded_source_range + 1; j < input->context.thread_num;
          j++) {
       input->context.first_indexes[j].first_source_index--;
     }
-    pthread_mutex_unlock(&mutex);
   }
+  pthread_mutex_unlock(&mutex);
 
   pthread_barrier_wait(&barrier);
 
