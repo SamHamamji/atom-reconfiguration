@@ -53,10 +53,10 @@ class SolverGrid(html.Div):
 
         new_dataframe = dataframe.copy()
         new_dataframe.sort_values(
-            by=CsvHeader.LENGT.value, ascending=False, inplace=True
+            by=CsvHeader.LENGTH.value, ascending=False, inplace=True
         )
-        new_dataframe[CsvHeader.LENGT.value] = new_dataframe[
-            CsvHeader.LENGT.value
+        new_dataframe[CsvHeader.LENGTH.value] = new_dataframe[
+            CsvHeader.LENGTH.value
         ].astype(str)
 
         grid = html.Div(
