@@ -14,10 +14,10 @@ static struct Interval *new_interval(const struct Point *points, int length) {
 }
 
 struct IntervalCounts
-interval_get_counts_from_slice(const struct Interval *interval, int start,
-                               int exclusive_end) {
+interval_get_counts_from_range(const struct Interval *interval,
+                               struct Range range) {
   struct IntervalCounts counts = {0, 0};
-  for (int i = start; i < exclusive_end; i++) {
+  for (int i = range.start; i < range.exclusive_end; i++) {
     counts.source_num += interval->array[i].is_source;
     counts.target_num += interval->array[i].is_target;
   }
@@ -26,7 +26,8 @@ interval_get_counts_from_slice(const struct Interval *interval, int start,
 
 inline struct IntervalCounts
 interval_get_counts(const struct Interval *interval) {
-  return interval_get_counts_from_slice(interval, 0, interval->length);
+  return interval_get_counts_from_range(interval,
+                                        (struct Range){0, interval->length});
 }
 
 inline int get_imbalance_from_counts(struct IntervalCounts counts) {

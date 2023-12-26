@@ -2,6 +2,8 @@
 
 #include <stdbool.h>
 
+#include "../range.h"
+
 struct Point {
   bool is_target;
   bool is_source;
@@ -29,8 +31,8 @@ struct IntervalCounts {
 void interval_free(struct Interval *interval);
 
 struct IntervalCounts
-interval_get_counts_from_slice(const struct Interval *interval, int start,
-                               int exclusive_end);
+interval_get_counts_from_range(const struct Interval *interval,
+                               struct Range range);
 struct IntervalCounts interval_get_counts(const struct Interval *interval);
 int get_imbalance_from_counts(struct IntervalCounts counts);
 

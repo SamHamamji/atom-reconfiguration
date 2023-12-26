@@ -16,7 +16,7 @@ struct ThreadInputContext {
 
 struct ThreadInput {
   struct ThreadInputContext context;
-  struct ChainRange chain_range;
+  struct Range chain_range;
 };
 
 static void *get_exclusion_from_chain_range(void *args) {
@@ -26,10 +26,9 @@ static void *get_exclusion_from_chain_range(void *args) {
       input->context.interval_length);
 
   // Reduces false sharing
-  memcpy(
-      &input->context.output[input->chain_range.min_chain], excluded_indexes,
-      (input->chain_range.max_chain_exclusive - input->chain_range.min_chain) *
-          sizeof(int));
+  memcpy(&input->context.output[input->chain_range.start], excluded_indexes,
+         (input->chain_range.exclusive_end - input->chain_range.start) *
+             sizeof(int));
 
   free(excluded_indexes);
   pthread_exit(NULL);
@@ -52,11 +51,7 @@ static bool *get_exclusion_from_chains(const struct AlternatingChains *chains,
   };
 
   for (int i = 0; i < thread_num; i++) {
-    thread_inputs[i].chain_range.min_chain =
-        (i == 0 ? 0 : thread_inputs[i - 1].chain_range.max_chain_exclusive);
-    thread_inputs[i].chain_range.max_chain_exclusive =
-        thread_inputs[i].chain_range.min_chain + heights_per_thread +
-        (int)(i < remaining_heights);
+    thread_inputs[i].chain_range = get_range(i, thread_num, imbalance);
     thread_inputs[i].context = context;
 
     pthread_create(&thread_array[i], NULL, get_exclusion_from_chain_range,
@@ -66,8 +61,8 @@ static bool *get_exclusion_from_chains(const struct AlternatingChains *chains,
   bool *exclusion_array = calloc(interval_length, sizeof(bool));
   for (int i = 0; i < thread_num; i++) {
     pthread_join(thread_array[i], NULL);
-    for (int height = thread_inputs[i].chain_range.min_chain;
-         height < thread_inputs[i].chain_range.max_chain_exclusive; height++) {
+    for (int height = thread_inputs[i].chain_range.start;
+         height < thread_inputs[i].chain_range.exclusive_end; height++) {
       exclusion_array[excluded_indexes[height]] = true;
     }
   }

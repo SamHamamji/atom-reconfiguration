@@ -20,7 +20,7 @@ struct ThreadInput {
 
 static void *compute_mapping_from_exclusion_array(void *args) {
   const struct ThreadInput *input = (struct ThreadInput *)args;
-  solve_neutral_interval_slice(
+  solve_neutral_interval_half(
       input->context.interval, input->context.exclusion_array,
       input->context.mapping, (bool)(input->thread_index % 2),
       (bool)(input->thread_index / 2));

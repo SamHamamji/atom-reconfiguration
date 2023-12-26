@@ -22,11 +22,13 @@ static const int lengths[] = {
     // 375, 400, 425, 450, 475, 500, 525, 550, 575, 600, 625, 650,  675, 700,
     // 725, 750, 775, 800, 825, 850, 875, 900, 925, 950, 975, 1000,
 
-    100,  200,  300,  400,  500,  600,  700,  800,  900,  1000,
-    1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000,
-    2100, 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900, 3000,
-    3100, 3200, 3300, 3400, 3500, 3600, 3700, 3800, 3900, 4000,
-    4100, 4200, 4300, 4400, 4500, 4600, 4700, 4800, 4900, 5000,
+    // 100,  200,  300,  400,  500,  600,  700,  800,  900,  1000,
+    // 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000,
+    // 2100, 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900, 3000,
+    // 3100, 3200, 3300, 3400, 3500, 3600, 3700, 3800, 3900, 4000,
+    // 4100, 4200, 4300, 4400, 4500, 4600, 4700, 4800, 4900, 5000,
+
+    10000000, 20000000, 30000000, 40000000, 50000000,
 
     // 20000000,  40000000,   60000000,  80000000,  100000000, 120000000,
     // 140000000, 160000000,  180000000, 200000000, 220000000, 240000000,
@@ -39,11 +41,11 @@ static const int lengths[] = {
     // 980000000, 1000000000,
 
     // 100000000, 200000000, 300000000, 400000000, 500000000,
-
 };
 static const double imbalance_percentages[] = {
+    1, 5, 25, 100,
     // 0, 1, 3, 9, 27, 100,
-    0, 1, 4, 16, 64,
+    // 0, 1, 4, 16, 64,
 };
 
 static const struct Solver *config_solvers[] = {
@@ -54,18 +56,28 @@ static const struct Solver *config_solvers[] = {
     },
     &(struct Solver){
         .solve = aggarwal_parallel_solver_function,
+        .params = &(AggarwalParallelOnChainsParams){.thread_num = 1},
+        .name = "Aggarwal solver parallel (1 thread)",
+    },
+    &(struct Solver){
+        .solve = aggarwal_parallel_solver_function,
+        .params = &(AggarwalParallelOnChainsParams){.thread_num = 2},
+        .name = "Aggarwal solver parallel (2 threads)",
+    },
+    &(struct Solver){
+        .solve = aggarwal_parallel_solver_function,
         .params = &(AggarwalParallelOnChainsParams){.thread_num = 4},
-        .name = "Aggarwal solver parallel",
+        .name = "Aggarwal solver parallel (4 threads)",
     },
     &(struct Solver){
-        .solve = aggarwal_parallel_on_chains_solver_function,
-        .params = &(AggarwalParallelOnChainsParams){.thread_num = 3},
-        .name = "Aggarwal solver parallel on chains",
+        .solve = aggarwal_parallel_solver_function,
+        .params = &(AggarwalParallelOnChainsParams){.thread_num = 16},
+        .name = "Aggarwal solver parallel (16 threads)",
     },
     &(struct Solver){
-        .solve = aggarwal_parallel_on_neutral_solver_function,
-        .params = &(AggarwalParallelOnNeutralParams){.thread_num = 4},
-        .name = "Aggarwal solver parallel on neutral",
+        .solve = aggarwal_parallel_solver_function,
+        .params = &(AggarwalParallelOnChainsParams){.thread_num = 64},
+        .name = "Aggarwal solver parallel (64 threads)",
     },
 };
 
