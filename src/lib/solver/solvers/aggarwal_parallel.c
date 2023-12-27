@@ -1,6 +1,6 @@
 #include <assert.h>
 #include <pthread.h>
-#include <stdio.h>
+#include <semaphore.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -23,6 +23,7 @@ struct ThreadInputContext {
     int first_source_index;
     int first_target_index;
   } *first_indexes;
+  sem_t *semaphores;
   int thread_num;
 };
 
@@ -39,6 +40,15 @@ struct ThreadsConfig {
 static void thread_config_free(struct ThreadsConfig config) {
   free(config.ids);
   free(config.inputs);
+}
+
+static void thread_context_free(struct ThreadInputContext context) {
+  alternating_chains_free(context.chains);
+  free(context.exclusion_array);
+  free(context.global_counts);
+  free(context.thread_counts_array);
+  free(context.first_indexes);
+  free(context.semaphores);
 }
 
 static void *solve_interval_range(void *args) {
@@ -85,16 +95,8 @@ static void *solve_interval_range(void *args) {
     input->context.mapping->pair_count =
         input->context.global_counts->target_num;
 
-    input->context.first_indexes[0].first_source_index = 0;
-    input->context.first_indexes[0].first_target_index = 0;
-    for (int i = 1; i < input->context.thread_num; i++) {
-      input->context.first_indexes[i].first_source_index =
-          input->context.first_indexes[i - 1].first_source_index +
-          input->context.thread_counts_array[i - 1].source_num;
-      input->context.first_indexes[i].first_target_index =
-          input->context.first_indexes[i - 1].first_target_index +
-          input->context.thread_counts_array[i - 1].target_num;
-    }
+    memset(input->context.first_indexes, 0,
+           input->context.thread_num * sizeof(struct ThreadIndexes));
   }
 
   pthread_barrier_wait(&barrier);
@@ -122,16 +124,28 @@ static void *solve_interval_range(void *args) {
         get_range_index(excluded_indexes[i], input->context.thread_num,
                         input->context.interval->length);
 
-    for (int j = excluded_source_range + 1; j < input->context.thread_num;
-         j++) {
-      input->context.first_indexes[j].first_source_index--;
+    if (excluded_source_range != input->context.thread_num - 1) {
+      input->context.first_indexes[excluded_source_range + 1]
+          .first_source_index--;
     }
   }
   pthread_mutex_unlock(&mutex);
+  free(excluded_indexes);
 
   pthread_barrier_wait(&barrier);
-
-  free(excluded_indexes);
+  if (input->thread_index == input->context.thread_num - 1) {
+    for (int i = 1; i < input->context.thread_num; i++) {
+      input->context.first_indexes[i].first_source_index +=
+          input->context.first_indexes[i - 1].first_source_index +
+          input->context.thread_counts_array[i - 1].source_num;
+      input->context.first_indexes[i].first_target_index +=
+          input->context.first_indexes[i - 1].first_target_index +
+          input->context.thread_counts_array[i - 1].target_num;
+      sem_post(&input->context.semaphores[i]);
+    }
+  } else if (input->thread_index != 0) {
+    sem_wait(&input->context.semaphores[input->thread_index]);
+  }
 
   solve_neutral_interval_range(
       input->context.interval, input->context.exclusion_array, interval_range,
@@ -146,11 +160,11 @@ struct Mapping *
 aggarwal_parallel_solver_function(const struct Interval *interval,
                                   const void *params) {
   assert(params != NULL);
-  int thread_num = ((AggarwalParallelParams *)params)->thread_num;
-
   if (interval->length <= 0) {
     return mapping_get_null();
   }
+
+  int thread_num = ((AggarwalParallelParams *)params)->thread_num;
   pthread_barrier_init(&barrier, NULL, thread_num);
   pthread_mutex_init(&mutex, NULL);
 
@@ -163,17 +177,20 @@ aggarwal_parallel_solver_function(const struct Interval *interval,
       .thread_counts_array = malloc(thread_num * sizeof(struct IntervalCounts)),
       .first_indexes = malloc(thread_num * sizeof(struct ThreadIndexes)),
       .thread_num = thread_num,
+      .semaphores = malloc(thread_num * sizeof(pthread_mutex_t)),
   };
 
   context.global_counts->source_num = 0;
   context.global_counts->target_num = 0;
   memset(context.exclusion_array, 0, context.interval->length);
 
-  struct ThreadsConfig thread_config = {
-      .ids = malloc(thread_num * sizeof(pthread_t)),
+  const struct ThreadsConfig thread_config = {
       .inputs = malloc(thread_num * sizeof(struct ThreadInput)),
+      .ids = malloc(thread_num * sizeof(pthread_t)),
   };
+
   for (int i = 0; i < thread_num; i++) {
+    sem_init(&context.semaphores[i], false, 0);
     thread_config.inputs[i].context = context;
     thread_config.inputs[i].thread_index = i;
     pthread_create(&thread_config.ids[i], NULL, solve_interval_range,
@@ -182,15 +199,11 @@ aggarwal_parallel_solver_function(const struct Interval *interval,
 
   for (int i = 0; i < thread_num; i++) {
     pthread_join(thread_config.ids[i], NULL);
+    sem_destroy(&context.semaphores[i]);
   }
 
   thread_config_free(thread_config);
-  alternating_chains_free(context.chains);
-
-  free(context.thread_counts_array);
-  free(context.exclusion_array);
-  free(context.global_counts);
-  free(context.first_indexes);
+  thread_context_free(context);
 
   pthread_barrier_destroy(&barrier);
   pthread_mutex_destroy(&mutex);

@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdlib.h>
 
 #include "solve_neutral_interval.h"
@@ -9,18 +10,10 @@ struct Mapping *solve_neutral_interval(const struct Interval *interval,
   mapping->pairs = malloc(target_num * sizeof(struct Pair));
   mapping->pair_count = target_num;
 
-  unsigned int source_counter = 0;
-  unsigned int target_counter = 0;
-  for (int i = 0; i < interval->length; i++) {
-    if (interval->array[i].is_source && !exclusion_array[i]) {
-      mapping->pairs[source_counter].source = i;
-      source_counter++;
-    }
-    if (interval->array[i].is_target) {
-      mapping->pairs[target_counter].target = i;
-      target_counter++;
-    }
-  }
+  solve_neutral_interval_range(
+      interval, exclusion_array,
+      (struct Range){.start = 0, .exclusive_end = interval->length}, 0, 0,
+      mapping);
 
   return mapping;
 }
@@ -29,6 +22,7 @@ void solve_neutral_interval_range(const struct Interval *interval,
                                   const bool *exclusion_array,
                                   struct Range range, int first_source,
                                   int first_target, struct Mapping *mapping) {
+  assert(0 <= range.start && range.exclusive_end <= interval->length);
   for (int i = range.start; i < range.exclusive_end; i++) {
     if (interval->array[i].is_source && !exclusion_array[i]) {
       mapping->pairs[first_source].source = i;
