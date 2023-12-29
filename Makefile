@@ -1,5 +1,5 @@
 #Config
-c-compiler := gcc
+c-compiler := gcc -std=gnu99
 python := python
 python-venv := venv
 default-visualization-port := 8050
