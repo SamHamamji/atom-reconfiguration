@@ -4,7 +4,6 @@
 #include "../../lib/solver/solver.h"
 #include "./test_solvers.h"
 #include "performance.h"
-#include "test_cases.h"
 
 static double test_solver_performance(const struct Solver *solver,
                                       const struct Interval *interval) {
@@ -20,30 +19,39 @@ static double test_solver_performance(const struct Solver *solver,
 
 struct PerformanceArray *
 test_solvers_performance(const struct PerformanceTestCasesConfig *config) {
-  struct PerformanceTestCases *test_cases = generate_performance_tests(config);
-
   struct PerformanceArray *performance_array =
       malloc(sizeof(struct PerformanceArray));
-  performance_array->length = test_cases->intervals_num * config->solvers_num;
+  performance_array->length = config->solvers_num * config->lengths_num *
+                              config->imbalance_percentages_num *
+                              config->repetition_num;
   performance_array->performances =
-      calloc(performance_array->length, sizeof(struct Performance));
+      malloc(performance_array->length * sizeof(struct Performance));
 
-  for (int solver_index = 0; solver_index < config->solvers_num;
-       solver_index++) {
-    for (int i = 0; i < test_cases->intervals_num; i++) {
-      double time_taken = test_solver_performance(config->solvers[solver_index],
-                                                  test_cases->intervals[i]);
+  int testcase_index = 0;
+  for (int i = 0; i < config->lengths_num; i++) {
+    for (int j = 0; j < config->imbalance_percentages_num; j++) {
+      for (int k = 0; k < config->repetition_num; k++) {
+        int imbalance = (int)(config->interval_lengths[i] *
+                              config->imbalance_percentages[j] / 100);
+        struct Interval *interval =
+            config->interval_generator(config->interval_lengths[i], imbalance);
+        for (int solver_index = 0; solver_index < config->solvers_num;
+             solver_index++) {
+          double time_taken =
+              test_solver_performance(config->solvers[solver_index], interval);
 
-      performance_array->performances[i * config->solvers_num + solver_index] =
-          (struct Performance){
-              .solver = config->solvers[solver_index],
-              .interval_length = test_cases->intervals[i]->length,
-              .imbalance_percentage = test_cases->imbalance_percentages[i],
-              .time_taken = time_taken,
-          };
+          performance_array->performances[testcase_index] =
+              (struct Performance){
+                  .solver = config->solvers[solver_index],
+                  .interval_length = interval->length,
+                  .imbalance_percentage = config->imbalance_percentages[j],
+                  .time_taken = time_taken,
+              };
+          testcase_index++;
+        }
+        interval_free(interval);
+      }
     }
   }
-
-  performance_test_cases_free(test_cases);
   return performance_array;
 }

@@ -5,7 +5,6 @@
 #include <time.h>
 
 #include "../lib/solver/solver.h"
-#include "./solver/test_cases.h"
 #include "./solver/test_solvers.h"
 #include "solver/performance.h"
 
@@ -22,13 +21,14 @@ static const int lengths[] = {
     // 375, 400, 425, 450, 475, 500, 525, 550, 575, 600, 625, 650,  675, 700,
     // 725, 750, 775, 800, 825, 850, 875, 900, 925, 950, 975, 1000,
 
-    // 100,  200,  300,  400,  500,  600,  700,  800,  900,  1000,
-    // 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000,
-    // 2100, 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900, 3000,
-    // 3100, 3200, 3300, 3400, 3500, 3600, 3700, 3800, 3900, 4000,
-    // 4100, 4200, 4300, 4400, 4500, 4600, 4700, 4800, 4900, 5000,
+    100,  200,  300,  400,  500,  600,  700,  800,  900,  1000,
+    1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000,
+    2100, 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900, 3000,
+    3100, 3200, 3300, 3400, 3500, 3600, 3700, 3800, 3900, 4000,
+    4100, 4200, 4300, 4400, 4500, 4600, 4700, 4800, 4900, 5000,
 
-    10000000, 20000000, 30000000, 40000000, 50000000,
+    // 5000000,  10000000, 15000000, 20000000, 25000000,
+    // 30000000, 35000000, 40000000, 45000000, 50000000,
 
     // 20000000,  40000000,   60000000,  80000000,  100000000, 120000000,
     // 140000000, 160000000,  180000000, 200000000, 220000000, 240000000,
@@ -71,14 +71,24 @@ static const struct Solver *config_solvers[] = {
     },
     &(struct Solver){
         .solve = aggarwal_parallel_solver_function,
-        .params = &(AggarwalParallelOnChainsParams){.thread_num = 16},
-        .name = "Aggarwal solver parallel (16 threads)",
+        .params = &(AggarwalParallelOnChainsParams){.thread_num = 6},
+        .name = "Aggarwal solver parallel (6 threads)",
     },
     &(struct Solver){
         .solve = aggarwal_parallel_solver_function,
-        .params = &(AggarwalParallelOnChainsParams){.thread_num = 64},
-        .name = "Aggarwal solver parallel (64 threads)",
+        .params = &(AggarwalParallelOnChainsParams){.thread_num = 8},
+        .name = "Aggarwal solver parallel (8 threads)",
     },
+    // &(struct Solver){
+    //     .solve = aggarwal_parallel_solver_function,
+    //     .params = &(AggarwalParallelOnChainsParams){.thread_num = 12},
+    //     .name = "Aggarwal solver parallel (12 threads)",
+    // },
+    // &(struct Solver){
+    //     .solve = aggarwal_parallel_solver_function,
+    //     .params = &(AggarwalParallelOnChainsParams){.thread_num = 16},
+    //     .name = "Aggarwal solver parallel (16 threads)",
+    // },
 };
 
 static const struct PerformanceTestCasesConfig config = {
@@ -90,7 +100,7 @@ static const struct PerformanceTestCasesConfig config = {
     .imbalance_percentages_num =
         sizeof(imbalance_percentages) / sizeof(imbalance_percentages[0]),
     .solvers_num = sizeof(config_solvers) / sizeof(config_solvers[0]),
-    .repetitions_per_test_case = 1,
+    .repetition_num = 1,
 };
 
 char *get_output_file_name(unsigned int seed) {
