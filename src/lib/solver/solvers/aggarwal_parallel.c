@@ -17,7 +17,6 @@ struct ThreadInputContext {
   struct Mapping *mapping;
   struct IntervalCounts *thread_counts_array;
   struct IntervalCounts *global_counts;
-  struct AlternatingChains *chains;
   bool *exclusion_array;
   struct ThreadIndexes {
     int first_source_index;
@@ -33,7 +32,6 @@ struct ThreadInput {
 };
 
 static void thread_context_free(struct ThreadInputContext context) {
-  alternating_chains_free(context.chains);
   free(context.exclusion_array);
   free(context.global_counts);
   free(context.thread_counts_array);
@@ -70,36 +68,35 @@ static void *solve_interval_range(void *args) {
   bool solvable = (bool)(imbalance >= 0);
 
   if (input->thread_index == 0) {
-    *input->context.chains = (struct AlternatingChains){
-        .chain_start_indexes = malloc(solvable ? imbalance * sizeof(int) : 0),
-        .right_partners = malloc(input->context.interval->length * sizeof(int)),
-    };
     int pair_count = solvable ? input->context.global_counts->target_num : 0;
     *input->context.mapping = (struct Mapping){
         .pairs = malloc(pair_count * sizeof(struct Pair)),
         .pair_count = pair_count,
     };
-    for (int i = 0; i < imbalance; i++) {
-      input->context.chains->chain_start_indexes[i] = NO_CHAIN_START;
-    }
   }
 
   if (!solvable) {
     pthread_exit(NULL);
   }
 
-  pthread_barrier_wait(&barrier);
-
-  const struct Range chain_range =
+  struct Range chain_range =
       get_range(input->thread_index, input->context.thread_num, imbalance);
 
-  alternating_chains_compute_range(input->context.interval,
-                                   input->context.chains, chain_range);
+  struct AlternatingChains chains = {
+      .chain_start_indexes = malloc(imbalance * sizeof(int)),
+      .right_partners = malloc(input->context.interval->length * sizeof(int)),
+  };
+
+  alternating_chains_compute_range(input->context.interval, &chains,
+                                   chain_range);
+
+  int *excluded_indexes = alternating_chains_get_exclusion_from_range(
+      &chains, chain_range, input->context.interval->length);
+
+  free(chains.chain_start_indexes);
+  free(chains.right_partners);
 
   const int chain_range_length = chain_range.exclusive_end - chain_range.start;
-  int *excluded_indexes = alternating_chains_get_exclusion_from_range(
-      input->context.chains, chain_range, input->context.interval->length);
-
   for (int i = 0; i < chain_range_length; i++) {
     input->context.exclusion_array[excluded_indexes[i]] = true;
   }
@@ -158,7 +155,6 @@ aggarwal_parallel_solver_function(const struct Interval *interval,
   const struct ThreadInputContext context = {
       .interval = interval,
       .mapping = malloc(sizeof(struct Mapping)),
-      .chains = malloc(sizeof(struct AlternatingChains)),
       .exclusion_array = malloc(interval->length * sizeof(bool)),
       .global_counts = malloc(sizeof(struct IntervalCounts)),
       .thread_counts_array = malloc(thread_num * sizeof(struct IntervalCounts)),
