@@ -1,22 +1,7 @@
 #pragma once
 
-#include <stdbool.h>
-
+#include "../point/point.h"
 #include "../range.h"
-
-struct Point {
-  bool is_target;
-  bool is_source;
-};
-
-#define EMPTY                                                                  \
-  { .is_target = false, .is_source = false }
-#define SOURCE                                                                 \
-  { .is_target = false, .is_source = true }
-#define TARGET                                                                 \
-  { .is_target = true, .is_source = false }
-#define BOTH                                                                   \
-  { .is_target = true, .is_source = true }
 
 struct Interval {
   struct Point *array;
