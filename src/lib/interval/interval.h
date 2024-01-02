@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../point/point.h"
-#include "../range.h"
+#include "../utils/range.h"
 
 struct Interval {
   struct Point *array;

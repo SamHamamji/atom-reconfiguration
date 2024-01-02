@@ -3,10 +3,10 @@
 #include "../../interval/interval.h"
 #include "../common/alternating_chains.h"
 #include "../common/solve_neutral_interval.h"
-#include "../solver.h"
+#include "../linear_solver.h"
 
-struct Mapping *aggarwal_solver_function(const struct Interval *interval,
-                                         const void *params) {
+struct Mapping *linear_solve_aggarwal(const struct Interval *interval,
+                                      const void *params) {
   if (interval->length <= 0) {
     return mapping_get_null();
   }

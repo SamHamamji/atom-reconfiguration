@@ -12,7 +12,7 @@
     .pair_count = sizeof(pairs_array) / sizeof(pairs_array[0]),                \
   }
 
-#define NEW_SOLVER_TEST_CASE(interval, mapping)                                \
+#define NEW_LINEAR_SOLVER_TEST_CASE(interval, mapping)                         \
   { .input = INTERVAL(interval), .expected_output = MAPPING(mapping), }
 
 // Test 1
@@ -202,34 +202,34 @@ static struct Point interval_26[] = {
 };
 static struct Pair mapping_26[] = {{1, 3}, {4, 4}};
 
-const struct SolverTestCase solver_test_cases[] = {
-    NEW_SOLVER_TEST_CASE(interval_1, mapping_1),
-    NEW_SOLVER_TEST_CASE(interval_2, mapping_2),
-    NEW_SOLVER_TEST_CASE(interval_3, mapping_3),
-    NEW_SOLVER_TEST_CASE(interval_4, mapping_4),
-    NEW_SOLVER_TEST_CASE(interval_5, mapping_5),
-    NEW_SOLVER_TEST_CASE(interval_6, mapping_6),
-    NEW_SOLVER_TEST_CASE(interval_7, mapping_7),
-    NEW_SOLVER_TEST_CASE(interval_8, mapping_8),
-    NEW_SOLVER_TEST_CASE(interval_9, mapping_9),
-    NEW_SOLVER_TEST_CASE(interval_10, mapping_10),
-    NEW_SOLVER_TEST_CASE(interval_11, mapping_11),
-    NEW_SOLVER_TEST_CASE(interval_12, mapping_12),
-    NEW_SOLVER_TEST_CASE(interval_13, mapping_13),
-    NEW_SOLVER_TEST_CASE(interval_14, mapping_14),
-    NEW_SOLVER_TEST_CASE(interval_15, mapping_15),
-    NEW_SOLVER_TEST_CASE(interval_16, mapping_16),
-    NEW_SOLVER_TEST_CASE(interval_17, mapping_17),
-    NEW_SOLVER_TEST_CASE(interval_18, mapping_18),
-    NEW_SOLVER_TEST_CASE(interval_19, mapping_19),
-    NEW_SOLVER_TEST_CASE(interval_20, mapping_20),
-    NEW_SOLVER_TEST_CASE(interval_21, mapping_21),
-    NEW_SOLVER_TEST_CASE(interval_22, mapping_22),
-    NEW_SOLVER_TEST_CASE(interval_23, mapping_23),
-    NEW_SOLVER_TEST_CASE(interval_24, mapping_24),
-    NEW_SOLVER_TEST_CASE(interval_25, mapping_25),
-    NEW_SOLVER_TEST_CASE(interval_26, mapping_26),
+const struct LinearSolverTestCase linear_solver_test_cases[] = {
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_1, mapping_1),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_2, mapping_2),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_3, mapping_3),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_4, mapping_4),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_5, mapping_5),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_6, mapping_6),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_7, mapping_7),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_8, mapping_8),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_9, mapping_9),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_10, mapping_10),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_11, mapping_11),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_12, mapping_12),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_13, mapping_13),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_14, mapping_14),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_15, mapping_15),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_16, mapping_16),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_17, mapping_17),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_18, mapping_18),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_19, mapping_19),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_20, mapping_20),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_21, mapping_21),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_22, mapping_22),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_23, mapping_23),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_24, mapping_24),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_25, mapping_25),
+    NEW_LINEAR_SOLVER_TEST_CASE(interval_26, mapping_26),
 };
 
-const int solver_test_cases_num =
-    sizeof(solver_test_cases) / sizeof(solver_test_cases[0]);
+const int linear_solver_test_cases_num =
+    sizeof(linear_solver_test_cases) / sizeof(linear_solver_test_cases[0]);

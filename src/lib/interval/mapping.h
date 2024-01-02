@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../interval/interval.h"
+#include <stdbool.h>
 
 struct Pair {
   unsigned int source;

@@ -10,7 +10,7 @@ build-type := dev
 
 # Compiler flags
 library-flags := -lm -lpthread
-debugging-flags := -Wall -Wextra -fsanitize=undefined,address -g -Og
+debugging-flags := -Wall -Wextra -fsanitize=undefined,address -Wfatal-errors -g -Og
 optimization-flags := -O3
 default-flags := $(library-flags)
 

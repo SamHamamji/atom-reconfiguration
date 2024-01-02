@@ -3,7 +3,7 @@
 
 #include "../common/height_array.h"
 #include "../common/solve_neutral_interval.h"
-#include "../solver.h"
+#include "../linear_solver.h"
 
 static bool *get_exclusion_array(const struct Interval *interval,
                                  const int *iterative_height_array) {
@@ -35,8 +35,8 @@ static bool *get_exclusion_array(const struct Interval *interval,
   return exclusion_array;
 }
 
-struct Mapping *iterative_solver_function(const struct Interval *const interval,
-                                          const void *params) {
+struct Mapping *linear_solve_iterative(const struct Interval *const interval,
+                                       const void *params) {
   if (interval->length <= 0) {
     return mapping_get_null();
   }

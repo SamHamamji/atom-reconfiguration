@@ -4,9 +4,9 @@
 #include <sys/stat.h>
 #include <time.h>
 
-#include "../lib/solver/solver.h"
-#include "./solver/test_solvers.h"
-#include "solver/performance.h"
+#include "../lib/linear_solver/linear_solver.h"
+#include "linear_solver/performance.h"
+#include "linear_solver/test_linear_solvers.h"
 
 const char output_dir_name[] = "performance_results";
 const char output_file_format[] = "./%s/%u.csv";
@@ -27,8 +27,7 @@ static const int lengths[] = {
     3100, 3200, 3300, 3400, 3500, 3600, 3700, 3800, 3900, 4000,
     4100, 4200, 4300, 4400, 4500, 4600, 4700, 4800, 4900, 5000,
 
-    // 5000000,  10000000, 15000000, 20000000, 25000000,
-    // 30000000, 35000000, 40000000, 45000000, 50000000,
+    // 2000000, 4000000, 6000000, 8000000, 10000000,
 
     // 20000000,  40000000,   60000000,  80000000,  100000000, 120000000,
     // 140000000, 160000000,  180000000, 200000000, 220000000, 240000000,
@@ -48,59 +47,50 @@ static const double imbalance_percentages[] = {
     // 0, 1, 4, 16, 64,
 };
 
-static const struct Solver *config_solvers[] = {
-    &(struct Solver){
-        .solve = aggarwal_solver_function,
+static const struct LinearSolver *config_linear_solvers[] = {
+    &(struct LinearSolver){
+        .solve = linear_solve_aggarwal,
         .params = NULL,
         .name = "Aggarwal solver",
     },
-    &(struct Solver){
-        .solve = aggarwal_parallel_solver_function,
+    &(struct LinearSolver){
+        .solve = linear_solve_aggarwal_parallel,
         .params = &(AggarwalParallelOnChainsParams){.thread_num = 1},
         .name = "Aggarwal solver parallel (1 thread)",
     },
-    &(struct Solver){
-        .solve = aggarwal_parallel_solver_function,
+    &(struct LinearSolver){
+        .solve = linear_solve_aggarwal_parallel,
         .params = &(AggarwalParallelOnChainsParams){.thread_num = 2},
         .name = "Aggarwal solver parallel (2 threads)",
     },
-    &(struct Solver){
-        .solve = aggarwal_parallel_solver_function,
+    &(struct LinearSolver){
+        .solve = linear_solve_aggarwal_parallel,
         .params = &(AggarwalParallelOnChainsParams){.thread_num = 4},
         .name = "Aggarwal solver parallel (4 threads)",
     },
-    &(struct Solver){
-        .solve = aggarwal_parallel_solver_function,
+    &(struct LinearSolver){
+        .solve = linear_solve_aggarwal_parallel,
         .params = &(AggarwalParallelOnChainsParams){.thread_num = 6},
         .name = "Aggarwal solver parallel (6 threads)",
     },
-    &(struct Solver){
-        .solve = aggarwal_parallel_solver_function,
+    &(struct LinearSolver){
+        .solve = linear_solve_aggarwal_parallel,
         .params = &(AggarwalParallelOnChainsParams){.thread_num = 8},
         .name = "Aggarwal solver parallel (8 threads)",
     },
-    // &(struct Solver){
-    //     .solve = aggarwal_parallel_solver_function,
-    //     .params = &(AggarwalParallelOnChainsParams){.thread_num = 12},
-    //     .name = "Aggarwal solver parallel (12 threads)",
-    // },
-    // &(struct Solver){
-    //     .solve = aggarwal_parallel_solver_function,
-    //     .params = &(AggarwalParallelOnChainsParams){.thread_num = 16},
-    //     .name = "Aggarwal solver parallel (16 threads)",
-    // },
 };
 
 static const struct PerformanceTestCasesConfig config = {
     .interval_lengths = lengths,
     .imbalance_percentages = imbalance_percentages,
-    .solvers = config_solvers,
+    .linear_solvers = config_linear_solvers,
     .interval_generator = interval_generator,
     .lengths_num = sizeof(lengths) / sizeof(lengths[0]),
     .imbalance_percentages_num =
         sizeof(imbalance_percentages) / sizeof(imbalance_percentages[0]),
-    .solvers_num = sizeof(config_solvers) / sizeof(config_solvers[0]),
-    .repetition_num = 1,
+    .linear_solvers_num =
+        sizeof(config_linear_solvers) / sizeof(config_linear_solvers[0]),
+    .repetition_num = 2,
 };
 
 char *get_output_file_name(unsigned int seed) {
@@ -117,7 +107,7 @@ int main() {
   srand(seed);
   printf("Seed set to %u\n", seed);
 
-  struct PerformanceArray *results = test_solvers_performance(&config);
+  struct PerformanceArray *results = test_linear_solvers_performance(&config);
 
   char *output_file_name = get_output_file_name(seed);
   mkdir(output_dir_name, S_IRWXU | S_IRWXG | S_IRWXO);

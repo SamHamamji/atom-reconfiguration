@@ -40,16 +40,18 @@ class GridElement(html.Div):
         )
 
 
-class SolverGrid(html.Div):
+class LinearSolverGrid(html.Div):
     graphConfig = GraphConfig(
         x=CsvHeader.IMBALANCE_PERCENT,
         y=CsvHeader.TIME_TAKEN,
         color=CsvHeader.LENGTH,
-        header=CsvHeader.SOLVER,
+        header=CsvHeader.LINEAR_SOLVER,
     )
 
     def __init__(self, dataframe: pd.DataFrame):
-        solver_names = dataframe[CsvHeader.SOLVER.value].sort_values().unique()
+        linear_solver_names = (
+            dataframe[CsvHeader.LINEAR_SOLVER.value].sort_values().unique()
+        )
 
         new_dataframe = dataframe.copy()
         new_dataframe.sort_values(
@@ -61,12 +63,12 @@ class SolverGrid(html.Div):
 
         grid = html.Div(
             [
-                GridElement(new_dataframe, self.graphConfig, solver_name)
-                for solver_name in solver_names
+                GridElement(new_dataframe, self.graphConfig, linear_solver_name)
+                for linear_solver_name in linear_solver_names
             ],
             className="grid",
         )
-        grid_title = html.H1("Performance by solver")
+        grid_title = html.H1("Performance by linear solver")
         html.Div.__init__(self, [grid_title, grid])
 
 
@@ -75,21 +77,23 @@ class HeatMapGrid(html.Div):
         x=CsvHeader.LENGTH,
         y=CsvHeader.IMBALANCE_PERCENT,
         color=CsvHeader.TIME_TAKEN,
-        header=CsvHeader.SOLVER,
+        header=CsvHeader.LINEAR_SOLVER,
         trendline=None,
     )
 
     def __init__(self, dataframe: pd.DataFrame):
-        solver_names = dataframe[CsvHeader.SOLVER.value].sort_values().unique()
+        linear_solver_names = (
+            dataframe[CsvHeader.LINEAR_SOLVER.value].sort_values().unique()
+        )
 
         grid = html.Div(
             [
-                GridElement(dataframe, self.graphConfig, solver_name)
-                for solver_name in solver_names
+                GridElement(dataframe, self.graphConfig, linear_solver_name)
+                for linear_solver_name in linear_solver_names
             ],
             className="grid",
         )
-        grid_title = html.H1("Performance map by solver")
+        grid_title = html.H1("Performance map by linear solver")
         html.Div.__init__(self, [grid_title, grid])
 
 
@@ -97,7 +101,7 @@ class LengthGrid(html.Div):
     graphConfig = GraphConfig(
         x=CsvHeader.IMBALANCE_PERCENT,
         y=CsvHeader.TIME_TAKEN,
-        color=CsvHeader.SOLVER,
+        color=CsvHeader.LINEAR_SOLVER,
         header=CsvHeader.LENGTH,
     )
 
@@ -120,7 +124,7 @@ class ImbalanceGrid(html.Div):
     graphConfig = GraphConfig(
         x=CsvHeader.LENGTH,
         y=CsvHeader.TIME_TAKEN,
-        color=CsvHeader.SOLVER,
+        color=CsvHeader.LINEAR_SOLVER,
         header=CsvHeader.IMBALANCE_PERCENT,
         title_generator=lambda x: f"{x}%",
     )
@@ -150,7 +154,7 @@ class OverviewElement(html.Div):
             new_dataframe,
             x=CsvHeader.LENGTH.value,
             y=CsvHeader.TIME_TAKEN.value,
-            color=new_dataframe[CsvHeader.SOLVER.value],
+            color=new_dataframe[CsvHeader.LINEAR_SOLVER.value],
             color_continuous_scale=px.colors.sequential.Turbo_r,
             trendline="lowess",
             trendline_options={"frac": 0.3},

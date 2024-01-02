@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../interval/interval.h"
-#include "../../mapping/mapping.h"
+#include "../../interval/mapping.h"
 
 int *get_height_array(const struct Interval *interval);
 

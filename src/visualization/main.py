@@ -4,7 +4,7 @@ from app import PerformanceVisualizationApp
 from data_processing import read_data
 
 parser = argparse.ArgumentParser(
-    description="Visualize linear assignment solvers performance results",
+    description="Visualize linear solvers performance results",
     prog="visualize_performance",
 )
 parser.add_argument(

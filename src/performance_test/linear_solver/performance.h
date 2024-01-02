@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../../lib/solver/solver.h"
+#include "../../lib/linear_solver/linear_solver.h"
 
 struct Performance {
-  const struct Solver *solver;
+  const struct LinearSolver *linear_solver;
   int interval_length;
   double imbalance_percentage;
   double time_taken;

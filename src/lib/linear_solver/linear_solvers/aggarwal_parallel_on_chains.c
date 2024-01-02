@@ -6,7 +6,7 @@
 #include "../../interval/interval.h"
 #include "../common/alternating_chains.h"
 #include "../common/solve_neutral_interval.h"
-#include "../solver.h"
+#include "../linear_solver.h"
 
 struct ThreadInputContext {
   const struct AlternatingChains *chains;
@@ -74,8 +74,8 @@ static bool *get_exclusion_from_chains(const struct AlternatingChains *chains,
 }
 
 struct Mapping *
-aggarwal_parallel_on_chains_solver_function(const struct Interval *interval,
-                                            const void *params) {
+linear_solve_aggarwal_parallel_on_chains(const struct Interval *interval,
+                                         const void *params) {
   assert(params != NULL);
   int thread_num = ((AggarwalParallelOnChainsParams *)params)->thread_num;
   if (interval->length <= 0) {

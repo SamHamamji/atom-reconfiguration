@@ -48,8 +48,8 @@ static void interval_swap_target(struct Interval *interval, int a, int b) {
 
 static void interval_shuffle(struct Interval *interval) {
   for (int i = 0; i < interval->length; i++) {
-    int source_index = random() % interval->length;
-    int target_index = random() % interval->length;
+    int source_index = rand() % interval->length;
+    int target_index = rand() % interval->length;
     interval_swap_source(interval, i, source_index);
     interval_swap_target(interval, i, target_index);
   }
@@ -61,8 +61,8 @@ static struct Interval *generate_randomized_interval(int length) {
   interval->array = calloc(length, sizeof(struct Point));
   for (int i = 0; i < length; i++) {
     interval->array[i] = (struct Point){
-        .is_source = (bool)(random() % 2),
-        .is_target = (bool)(random() % 2),
+        .is_source = (bool)(rand() % 2),
+        .is_target = (bool)(rand() % 2),
     };
   }
   return interval;
@@ -80,7 +80,7 @@ static struct Interval *generate_interval_by_imbalance(int length,
   }
 
   while (i < length) {
-    switch (random() % 3) {
+    switch (rand() % 3) {
     case 0:
       if (i == length - 1) {
         interval->array[i] = (struct Point)EMPTY;

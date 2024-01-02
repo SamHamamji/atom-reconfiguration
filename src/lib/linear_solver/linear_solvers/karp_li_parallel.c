@@ -6,7 +6,7 @@
 
 #include "../common/height_array.h"
 #include "../common/solve_neutral_interval.h"
-#include "../solver.h"
+#include "../linear_solver.h"
 
 struct ThreadInputContext {
   const int *height_array;
@@ -107,9 +107,8 @@ static bool *get_exclusion_array(const struct Interval *interval,
   return exclusion_array;
 }
 
-struct Mapping *
-karp_li_parallel_solver_function(const struct Interval *interval,
-                                 const void *params) {
+struct Mapping *linear_solve_karp_li_parallel(const struct Interval *interval,
+                                              const void *params) {
   assert(params != NULL);
   int thread_num = ((KarpLiParallelParams *)params)->thread_num;
   if (interval->length <= 0) {

@@ -13,28 +13,28 @@ inline static bool pair_equals(const struct Pair a, const struct Pair b) {
 
 bool mapping_equals(const struct Mapping *a, const struct Mapping *b) {
   if (a->pair_count != b->pair_count) {
-    return 0;
+    return false;
   }
 
-  bool *used = calloc(a->pair_count, sizeof(bool));
+  bool *pair_is_matched = calloc(a->pair_count, sizeof(bool));
 
   for (int i = 0; i < a->pair_count; i++) {
     bool found = false;
     for (int j = 0; j < b->pair_count; j++) {
-      if (!used[j] && pair_equals(a->pairs[i], b->pairs[j])) {
-        used[j] = true;
+      if (!pair_is_matched[j] && pair_equals(a->pairs[i], b->pairs[j])) {
+        pair_is_matched[j] = true;
         found = true;
         break;
       }
     }
     if (!found) {
-      free(used);
-      return 0;
+      free(pair_is_matched);
+      return false;
     }
   }
 
-  free(used);
-  return 1;
+  free(pair_is_matched);
+  return true;
 }
 
 struct Mapping *mapping_get_null() {

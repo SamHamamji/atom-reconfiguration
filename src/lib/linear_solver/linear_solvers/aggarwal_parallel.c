@@ -7,7 +7,7 @@
 #include "../../interval/interval.h"
 #include "../common/alternating_chains.h"
 #include "../common/solve_neutral_interval.h"
-#include "../solver.h"
+#include "../linear_solver.h"
 
 static pthread_barrier_t barrier;
 static pthread_mutex_t mutex;
@@ -140,9 +140,8 @@ static void *solve_interval_range(void *args) {
   pthread_exit(NULL);
 }
 
-struct Mapping *
-aggarwal_parallel_solver_function(const struct Interval *interval,
-                                  const void *params) {
+struct Mapping *linear_solve_aggarwal_parallel(const struct Interval *interval,
+                                               const void *params) {
   assert(params != NULL);
   if (interval->length <= 0) {
     return mapping_get_null();

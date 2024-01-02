@@ -4,7 +4,7 @@ from dash import Dash, html, Output, Input, dcc
 from tab_contents import (
     HeatMapGrid,
     ImbalanceGrid,
-    SolverGrid,
+    LinearSolverGrid,
     LengthGrid,
     OverviewElement,
 )
@@ -14,9 +14,9 @@ class PerformanceVisualizationApp(Dash):
     tab_content_types: dict[str, type[html.Div]] = {
         "Overview": OverviewElement,
         "Imbalance Grid": ImbalanceGrid,
-        "Solver Grid": SolverGrid,
-        "HeatMap Grid": HeatMapGrid,
+        "Linear Solver Grid": LinearSolverGrid,
         "Length Grid": LengthGrid,
+        "HeatMap Grid": HeatMapGrid,
     }
     tabs: list[dcc.Tab] = list(
         map(lambda name: dcc.Tab(label=name, value=name), tab_content_types.keys())

@@ -1,15 +1,16 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "../../lib/solver/solver.h"
-#include "./test_solvers.h"
+#include "../../lib/linear_solver/linear_solver.h"
+#include "./test_linear_solvers.h"
 #include "performance.h"
 
-static double test_solver_performance(const struct Solver *solver,
-                                      const struct Interval *interval) {
+static double test_linear_solver_performance_on_interval(
+    const struct LinearSolver *linear_solver, const struct Interval *interval) {
   struct timespec start, finish;
   clock_gettime(CLOCK_MONOTONIC, &start);
-  struct Mapping *mapping = solver->solve(interval, solver->params);
+  struct Mapping *mapping =
+      linear_solver->solve(interval, linear_solver->params);
   clock_gettime(CLOCK_MONOTONIC, &finish);
   mapping_free(mapping);
 
@@ -17,11 +18,11 @@ static double test_solver_performance(const struct Solver *solver,
          (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
 }
 
-struct PerformanceArray *
-test_solvers_performance(const struct PerformanceTestCasesConfig *config) {
+struct PerformanceArray *test_linear_solvers_performance(
+    const struct PerformanceTestCasesConfig *config) {
   struct PerformanceArray *performance_array =
       malloc(sizeof(struct PerformanceArray));
-  performance_array->length = config->solvers_num * config->lengths_num *
+  performance_array->length = config->linear_solvers_num * config->lengths_num *
                               config->imbalance_percentages_num *
                               config->repetition_num;
   performance_array->performances =
@@ -35,14 +36,15 @@ test_solvers_performance(const struct PerformanceTestCasesConfig *config) {
                               config->imbalance_percentages[j] / 100);
         struct Interval *interval =
             config->interval_generator(config->interval_lengths[i], imbalance);
-        for (int solver_index = 0; solver_index < config->solvers_num;
-             solver_index++) {
-          double time_taken =
-              test_solver_performance(config->solvers[solver_index], interval);
+        for (int linear_solver_index = 0;
+             linear_solver_index < config->linear_solvers_num;
+             linear_solver_index++) {
+          double time_taken = test_linear_solver_performance_on_interval(
+              config->linear_solvers[linear_solver_index], interval);
 
           performance_array->performances[testcase_index] =
               (struct Performance){
-                  .solver = config->solvers[solver_index],
+                  .linear_solver = config->linear_solvers[linear_solver_index],
                   .interval_length = interval->length,
                   .imbalance_percentage = config->imbalance_percentages[j],
                   .time_taken = time_taken,
