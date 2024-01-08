@@ -2,4 +2,4 @@
 
 #include "./reconfiguration.h"
 
-struct Reconfiguration *red_rec(struct Grid *grid);
+struct Reconfiguration *red_rec(const struct Grid *grid);

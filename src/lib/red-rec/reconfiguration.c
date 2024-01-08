@@ -1,11 +1,24 @@
+#include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "../grid/grid.h"
+#include "../interval/mapping.h"
+#include "move.h"
 #include "reconfiguration.h"
 
-static bool coordinates_are_equal(struct Coordinates a, struct Coordinates b) {
-  return a.col == b.col && a.row == b.row;
+struct Reconfiguration {
+  struct Move *moves;
+  int move_count;
+};
+
+struct Reconfiguration *reconfiguration_new(int max_move_count) {
+  struct Reconfiguration *reconfiguration =
+      malloc(sizeof(struct Reconfiguration));
+  *reconfiguration = (struct Reconfiguration){
+      .moves = malloc(max_move_count * sizeof(struct Move)),
+      .move_count = 0,
+  };
+  return reconfiguration;
 }
 
 void reconfiguration_free(struct Reconfiguration *reconfiguration) {
@@ -13,43 +26,87 @@ void reconfiguration_free(struct Reconfiguration *reconfiguration) {
   free(reconfiguration);
 }
 
+void reconfiguration_apply_move(struct Reconfiguration *reconfiguration,
+                                struct Grid *grid, int index) {
+  move_apply(grid, reconfiguration->moves[index]);
+}
+
+void reconfiguration_apply_move_range(
+    const struct Reconfiguration *reconfiguration, struct Grid *grid,
+    struct Range range) {
+  for (int i = range.start; i < range.exclusive_end; i++) {
+    move_apply(grid, reconfiguration->moves[i]);
+  }
+}
+
 void reconfiguration_apply(const struct Reconfiguration *reconfiguration,
                            struct Grid *grid) {
-  bool *move_is_complete = calloc(reconfiguration->move_count, sizeof(bool));
-  int move_counter = 0;
-
-  while (move_counter < reconfiguration->move_count) {
-    for (int i = 0; i < reconfiguration->move_count; i++) {
-      if (move_is_complete[i]) {
-        continue;
-      }
-
-      struct Coordinates destination = reconfiguration->moves[i].destination;
-      struct Coordinates origin = reconfiguration->moves[i].origin;
-
-      // printf("Moving from (%d, %d) to (%d, %d)\n", origin.col, origin.row,
-      //        destination.col, destination.row);
-
-      if (!coordinates_are_equal(destination, origin)) {
-        if (grid_get_point(grid, destination.col, destination.row).is_source ||
-            !grid_get_point(grid, origin.col, origin.row).is_source) {
-          continue;
-        }
-        grid_set_source(grid, origin.col, origin.row, false);
-        grid_set_source(grid, destination.col, destination.row, true);
-      }
-
-      move_is_complete[i] = true;
-      move_counter++;
-      // printf("Move %d/%d\n", move_counter, reconfiguration->move_count);
-    }
-  }
-
-  free(move_is_complete);
+  reconfiguration_apply_move_range(
+      reconfiguration, grid,
+      (struct Range){
+          .start = 0,
+          .exclusive_end = reconfiguration->move_count,
+      });
 }
 
 void reconfiguration_add_move(struct Reconfiguration *reconfiguration,
                               struct Move move) {
   reconfiguration->moves[reconfiguration->move_count] = move;
   reconfiguration->move_count++;
+}
+
+struct Move
+reconfiguration_get_move(const struct Reconfiguration *reconfiguration,
+                         int index) {
+  return reconfiguration->moves[index];
+}
+
+int reconfiguration_get_move_count(
+    const struct Reconfiguration *reconfiguration) {
+  return reconfiguration->move_count;
+}
+
+/** Unobstructs and adds a 1d obstructed `mapping` to `reconfiguration`, mutates
+ * `grid` too. */
+void reconfiguration_add_mapping(struct Reconfiguration *reconfiguration,
+                                 struct Grid *grid,
+                                 const struct Mapping *mapping,
+                                 int column_index) {
+  bool *move_is_complete = calloc(mapping->pair_count, sizeof(bool));
+  bool move_executed = true;
+  while (move_executed) {
+    move_executed = false;
+    for (int i = 0; i < mapping->pair_count; i++) {
+      struct Move current_move = (struct Move){
+          .origin = {.col = column_index, .row = mapping->pairs[i].source},
+          .destination = {.col = column_index, .row = mapping->pairs[i].target},
+      };
+      if (!move_is_complete[i] && move_is_valid(grid, current_move)) {
+        reconfiguration_add_move(reconfiguration, current_move);
+        move_apply(grid, current_move);
+        move_is_complete[i] = true;
+        move_executed = true;
+      }
+    }
+    if (!move_executed) {
+      break;
+    }
+  }
+
+  free(move_is_complete);
+}
+
+void reconfiguration_filter_identical(struct Reconfiguration *reconfiguration) {
+  int filtered_i = 0;
+  for (int i = 0; i < reconfiguration->move_count; i++) {
+    if (reconfiguration->moves[i].destination.col ==
+            reconfiguration->moves[i].origin.col &&
+        reconfiguration->moves[i].destination.row ==
+            reconfiguration->moves[i].origin.row) {
+      continue;
+    }
+    reconfiguration->moves[filtered_i] = reconfiguration->moves[i];
+    filtered_i++;
+  }
+  reconfiguration->move_count = filtered_i;
 }

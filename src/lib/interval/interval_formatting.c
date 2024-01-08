@@ -11,4 +11,5 @@ void interval_print(const struct Interval *interval) {
   for (int i = 0; i < interval->length; i++) {
     printf("%s ", point_to_string(interval->array[i]));
   }
+  printf("\n");
 }

@@ -12,6 +12,10 @@ static int integer_length(int num) {
 }
 
 void grid_print(const struct Grid *grid) {
+  if (grid->height == 0 || grid->width == 0) {
+    printf("Empty grid\n");
+    return;
+  }
   const int max_height_index_length = integer_length(grid->height - 1);
   const int max_width_index_length = integer_length(grid->width - 1);
 
@@ -21,10 +25,11 @@ void grid_print(const struct Grid *grid) {
   }
   printf("\n");
 
-  for (int y = 0; y < grid->height; y++) {
-    printf("%-*d ", max_height_index_length, y);
-    for (int x = 0; x < grid->width; x++) {
-      printf("%s", point_to_string(grid_get_point(grid, x, y)));
+  for (int row = 0; row < grid->height; row++) {
+    printf("%-*d ", max_height_index_length, row);
+    for (int col = 0; col < grid->width; col++) {
+      struct Point point = grid_get_point(grid, (struct Coordinates){col, row});
+      printf("%s", point_to_string(point));
       printf("%-*s", max_height_index_length, "");
     }
     printf("\n");

@@ -1,10 +1,11 @@
 #include "./range.h"
+#include "./max_min.h"
 
 inline static int get_range_start(int range_index, int range_num,
                                   int total_length) {
   int remaining_length = total_length % range_num;
   return range_index * (total_length / range_num) +
-         (range_index < remaining_length ? range_index : remaining_length);
+         min(range_index, remaining_length);
 }
 
 inline struct Range get_range(int range_index, int range_num,
