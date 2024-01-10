@@ -15,8 +15,8 @@ static pthread_mutex_t mutex;
 struct ThreadInputContext {
   const struct Interval *interval;
   struct Mapping *mapping;
-  struct IntervalCounts *thread_counts_array;
-  struct IntervalCounts *global_counts;
+  struct Counts *thread_counts_array;
+  struct Counts *total_counts;
   bool *exclusion_array;
   struct ThreadIndexes {
     int first_source_index;
@@ -33,7 +33,7 @@ struct ThreadInput {
 
 static void thread_context_free(struct ThreadInputContext context) {
   free(context.exclusion_array);
-  free(context.global_counts);
+  free(context.total_counts);
   free(context.thread_counts_array);
   free(context.first_indexes);
   free(context.semaphores);
@@ -41,12 +41,12 @@ static void thread_context_free(struct ThreadInputContext context) {
 
 static void compute_interval_counts(const struct Interval *interval,
                                     struct Range interval_range,
-                                    struct IntervalCounts *range_counts,
-                                    struct IntervalCounts *global_counts) {
+                                    struct Counts *range_counts,
+                                    struct Counts *total_counts) {
   *range_counts = interval_get_counts_from_range(interval, interval_range);
   pthread_mutex_lock(&mutex);
-  global_counts->source_num += range_counts->source_num;
-  global_counts->target_num += range_counts->target_num;
+  total_counts->source_num += range_counts->source_num;
+  total_counts->target_num += range_counts->target_num;
   pthread_mutex_unlock(&mutex);
 }
 
@@ -60,15 +60,15 @@ static void *solve_interval_range(void *args) {
   compute_interval_counts(
       input->context.interval, interval_range,
       &input->context.thread_counts_array[input->thread_index],
-      input->context.global_counts);
+      input->context.total_counts);
 
   pthread_barrier_wait(&barrier);
 
-  int imbalance = get_imbalance_from_counts(*input->context.global_counts);
+  int imbalance = counts_get_imbalance(*input->context.total_counts);
   bool solvable = (bool)(imbalance >= 0);
 
   if (input->thread_index == 0) {
-    int pair_count = solvable ? input->context.global_counts->target_num : 0;
+    int pair_count = solvable ? input->context.total_counts->target_num : 0;
     *input->context.mapping = (struct Mapping){
         .pairs = malloc(pair_count * sizeof(struct Pair)),
         .pair_count = pair_count,
@@ -155,14 +155,14 @@ struct Mapping *linear_solve_aggarwal_parallel(const struct Interval *interval,
       .interval = interval,
       .mapping = malloc(sizeof(struct Mapping)),
       .exclusion_array = malloc(interval->length * sizeof(bool)),
-      .global_counts = malloc(sizeof(struct IntervalCounts)),
-      .thread_counts_array = malloc(thread_num * sizeof(struct IntervalCounts)),
+      .total_counts = malloc(sizeof(struct Counts)),
+      .thread_counts_array = malloc(thread_num * sizeof(struct Counts)),
       .first_indexes = malloc(thread_num * sizeof(struct ThreadIndexes)),
       .semaphores = malloc(thread_num * sizeof(pthread_mutex_t)),
       .thread_num = thread_num,
   };
 
-  *context.global_counts = (struct IntervalCounts){0, 0};
+  *context.total_counts = (struct Counts){0, 0};
   memset(context.first_indexes, 0, thread_num * sizeof(struct ThreadIndexes));
   memset(context.exclusion_array, 0, context.interval->length);
 

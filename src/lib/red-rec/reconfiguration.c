@@ -36,7 +36,20 @@ void reconfiguration_apply_move_range(
     struct Range range) {
   for (int i = range.start; i < range.exclusive_end; i++) {
     move_apply(grid, reconfiguration->moves[i]);
+
+    struct Move move = reconfiguration->moves[i];
   }
+}
+
+void reconfiguration_apply_last_moves(
+    const struct Reconfiguration *reconfiguration, struct Grid *grid,
+    int move_count) {
+  reconfiguration_apply_move_range(
+      reconfiguration, grid,
+      (struct Range){
+          .start = reconfiguration->move_count - move_count,
+          .exclusive_end = reconfiguration->move_count,
+      });
 }
 
 void reconfiguration_apply(const struct Reconfiguration *reconfiguration,
@@ -66,8 +79,6 @@ int reconfiguration_get_move_count(
   return reconfiguration->move_count;
 }
 
-/** Unobstructs and adds a 1d obstructed `mapping` to `reconfiguration`, mutates
- * `grid` too. */
 void reconfiguration_add_mapping(struct Reconfiguration *reconfiguration,
                                  struct Grid *grid,
                                  const struct Mapping *mapping,
@@ -83,7 +94,7 @@ void reconfiguration_add_mapping(struct Reconfiguration *reconfiguration,
       };
       if (!move_is_complete[i] && move_is_valid(grid, current_move)) {
         reconfiguration_add_move(reconfiguration, current_move);
-        move_apply(grid, current_move);
+        reconfiguration_apply_last_moves(reconfiguration, grid, 1);
         move_is_complete[i] = true;
         move_executed = true;
       }

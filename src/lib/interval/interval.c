@@ -13,10 +13,9 @@ static struct Interval *new_interval(const struct Point *points, int length) {
   return interval;
 }
 
-struct IntervalCounts
-interval_get_counts_from_range(const struct Interval *interval,
-                               struct Range range) {
-  struct IntervalCounts counts = {0, 0};
+struct Counts interval_get_counts_from_range(const struct Interval *interval,
+                                             struct Range range) {
+  struct Counts counts = {0, 0};
   for (int i = range.start; i < range.exclusive_end; i++) {
     counts.source_num += interval->array[i].is_source;
     counts.target_num += interval->array[i].is_target;
@@ -24,13 +23,12 @@ interval_get_counts_from_range(const struct Interval *interval,
   return counts;
 }
 
-inline struct IntervalCounts
-interval_get_counts(const struct Interval *interval) {
+inline struct Counts interval_get_counts(const struct Interval *interval) {
   return interval_get_counts_from_range(interval,
                                         (struct Range){0, interval->length});
 }
 
-inline int get_imbalance_from_counts(struct IntervalCounts counts) {
+inline int counts_get_imbalance(struct Counts counts) {
   return counts.source_num - counts.target_num;
 }
 

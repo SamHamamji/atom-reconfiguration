@@ -3,23 +3,24 @@
 #include "../point/point.h"
 #include "../utils/range.h"
 
+/** Represents a line of evenly spaced points */
 struct Interval {
   struct Point *array;
   int length;
 };
 
-struct IntervalCounts {
+/** Represents a number of sources and targets */
+struct Counts {
   int source_num;
   int target_num;
 };
 
 void interval_free(struct Interval *interval);
 
-struct IntervalCounts
-interval_get_counts_from_range(const struct Interval *interval,
-                               struct Range range);
-struct IntervalCounts interval_get_counts(const struct Interval *interval);
-int get_imbalance_from_counts(struct IntervalCounts counts);
+struct Counts interval_get_counts_from_range(const struct Interval *interval,
+                                             struct Range range);
+struct Counts interval_get_counts(const struct Interval *interval);
+int counts_get_imbalance(struct Counts counts);
 
 void interval_print(const struct Interval *interval);
 

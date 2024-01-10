@@ -71,8 +71,8 @@ linear_solve_aggarwal_parallel_on_neutral(const struct Interval *interval,
     return mapping_get_null();
   }
 
-  struct IntervalCounts counts = interval_get_counts(interval);
-  int imbalance = get_imbalance_from_counts(counts);
+  struct Counts counts = interval_get_counts(interval);
+  int imbalance = counts_get_imbalance(counts);
   if (imbalance < 0) {
     return mapping_get_null();
   }

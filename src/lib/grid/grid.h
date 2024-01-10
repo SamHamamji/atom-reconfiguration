@@ -26,6 +26,7 @@ void grid_set_source(struct Grid *grid, struct Coordinates coords,
 void grid_set_target(struct Grid *grid, struct Coordinates coords,
                      bool is_target);
 struct Point *grid_get_column(const struct Grid *grid, int col);
-int *grid_get_column_supluses(const struct Grid *grid);
+struct Counts *grid_get_column_counts(const struct Grid *grid);
+bool grid_is_solved(const struct Grid *grid);
 
 void grid_print(const struct Grid *grid);

@@ -1,21 +1,22 @@
 #include <stdlib.h>
-#include <time.h>
 
 #include "../../lib/linear_solver/linear_solver.h"
+#include "../timer.h"
 #include "./test_linear_solvers.h"
 #include "performance.h"
 
 static double test_linear_solver_performance_on_interval(
     const struct LinearSolver *linear_solver, const struct Interval *interval) {
-  struct timespec start, finish;
-  clock_gettime(CLOCK_MONOTONIC, &start);
+  struct Timer timer;
+
+  timer_start(&timer);
   struct Mapping *mapping =
       linear_solver->solve(interval, linear_solver->params);
-  clock_gettime(CLOCK_MONOTONIC, &finish);
+  timer_stop(&timer);
+
   mapping_free(mapping);
 
-  return (finish.tv_sec - start.tv_sec) +
-         (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+  return timer_get_time(&timer);
 }
 
 struct PerformanceArray *test_linear_solvers_performance(

@@ -69,14 +69,24 @@ void grid_set_target(struct Grid *grid, struct Coordinates coords,
   grid->elements[coords.col * grid->height + coords.row].is_target = is_target;
 }
 
-int *grid_get_column_supluses(const struct Grid *grid) {
-  int *column_supluses = calloc(grid->width, sizeof(int));
+struct Counts *grid_get_column_counts(const struct Grid *grid) {
+  struct Counts *column_counts = calloc(grid->width, sizeof(struct Counts));
 
   for (int i = 0; i < grid->width; i++) {
-    struct Point *column = grid_get_column(grid, i);
-    for (int j = 0; j < grid->height; j++) {
-      column_supluses[i] += (int)column[j].is_source - (int)column[j].is_target;
+    column_counts[i] = interval_get_counts(&(struct Interval){
+        .array = grid_get_column(grid, i),
+        .length = grid->height,
+    });
+  }
+
+  return column_counts;
+}
+
+bool grid_is_solved(const struct Grid *grid) {
+  for (int i = 0; i < grid->width * grid->height; i++) {
+    if (grid->elements[i].is_target && !grid->elements[i].is_source) {
+      return false;
     }
   }
-  return column_supluses;
+  return true;
 }
