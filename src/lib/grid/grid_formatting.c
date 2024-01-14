@@ -30,7 +30,7 @@ void grid_print(const struct Grid *grid) {
     for (int col = 0; col < grid->width; col++) {
       struct Point point = grid_get_point(grid, (struct Coordinates){col, row});
       printf("%s", point_to_string(point));
-      printf("%-*s", max_height_index_length, "");
+      printf("%-*s", max_width_index_length, "");
     }
     printf("\n");
   }
