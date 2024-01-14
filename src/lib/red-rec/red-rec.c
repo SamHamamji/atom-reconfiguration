@@ -1,5 +1,4 @@
 #include <limits.h>
-#include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -24,13 +23,10 @@ struct SourceLocations {
 
 static struct SourceLocations get_column_source_locations(struct Grid *grid,
                                                           int column_index) {
-  struct SourceLocations column_source_locations = {
-      .upper_reservoir = 0,
-      .target_region = 0,
-      .lower_reservoir = 0,
-  };
-  int i = 0;
+  struct SourceLocations column_source_locations = {0, 0, 0};
   struct Point *column = grid_get_column(grid, column_index);
+
+  int i = 0;
   while (i < grid->height && !column[i].is_target) {
     column_source_locations.upper_reservoir += (int)column[i].is_source;
     i++;
@@ -63,6 +59,56 @@ solve_self_sufficient_columns(struct Grid *grid, struct Counts *column_counts,
       column_is_solved[column_index] = true;
     }
   }
+}
+
+static void redistribute_and_reconfigure_without_1d(
+    struct Grid *grid, struct Reconfiguration *reconfiguration,
+    struct ColumnPair column_pair, struct Range target_region_range) {
+  struct Point *receiver_alias = malloc(grid->height * sizeof(struct Point));
+  struct Point *donor = grid_get_column(grid, column_pair.donor_index);
+  struct Point *receiver = grid_get_column(grid, column_pair.receiver_index);
+
+  int source_count = 0;
+  for (int j = 0; j < grid->height; j++) {
+    if (donor[j].is_source && !donor[j].is_target) {
+      reconfiguration_add_move(
+          reconfiguration,
+          (struct Move){
+              .origin = {.col = column_pair.donor_index, .row = j},
+              .destination = {.col = column_pair.receiver_index, .row = j},
+          });
+      source_count++;
+    }
+
+    receiver_alias[j] = (struct Point){
+        .is_source = receiver[j].is_source ||
+                     (donor[j].is_source && !donor[j].is_target),
+        .is_target = target_region_range.start <= j &&
+                     j < target_region_range.exclusive_end &&
+                     receiver[j].is_target,
+    };
+  }
+
+  struct Mapping *mapping = linear_solve_aggarwal(
+      &(struct Interval){.array = receiver_alias, .length = grid->height},
+      NULL);
+  for (int j = 0; j < mapping->pair_count; j++) {
+    if (mapping->pairs[j].source != mapping->pairs[j].target) {
+      struct Move move = (struct Move){
+          .origin = {.col = column_pair.donor_index,
+                     .row = mapping->pairs[j].source},
+          .destination = {.col = column_pair.receiver_index,
+                          .row = mapping->pairs[j].source},
+      };
+      reconfiguration_add_move(reconfiguration, move);
+      reconfiguration_apply_last_moves(reconfiguration, grid, 1);
+    }
+  }
+
+  reconfiguration_add_mapping(reconfiguration, grid, mapping,
+                              column_pair.receiver_index);
+  mapping_free(mapping);
+  free(receiver_alias);
 }
 
 static void redistribute_and_reconfigure(
@@ -104,25 +150,10 @@ static void redistribute_and_reconfigure(
   free(receiver_alias);
 }
 
-static void solve_column_pair(struct Grid *grid, struct Counts *column_counts,
-                              struct ColumnPair column_pair,
-                              struct Reconfiguration *reconfiguration,
-                              struct DelayedMoves *delayed_moves,
-                              bool *column_is_solved) {
-
-  int redistributed_atoms_count =
-      min(column_pair.donor_surplus, column_pair.receiver_deficit);
-  column_counts[column_pair.donor_index].source_num -=
-      redistributed_atoms_count;
-  column_counts[column_pair.receiver_index].source_num +=
-      redistributed_atoms_count;
-
-  if (column_pair.donor_surplus < column_pair.receiver_deficit) {
-    delayed_moves->array[delayed_moves->length] = column_pair;
-    delayed_moves->length++;
-    return;
-  }
-
+static void solve_delayed_movements(struct Grid *grid,
+                                    struct Reconfiguration *reconfiguration,
+                                    struct DelayedMoves *delayed_moves,
+                                    struct ColumnPair column_pair) {
   struct Point *receiver = grid_get_column(grid, column_pair.receiver_index);
   struct Counts receiver_counts = {0, 0};
   for (int i = 0; i < grid->height; i++) {
@@ -194,8 +225,33 @@ static void solve_column_pair(struct Grid *grid, struct Counts *column_counts,
 
   redistribute_and_reconfigure(grid, reconfiguration, column_pair,
                                target_region_range);
+}
 
-  column_is_solved[column_pair.receiver_index] = true;
+static void solve_column_pair(struct Grid *grid,
+                              struct Reconfiguration *reconfiguration,
+                              struct DelayedMoves *delayed_moves,
+                              struct Counts *column_counts,
+                              bool *column_is_solved,
+                              struct ColumnPair column_pair) {
+
+  int redistributed_atoms_count =
+      min(counts_get_imbalance(column_counts[column_pair.donor_index]),
+          abs(counts_get_imbalance(column_counts[column_pair.receiver_index])));
+  column_counts[column_pair.donor_index].source_num -=
+      redistributed_atoms_count;
+  column_counts[column_pair.receiver_index].source_num +=
+      redistributed_atoms_count;
+
+  if (counts_get_imbalance(column_counts[column_pair.receiver_index]) != 0) {
+    delayed_moves->array[delayed_moves->length] = column_pair;
+    delayed_moves->length++;
+  } else {
+    solve_delayed_movements(grid, reconfiguration, delayed_moves, column_pair);
+    column_is_solved[column_pair.receiver_index] = true;
+  }
+
+  for (int i = 0; i < grid->width; i++) {
+  }
 }
 
 struct Reconfiguration *red_rec(const struct Grid *grid) {
@@ -230,8 +286,8 @@ struct Reconfiguration *red_rec(const struct Grid *grid) {
       column_pair_get_best(grid_copy, column_counts, column_is_solved);
   while (best_column_pair.receiver_index != -1 &&
          best_column_pair.donor_index != -1) {
-    solve_column_pair(grid_copy, column_counts, best_column_pair,
-                      reconfiguration, &delayed_moves, column_is_solved);
+    solve_column_pair(grid_copy, reconfiguration, &delayed_moves, column_counts,
+                      column_is_solved, best_column_pair);
 
     best_column_pair =
         column_pair_get_best(grid_copy, column_counts, column_is_solved);

@@ -23,7 +23,7 @@ struct Grid *grid_new_square_compact(int width, int height) {
     for (int row = 0; row < height; row++) {
       grid_set_source(grid, (struct Coordinates){col, row}, (bool)(rand() % 2));
       grid_set_target(grid, (struct Coordinates){col, row},
-                      (height / 4 <= row) && (row < height * 3 / 4));
+                      (height / 4 < row) && (row < height * 3 / 4));
     }
   }
   return grid;

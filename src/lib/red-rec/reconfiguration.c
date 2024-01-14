@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -22,6 +21,9 @@ struct Reconfiguration *reconfiguration_new(int max_move_count) {
 }
 
 void reconfiguration_free(struct Reconfiguration *reconfiguration) {
+  if (reconfiguration == NULL) {
+    return;
+  }
   free(reconfiguration->moves);
   free(reconfiguration);
 }
@@ -36,8 +38,6 @@ void reconfiguration_apply_move_range(
     struct Range range) {
   for (int i = range.start; i < range.exclusive_end; i++) {
     move_apply(grid, reconfiguration->moves[i]);
-
-    struct Move move = reconfiguration->moves[i];
   }
 }
 

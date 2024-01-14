@@ -2,6 +2,7 @@
 
 #include "../lib/linear_solver/linear_solver.h"
 #include "./linear_solver/test_linear_solvers.h"
+#include "./red_rec/test_red_rec.h"
 
 const struct LinearSolver *linear_solvers[] = {
     &(struct LinearSolver){
@@ -45,8 +46,18 @@ const int linear_solvers_num =
     sizeof(linear_solvers) / sizeof(linear_solvers[0]);
 
 int main(void) {
-  if (!test_linear_solvers(linear_solvers, linear_solvers_num)) {
+  bool success = true;
+  success = success && test_linear_solvers(linear_solvers, linear_solvers_num);
+  success = success && test_red_rec(&(struct RedRecUnitTestConfig){
+                           .max_width = 30,
+                           .min_width = 4,
+                           .max_height = 30,
+                           .min_height = 4,
+                           .test_case_num = 2000,
+                       });
+
+  if (!success) {
     exit(EXIT_FAILURE);
-  };
+  }
   return 0;
 }

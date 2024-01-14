@@ -6,9 +6,7 @@
 
 struct ColumnPair {
   int donor_index;
-  int donor_surplus;
   int receiver_index;
-  int receiver_deficit;
 };
 
 /** Returns the best column pair

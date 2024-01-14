@@ -6,15 +6,20 @@
 /** Returns a positive number if the first element is greater than the second,
  * and vice versa
  */
-static int compare_column_pairs(struct ColumnPair a, struct ColumnPair b) {
+static int compare_column_pairs(struct ColumnPair a, struct ColumnPair b,
+                                struct Counts *column_counts) {
   /**
    * Comparisons by priority
    * 1. maximizes the number of exchanged tokens
    * 2. minimizes the number of columns between the donor and the receiver
    * 3. maximizes the receiver surplus (closest to saturation)
    */
-  int exchanged_sources_a = min(a.donor_surplus, a.receiver_deficit);
-  int exchanged_sources_b = min(b.donor_surplus, b.receiver_deficit);
+  int exchanged_sources_a =
+      min(counts_get_imbalance(column_counts[a.donor_index]),
+          abs(counts_get_imbalance(column_counts[a.receiver_index])));
+  int exchanged_sources_b =
+      min(counts_get_imbalance(column_counts[b.donor_index]),
+          abs(counts_get_imbalance(column_counts[b.receiver_index])));
   if (exchanged_sources_a != exchanged_sources_b) {
     return exchanged_sources_a - exchanged_sources_b;
   }
@@ -25,21 +30,24 @@ static int compare_column_pairs(struct ColumnPair a, struct ColumnPair b) {
     return column_distance_b - column_distance_a;
   }
 
-  return b.receiver_deficit - a.receiver_deficit;
+  int a_receiver_remaining_deficit =
+      abs(counts_get_imbalance(column_counts[a.receiver_index]));
+  int b_receiver_remaining_deficit =
+      abs(counts_get_imbalance(column_counts[b.receiver_index]));
+
+  return b_receiver_remaining_deficit - a_receiver_remaining_deficit;
 }
 
 struct ColumnPair column_pair_get_best(struct Grid *grid,
                                        struct Counts *column_counts,
                                        bool *column_is_solved) {
-  int previous_column = -1;
+  int previous_column = 0;
   struct ColumnPair best_column_pair = {
-      .receiver_index = -1,
       .donor_index = -1,
-      .donor_surplus = 0,
-      .receiver_deficit = 0,
+      .receiver_index = -1,
   };
 
-  for (int current_column = 0; current_column < grid->width; current_column++) {
+  for (int current_column = 1; current_column < grid->width; current_column++) {
     if (column_is_solved[current_column] &&
         counts_get_imbalance(column_counts[current_column]) == 0) {
       continue;
@@ -48,20 +56,19 @@ struct ColumnPair column_pair_get_best(struct Grid *grid,
         counts_get_imbalance(column_counts[previous_column]) < 0;
     bool current_column_is_receiver =
         counts_get_imbalance(column_counts[current_column]) < 0;
-    if (previous_column != -1 &&
-        previous_column_is_receiver != current_column_is_receiver) {
-      struct ColumnPair current_column_pair = (struct ColumnPair){
+
+    if (previous_column_is_receiver != current_column_is_receiver) {
+      struct ColumnPair pair = (struct ColumnPair){
           .donor_index =
               previous_column_is_receiver ? current_column : previous_column,
           .receiver_index =
               previous_column_is_receiver ? previous_column : current_column,
       };
-      current_column_pair.donor_surplus =
-          counts_get_imbalance(column_counts[current_column_pair.donor_index]);
-      current_column_pair.receiver_deficit = abs(counts_get_imbalance(
-          column_counts[current_column_pair.receiver_index]));
-      if (compare_column_pairs(current_column_pair, best_column_pair) > 0) {
-        best_column_pair = current_column_pair;
+
+      if (best_column_pair.donor_index == -1 ||
+          best_column_pair.receiver_index == -1 ||
+          compare_column_pairs(pair, best_column_pair, column_counts) > 0) {
+        best_column_pair = pair;
       }
     }
     previous_column = current_column;
