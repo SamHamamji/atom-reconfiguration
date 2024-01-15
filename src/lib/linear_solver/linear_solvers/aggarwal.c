@@ -7,14 +7,10 @@
 
 struct Mapping *linear_solve_aggarwal(const struct Interval *interval,
                                       const void *params) {
-  if (interval->length <= 0) {
-    return mapping_get_null();
-  }
-
   struct Counts counts = interval_get_counts(interval);
   int imbalance = counts_get_imbalance(counts);
   if (imbalance < 0) {
-    return mapping_get_null();
+    return NULL;
   }
 
   struct AlternatingChains *chains =

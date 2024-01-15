@@ -9,9 +9,9 @@ static void print_failed_test_case(const struct LinearSolverTestCase test_case,
                                    const struct Mapping *result) {
   printf("Failed test case %d\n", test_case_index);
   printf("Interval:\n");
-  interval_print(&test_case.input);
+  interval_print(test_case.input);
   printf("Expected:\n");
-  mapping_print(&test_case.expected_output);
+  mapping_print(test_case.expected_output);
   printf("Received:\n");
   mapping_print(result);
 }
@@ -20,13 +20,14 @@ static bool test_linear_solver(const struct LinearSolver *linear_solver) {
   int failed_test_cases = 0;
 
   for (int i = 0; i < linear_solver_test_cases_num; i++) {
+    interval_print(linear_solver_test_cases[i]->input);
     struct Mapping *mapping = linear_solver->solve(
-        &linear_solver_test_cases[i].input, linear_solver->params);
+        linear_solver_test_cases[i]->input, linear_solver->params);
     bool mappings_are_equal =
-        mapping_equals(mapping, &linear_solver_test_cases[i].expected_output);
+        mapping_equals(mapping, linear_solver_test_cases[i]->expected_output);
     if (!mappings_are_equal) {
       if (failed_test_cases == 0) {
-        print_failed_test_case(linear_solver_test_cases[i], i + 1, mapping);
+        print_failed_test_case(*linear_solver_test_cases[i], i + 1, mapping);
       }
       failed_test_cases++;
     }

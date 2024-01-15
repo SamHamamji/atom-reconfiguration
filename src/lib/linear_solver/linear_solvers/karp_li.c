@@ -44,14 +44,10 @@ static bool *get_exclusion_array(const struct Interval *interval,
 
 struct Mapping *linear_solve_karp_li(const struct Interval *interval,
                                      const void *params) {
-  if (interval->length <= 0) {
-    return mapping_get_null();
-  }
-
   int *height_array = get_height_array(interval);
   if (get_imbalance_from_height_array(interval, height_array) < 0) {
     free(height_array);
-    return mapping_get_null();
+    return NULL;
   }
 
   bool *exclusion_array = get_exclusion_array(interval, height_array);

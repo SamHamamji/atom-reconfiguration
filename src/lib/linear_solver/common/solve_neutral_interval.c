@@ -39,6 +39,10 @@ void solve_neutral_interval_half(const struct Interval *interval,
                                  const bool *exclusion_array,
                                  struct Mapping *mapping, bool solve_source,
                                  bool solve_first_half) {
+  if (interval->length == 0) {
+    return;
+  }
+
   int counter, start, increment;
   int middle = interval->length / 2 + (int)solve_first_half;
   if (solve_first_half) {

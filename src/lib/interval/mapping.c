@@ -3,6 +3,9 @@
 #include "mapping.h"
 
 void mapping_free(struct Mapping *mapping) {
+  if (mapping == NULL) {
+    return;
+  }
   free(mapping->pairs);
   free(mapping);
 }
@@ -12,6 +15,14 @@ inline static bool pair_equals(const struct Pair a, const struct Pair b) {
 }
 
 bool mapping_equals(const struct Mapping *a, const struct Mapping *b) {
+  if (a == NULL && b == NULL) {
+    return true;
+  }
+
+  if (a == NULL || b == NULL) {
+    return false;
+  }
+
   if (a->pair_count != b->pair_count) {
     return false;
   }

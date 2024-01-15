@@ -37,14 +37,10 @@ static bool *get_exclusion_array(const struct Interval *interval,
 
 struct Mapping *linear_solve_iterative(const struct Interval *const interval,
                                        const void *params) {
-  if (interval->length <= 0) {
-    return mapping_get_null();
-  }
-
   int *iterative_height_array = get_height_array(interval);
   if (get_imbalance_from_height_array(interval, iterative_height_array) < 0) {
     free(iterative_height_array);
-    return mapping_get_null();
+    return NULL;
   }
 
   for (int i = 0; i < interval->length; i++) {

@@ -111,14 +111,11 @@ struct Mapping *linear_solve_karp_li_parallel(const struct Interval *interval,
                                               const void *params) {
   assert(params != NULL);
   int thread_num = ((KarpLiParallelParams *)params)->thread_num;
-  if (interval->length <= 0) {
-    return mapping_get_null();
-  }
 
   int *height_array = get_height_array(interval);
   if (get_imbalance_from_height_array(interval, height_array) < 0) {
     free(height_array);
-    return mapping_get_null();
+    return NULL;
   }
 
   bool *exclusion_array =
