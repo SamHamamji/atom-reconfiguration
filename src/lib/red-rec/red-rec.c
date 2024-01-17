@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -154,6 +155,7 @@ static void solve_delayed_movements(struct Grid *grid,
                                     struct Reconfiguration *reconfiguration,
                                     struct DelayedMoves *delayed_moves,
                                     struct ColumnPair column_pair) {
+  // Count upper & lower sources
   struct Point *receiver = grid_get_column(grid, column_pair.receiver_index);
   struct Counts receiver_counts = {0, 0};
   for (int i = 0; i < grid->height; i++) {
@@ -208,6 +210,7 @@ static void solve_delayed_movements(struct Grid *grid,
                           .receiver_index = column_pair.receiver_index},
       target_region_range);
 
+  // Solve delayed movements
   for (int i = 0; i < delayed_moves->length; i++) {
     if (delayed_moves->array[i].receiver_index == column_pair.receiver_index) {
       struct SourceLocations source_locations = get_column_source_locations(
@@ -249,12 +252,10 @@ static void solve_column_pair(struct Grid *grid,
     solve_delayed_movements(grid, reconfiguration, delayed_moves, column_pair);
     column_is_solved[column_pair.receiver_index] = true;
   }
-
-  for (int i = 0; i < grid->width; i++) {
-  }
 }
 
 struct Reconfiguration *red_rec(const struct Grid *grid) {
+  assert(grid_target_region_is_compact(grid));
   struct Counts *column_counts = grid_get_column_counts(grid);
 
   struct Counts total_counts = {0, 0};

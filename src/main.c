@@ -78,7 +78,7 @@ int main() {
   srand(seed);
   printf("Seed set to %u\n", seed);
 
-  struct Grid *grid = grid_new_square_compact(20, 20);
+  struct Grid *grid = grid_new_compact_target_region(20, 20);
   // struct Grid *grid = grid_1;
   // struct Grid *grid = grid_2;
   printf("Initial grid:\n");

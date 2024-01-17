@@ -14,7 +14,8 @@ struct Coordinates {
 };
 
 struct Grid *grid_new_random(int width, int height);
-struct Grid *grid_new_square_compact(int width, int height);
+struct Grid *grid_new_compact_target_region(int width, int height);
+bool grid_target_region_is_compact(const struct Grid *grid);
 struct Grid *grid_get_copy(const struct Grid *grid);
 void grid_free(struct Grid *grid);
 
