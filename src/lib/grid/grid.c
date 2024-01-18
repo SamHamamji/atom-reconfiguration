@@ -58,24 +58,10 @@ bool grid_target_region_is_compact(const struct Grid *grid) {
     }
   }
 
-  // Check that non target rows are compact
-  bool first_target_is_found = false;
-  bool last_target_is_found = false;
-  struct Point *first_column = grid_get_column(grid, 0);
-  for (int row = 0; row < grid->height; row++) {
-    if (first_column[row].is_target) {
-      first_target_is_found = true;
-      if (last_target_is_found) {
-        return false;
-      }
-    } else {
-      if (first_target_is_found) {
-        last_target_is_found = true;
-      }
-    }
-  }
-
-  return true;
+  return interval_target_region_is_compact(&(struct Interval){
+      .array = grid_get_column(grid, 0),
+      .length = grid->height,
+  });
 }
 
 struct Grid *grid_get_copy(const struct Grid *grid) {

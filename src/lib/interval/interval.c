@@ -3,16 +3,6 @@
 
 #include "interval.h"
 
-static struct Interval *new_interval(const struct Point *points, int length) {
-  struct Interval *interval = malloc(sizeof(struct Interval));
-  interval->array = malloc(length * sizeof(struct Point));
-  interval->length = length;
-
-  memcpy(interval->array, points, length * sizeof(struct Point));
-
-  return interval;
-}
-
 struct Counts interval_get_counts_from_range(const struct Interval *interval,
                                              struct Range range) {
   struct Counts counts = {0, 0};
@@ -30,6 +20,24 @@ inline struct Counts interval_get_counts(const struct Interval *interval) {
 
 inline int counts_get_imbalance(struct Counts counts) {
   return counts.source_num - counts.target_num;
+}
+
+bool interval_target_region_is_compact(const struct Interval *interval) {
+  bool first_target_is_found = false;
+  bool last_target_is_found = false;
+  for (int i = 0; i < interval->length; i++) {
+    if (interval->array[i].is_target) {
+      first_target_is_found = true;
+      if (last_target_is_found) {
+        return false;
+      }
+    } else {
+      if (first_target_is_found) {
+        last_target_is_found = true;
+      }
+    }
+  }
+  return true;
 }
 
 static void interval_swap_source(struct Interval *interval, int a, int b) {
@@ -53,7 +61,17 @@ static void interval_shuffle(struct Interval *interval) {
   }
 }
 
-static struct Interval *generate_randomized_interval(int length) {
+static struct Interval *new_interval(const struct Point *points, int length) {
+  struct Interval *interval = malloc(sizeof(struct Interval));
+  interval->array = malloc(length * sizeof(struct Point));
+  interval->length = length;
+
+  memcpy(interval->array, points, length * sizeof(struct Point));
+
+  return interval;
+}
+
+static struct Interval *generate_interval(int length) {
   struct Interval *interval = malloc(sizeof(struct Interval));
   interval->length = length;
   interval->array = calloc(length, sizeof(struct Point));
@@ -102,9 +120,36 @@ static struct Interval *generate_interval_by_imbalance(int length,
   return interval;
 }
 
+static struct Interval *generate_compact_target_interval(int length) {
+  struct Interval *interval = malloc(sizeof(struct Interval));
+  interval->length = length;
+  interval->array = malloc(interval->length * sizeof(struct Point));
+
+  for (int i = 0; i < length; i++) {
+    interval->array[i] = (struct Point){
+        .is_source = (bool)(rand() % 2),
+        .is_target = (bool)(rand() % 2),
+    };
+  }
+
+  int target_count = 0;
+  for (int i = 0; i < length; i++) {
+    if (interval->array[i].is_target) {
+      target_count++;
+    }
+    interval->array[i].is_target = false;
+  }
+  int target_start = (length - target_count) / 2;
+  for (int i = 0; i < target_count; i++) {
+    interval->array[target_start + i].is_target = true;
+  }
+  return interval;
+}
+
 const struct IntervalFactory interval_factory = {
-    .generate_randomized_interval = generate_randomized_interval,
+    .generate_interval = generate_interval,
     .generate_interval_by_imbalance = generate_interval_by_imbalance,
+    .generate_compact_target_interval = generate_compact_target_interval,
     .new_interval = new_interval,
 };
 
