@@ -12,7 +12,7 @@ int get_random_int(int min, int max) { return min + rand() % (max - min + 1); }
 
 bool test_red_rec(const struct RedRecUnitTestConfig *config) {
   for (int i = 0; i < config->test_case_num; i++) {
-    struct Grid *grid = grid_new_compact_target_region(
+    struct Grid *grid = grid_factory.generate_compact_target_region(
         get_random_int(config->min_width, config->max_width),
         get_random_int(config->min_height, config->max_height));
     struct Reconfiguration *reconfiguration = red_rec(grid);

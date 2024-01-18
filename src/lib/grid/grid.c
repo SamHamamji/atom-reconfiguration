@@ -3,7 +3,7 @@
 
 #include "./grid.h"
 
-struct Grid *grid_new_random(int width, int height) {
+static struct Grid *generate_grid(int width, int height) {
   struct Grid *grid = malloc(sizeof(struct Grid));
   grid->width = width;
   grid->height = height;
@@ -15,7 +15,7 @@ struct Grid *grid_new_random(int width, int height) {
   return grid;
 }
 
-struct Grid *grid_new_compact_target_region(int width, int height) {
+static struct Grid *generate_compact_target_region_grid(int width, int height) {
   struct Grid *grid = malloc(sizeof(struct Grid));
   grid->width = width;
   grid->height = height;
@@ -125,3 +125,8 @@ bool grid_is_solved(const struct Grid *grid) {
   }
   return true;
 }
+
+const struct GridFactory grid_factory = {
+    .generate = generate_grid,
+    .generate_compact_target_region = generate_compact_target_region_grid,
+};

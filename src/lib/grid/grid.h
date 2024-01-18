@@ -13,8 +13,6 @@ struct Coordinates {
   int row;
 };
 
-struct Grid *grid_new_random(int width, int height);
-struct Grid *grid_new_compact_target_region(int width, int height);
 bool grid_target_region_is_compact(const struct Grid *grid);
 struct Grid *grid_get_copy(const struct Grid *grid);
 void grid_free(struct Grid *grid);
@@ -31,3 +29,10 @@ struct Counts *grid_get_column_counts(const struct Grid *grid);
 bool grid_is_solved(const struct Grid *grid);
 
 void grid_print(const struct Grid *grid);
+
+struct GridFactory {
+  struct Grid *(*generate)(int width, int height);
+  struct Grid *(*generate_compact_target_region)(int width, int height);
+};
+
+extern const struct GridFactory grid_factory;

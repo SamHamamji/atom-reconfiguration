@@ -13,7 +13,7 @@ const char output_file_format[] = "./%s/%u.csv";
 
 static struct Interval *interval_generator(const int length,
                                            const int imbalance) {
-  return interval_factory.generate_interval_by_imbalance(length, imbalance);
+  return interval_factory.generate_by_imbalance(length, imbalance);
 }
 
 static const int lengths[] = {

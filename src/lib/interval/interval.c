@@ -120,7 +120,7 @@ static struct Interval *generate_interval_by_imbalance(int length,
   return interval;
 }
 
-static struct Interval *generate_compact_target_interval(int length) {
+static struct Interval *generate_compact_target_region_interval(int length) {
   struct Interval *interval = malloc(sizeof(struct Interval));
   interval->length = length;
   interval->array = malloc(interval->length * sizeof(struct Point));
@@ -147,9 +147,9 @@ static struct Interval *generate_compact_target_interval(int length) {
 }
 
 const struct IntervalFactory interval_factory = {
-    .generate_interval = generate_interval,
-    .generate_interval_by_imbalance = generate_interval_by_imbalance,
-    .generate_compact_target_interval = generate_compact_target_interval,
+    .generate = generate_interval,
+    .generate_by_imbalance = generate_interval_by_imbalance,
+    .generate_compact_target_region = generate_compact_target_region_interval,
     .new_interval = new_interval,
 };
 
