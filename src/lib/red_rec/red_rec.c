@@ -6,7 +6,7 @@
 #include "../grid/grid.h"
 #include "../linear_solver/linear_solver.h"
 #include "../utils/max_min.h"
-#include "./red-rec.h"
+#include "./red_rec.h"
 #include "column_pair.h"
 #include "move.h"
 #include "reconfiguration.h"
