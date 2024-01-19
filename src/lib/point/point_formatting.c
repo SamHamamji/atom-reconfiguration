@@ -1,9 +1,5 @@
+#include "../../lib/utils/colors.h"
 #include "./point.h"
-
-#define RED "\x1b[31m"
-#define GREEN "\x1b[32m"
-#define BLUE "\x1b[34m"
-#define RESET "\x1b[0m"
 
 char point_to_char(const struct Point point) {
   return point.is_source ? (point.is_target ? 'B' : 'S')

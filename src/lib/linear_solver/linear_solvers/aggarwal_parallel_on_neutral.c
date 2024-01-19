@@ -67,6 +67,7 @@ linear_solve_aggarwal_parallel_on_neutral(const struct Interval *interval,
                                           const void *params) {
   assert(params != NULL);
   int thread_num = ((AggarwalParallelOnNeutralParams *)params)->thread_num;
+  assert(thread_num >= 4);
 
   struct Counts counts = interval_get_counts(interval);
   int imbalance = counts_get_imbalance(counts);

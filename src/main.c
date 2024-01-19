@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 #include "./lib/grid/grid.h"
 #include "./lib/red-rec/red-rec.h"
+#include "./lib/utils/seed.h"
 #include "lib/point/point.h"
 #include "lib/red-rec/reconfiguration.h"
 
@@ -74,20 +74,17 @@ static struct Grid *grid_2 = &(struct Grid){
 };
 
 int main() {
-  unsigned int seed = (unsigned int)time(NULL);
-  srand(seed);
-  printf("Seed set to %u\n", seed);
+  seed_set_to_time();
 
-  struct Grid *grid = grid_new_compact_target_region(20, 20);
-  // struct Grid *grid = grid_1;
-  // struct Grid *grid = grid_2;
+  struct Grid *grid = grid_factory.generate_compact_target_region(20, 20);
+  //   struct Grid *grid = grid_1;
+  //   struct Grid *grid = grid_2;
   printf("Initial grid:\n");
   grid_print(grid);
 
   struct Reconfiguration *reconfiguration = red_rec(grid);
 
   if (reconfiguration != NULL) {
-    reconfiguration_filter_identical(reconfiguration);
     reconfiguration_apply(reconfiguration, grid);
     reconfiguration_free(reconfiguration);
     printf("Final grid:\n");

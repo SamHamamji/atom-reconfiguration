@@ -45,6 +45,14 @@ static char *mapping_to_string(const struct Mapping *mapping) {
 }
 
 void mapping_print(const struct Mapping *mapping) {
+  if (mapping == NULL) {
+    printf("NULL mapping\n");
+    return;
+  }
+  if (mapping->pair_count == 0) {
+    printf("Empty mapping\n");
+    return;
+  }
   char *string = mapping_to_string(mapping);
   printf("%s\n", string);
   free(string);

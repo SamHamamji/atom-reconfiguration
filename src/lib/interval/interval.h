@@ -28,7 +28,7 @@ void interval_free(struct Interval *interval);
 struct IntervalFactory {
   struct Interval *(*generate)(int length);
   struct Interval *(*generate_by_imbalance)(int length, int imbalance);
-  struct Interval *(*generate_compact_target_region)(int length);
+  struct Interval *(*generate_compact_target_region)(int length, int imbalance);
   struct Interval *(*new_interval)(const struct Point *points, int length);
 };
 

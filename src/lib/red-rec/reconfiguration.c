@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -11,6 +12,8 @@ struct Reconfiguration {
 };
 
 struct Reconfiguration *reconfiguration_new(int max_move_count) {
+  assert(max_move_count >= 0);
+
   struct Reconfiguration *reconfiguration =
       malloc(sizeof(struct Reconfiguration));
   *reconfiguration = (struct Reconfiguration){
@@ -30,6 +33,9 @@ void reconfiguration_free(struct Reconfiguration *reconfiguration) {
 
 void reconfiguration_apply_move(struct Reconfiguration *reconfiguration,
                                 struct Grid *grid, int index) {
+  if (reconfiguration == NULL) {
+    return;
+  }
   move_apply(grid, reconfiguration->moves[index]);
 }
 
@@ -44,6 +50,9 @@ void reconfiguration_apply_move_range(
 void reconfiguration_apply_last_moves(
     const struct Reconfiguration *reconfiguration, struct Grid *grid,
     int move_count) {
+  if (reconfiguration == NULL) {
+    return;
+  }
   reconfiguration_apply_move_range(
       reconfiguration, grid,
       (struct Range){
@@ -54,6 +63,9 @@ void reconfiguration_apply_last_moves(
 
 void reconfiguration_apply(const struct Reconfiguration *reconfiguration,
                            struct Grid *grid) {
+  if (reconfiguration == NULL) {
+    return;
+  }
   reconfiguration_apply_move_range(
       reconfiguration, grid,
       (struct Range){

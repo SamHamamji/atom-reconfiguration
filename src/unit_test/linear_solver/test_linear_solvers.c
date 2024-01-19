@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "../../lib/linear_solver/linear_solver.h"
+#include "../../lib/utils/colors.h"
 #include "./test_cases.h"
 #include "./test_linear_solvers.h"
 
@@ -20,7 +21,6 @@ static bool test_linear_solver(const struct LinearSolver *linear_solver) {
   int failed_test_cases = 0;
 
   for (int i = 0; i < linear_solver_test_cases_num; i++) {
-    interval_print(linear_solver_test_cases[i]->input);
     struct Mapping *mapping = linear_solver->solve(
         linear_solver_test_cases[i]->input, linear_solver->params);
     bool mappings_are_equal =
@@ -45,8 +45,8 @@ static bool test_linear_solver(const struct LinearSolver *linear_solver) {
 
 bool test_linear_solvers(const struct LinearSolver *linear_solvers[],
                          int linear_solver_num) {
+  printf(BOLD "Testing linear solvers:\n" RESET);
   int failed_tests = 0;
-  printf("\x1b[1mTesting linear solvers:\x1b[0m\n");
   for (int i = 0; i < linear_solver_num; i++) {
     printf("%s...\n", linear_solvers[i]->name);
     if (!test_linear_solver(linear_solvers[i])) {
@@ -54,9 +54,9 @@ bool test_linear_solvers(const struct LinearSolver *linear_solvers[],
     }
   }
   if (failed_tests == 0) {
-    printf("🟢 All tests passed\n");
+    printf("🟢 All tests passed.\n");
   } else {
-    printf("🔴 %d/%d tests failed\n", failed_tests, linear_solver_num);
+    printf("🔴 %d/%d tests failed!\n", failed_tests, linear_solver_num);
   }
   return failed_tests == 0;
 }

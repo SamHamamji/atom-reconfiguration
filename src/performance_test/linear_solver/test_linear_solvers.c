@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 #include "../../lib/linear_solver/linear_solver.h"
-#include "../timer.h"
+#include "../../lib/utils/timer.h"
 #include "./test_linear_solvers.h"
 #include "performance.h"
 
@@ -16,7 +16,7 @@ static double test_linear_solver_performance_on_interval(
 
   mapping_free(mapping);
 
-  return timer_get_time(&timer);
+  return timer_get_seconds(&timer);
 }
 
 struct PerformanceArray *test_linear_solvers_performance(
@@ -29,7 +29,7 @@ struct PerformanceArray *test_linear_solvers_performance(
   performance_array->performances =
       malloc(performance_array->length * sizeof(struct Performance));
 
-  int testcase_index = 0;
+  int test_case_index = 0;
   for (int i = 0; i < config->lengths_num; i++) {
     for (int j = 0; j < config->imbalance_percentages_num; j++) {
       for (int k = 0; k < config->repetition_num; k++) {
@@ -43,14 +43,14 @@ struct PerformanceArray *test_linear_solvers_performance(
           double time_taken = test_linear_solver_performance_on_interval(
               config->linear_solvers[linear_solver_index], interval);
 
-          performance_array->performances[testcase_index] =
+          performance_array->performances[test_case_index] =
               (struct Performance){
                   .linear_solver = config->linear_solvers[linear_solver_index],
                   .interval_length = interval->length,
                   .imbalance_percentage = config->imbalance_percentages[j],
                   .time_taken = time_taken,
               };
-          testcase_index++;
+          test_case_index++;
         }
         interval_free(interval);
       }

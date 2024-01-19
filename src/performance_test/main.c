@@ -5,14 +5,15 @@
 #include <time.h>
 
 #include "../lib/linear_solver/linear_solver.h"
+#include "../lib/utils/seed.h"
 #include "linear_solver/performance.h"
 #include "linear_solver/test_linear_solvers.h"
 
 const char output_dir_name[] = "performance_results";
 const char output_file_format[] = "./%s/%u.csv";
 
-static struct Interval *interval_generator(const int length,
-                                           const int imbalance) {
+static inline struct Interval *interval_generator(const int length,
+                                                  const int imbalance) {
   return interval_factory.generate_by_imbalance(length, imbalance);
 }
 
@@ -28,19 +29,8 @@ static const int lengths[] = {
     4100, 4200, 4300, 4400, 4500, 4600, 4700, 4800, 4900, 5000,
 
     // 2000000, 4000000, 6000000, 8000000, 10000000,
-
-    // 20000000,  40000000,   60000000,  80000000,  100000000, 120000000,
-    // 140000000, 160000000,  180000000, 200000000, 220000000, 240000000,
-    // 260000000, 280000000,  300000000, 320000000, 340000000, 360000000,
-    // 380000000, 400000000,  420000000, 440000000, 460000000, 480000000,
-    // 500000000, 520000000,  540000000, 560000000, 580000000, 600000000,
-    // 620000000, 640000000,  660000000, 680000000, 700000000, 720000000,
-    // 740000000, 760000000,  780000000, 800000000, 820000000, 840000000,
-    // 860000000, 880000000,  900000000, 920000000, 940000000, 960000000,
-    // 980000000, 1000000000,
-
-    // 100000000, 200000000, 300000000, 400000000, 500000000,
 };
+
 static const double imbalance_percentages[] = {
     1, 5, 25, 100,
     // 0, 1, 3, 9, 27, 100,
@@ -104,8 +94,7 @@ char *get_output_file_name(unsigned int seed) {
 int main() {
   printf("RUNNING PERFORMANCE TESTS\n");
   unsigned int seed = (unsigned int)time(NULL);
-  srand(seed);
-  printf("Seed set to %u\n", seed);
+  seed_set(seed);
 
   struct PerformanceArray *results = test_linear_solvers_performance(&config);
 

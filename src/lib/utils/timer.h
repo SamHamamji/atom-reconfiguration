@@ -9,4 +9,4 @@ struct Timer {
 
 void timer_start(struct Timer *timer);
 void timer_stop(struct Timer *timer);
-float timer_get_time(struct Timer *timer);
+double timer_get_seconds(struct Timer *timer);

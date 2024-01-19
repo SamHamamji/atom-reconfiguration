@@ -294,6 +294,8 @@ struct Reconfiguration *red_rec(const struct Grid *grid) {
         column_pair_get_best(grid_copy, column_counts, column_is_solved);
   }
 
+  reconfiguration_filter_identical(reconfiguration);
+
   free(column_counts);
   free(column_is_solved);
   free(delayed_moves.array);
