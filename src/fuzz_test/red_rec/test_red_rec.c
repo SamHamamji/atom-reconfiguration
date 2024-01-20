@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../../lib/red-rec/reconfiguration.h"
-#include "../../lib/red-rec/red-rec.h"
+#include "../../lib/red_rec/reconfiguration.h"
+#include "../../lib/red_rec/red_rec.h"
 #include "../../lib/utils/colors.h"
 #include "../../lib/utils/timer.h"
 #include "./test_red_rec.h"

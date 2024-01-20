@@ -2,10 +2,10 @@
 #include <stdlib.h>
 
 #include "./lib/grid/grid.h"
-#include "./lib/red-rec/red-rec.h"
+#include "./lib/red_rec/red_rec.h"
 #include "./lib/utils/seed.h"
 #include "lib/point/point.h"
-#include "lib/red-rec/reconfiguration.h"
+#include "lib/red_rec/reconfiguration.h"
 
 static struct Grid *grid_1 = &(struct Grid){
     (struct Point[]){
