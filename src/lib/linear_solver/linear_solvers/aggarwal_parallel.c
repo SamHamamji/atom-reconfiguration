@@ -77,6 +77,7 @@ static void *solve_interval_range(void *args) {
   struct AlternatingChains chains = {
       .chain_start_indexes = malloc(imbalance * sizeof(int)),
       .right_partners = malloc(input->context->interval->length * sizeof(int)),
+      .chain_num = imbalance,
   };
 
   alternating_chains_compute_range(input->context->interval, &chains,

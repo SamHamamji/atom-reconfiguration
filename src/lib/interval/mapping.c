@@ -15,12 +15,8 @@ inline static bool pair_equals(const struct Pair a, const struct Pair b) {
 }
 
 bool mapping_equals(const struct Mapping *a, const struct Mapping *b) {
-  if (a == NULL && b == NULL) {
-    return true;
-  }
-
   if (a == NULL || b == NULL) {
-    return false;
+    return a == b;
   }
 
   if (a->pair_count != b->pair_count) {

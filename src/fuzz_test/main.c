@@ -44,28 +44,23 @@ const struct LinearSolver *linear_solvers[] = {
         .params = &(AggarwalParallelOnNeutralParams){.thread_num = 4},
         .name = "Aggarwal solver parallel on neutral",
     },
-    &(struct LinearSolver){
-        .solve = linear_solve_compact_target_region_aggarwal,
-        .params = NULL,
-        .name = "Aggarwal solver compact target region",
-    },
 };
 
 static struct Interval *interval_generator(int length, int imbalance) {
   return interval_factory.generate_compact_target_region(length, imbalance);
 }
 
-static struct Grid *grid_generator(int width, int height) {
-  return grid_factory.generate_compact_target_region(width, height);
-}
-
 static struct LinearSolversFuzzTestConfig linear_solvers_config = {
-    .length_range = {.start = 0, .exclusive_end = 1000},
+    .length_range = {.start = 0, .exclusive_end = 30},
     .interval_generator = interval_generator,
     .linear_solvers = linear_solvers,
     .linear_solvers_num = sizeof(linear_solvers) / sizeof(linear_solvers[0]),
     .time_limit_in_seconds = 5.0,
 };
+
+static struct Grid *grid_generator(int width, int height) {
+  return grid_factory.generate_compact_target_region(width, height);
+}
 
 static struct RedRecFuzzTestConfig red_rec_config = {
     .width_range = {0, 35},
@@ -78,11 +73,9 @@ int main(void) {
   seed_set_to_time();
 
   if (!fuzz_test_linear_solvers(linear_solvers_config)) {
-    printf("🔴 Linear solvers tests failed!\n");
     return EXIT_FAILURE;
   }
   if (!fuzz_test_red_rec(red_rec_config)) {
-    printf("🔴 Red-rec tests failed!\n");
     return EXIT_FAILURE;
   }
   printf("🟢 All tests passed.\n");

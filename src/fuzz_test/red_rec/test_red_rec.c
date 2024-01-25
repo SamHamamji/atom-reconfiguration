@@ -53,6 +53,8 @@ bool fuzz_test_red_rec(const struct RedRecFuzzTestConfig config) {
 
   if (success) {
     printf("%d red-rec tests passed!\n", test_case_num);
+  } else {
+    printf("🔴 Failed red-rec test case %d.\n", test_case_num);
   }
 
   return success;

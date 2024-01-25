@@ -35,15 +35,14 @@ static void *get_exclusion_from_chain_range(void *args) {
 }
 
 static bool *get_exclusion_from_chains(const struct AlternatingChains *chains,
-                                       int thread_num, int interval_length,
-                                       int imbalance) {
-  int *excluded_indexes = malloc(sizeof(int) * imbalance);
+                                       int thread_num, int interval_length) {
+  int *excluded_indexes = malloc(sizeof(int) * chains->chain_num);
   pthread_t *thread_array = malloc(thread_num * sizeof(pthread_t));
   struct ThreadInput *thread_inputs =
       malloc(thread_num * sizeof(struct ThreadInput));
 
-  const int heights_per_thread = imbalance / thread_num;
-  const int remaining_heights = imbalance % thread_num;
+  const int heights_per_thread = chains->chain_num / thread_num;
+  const int remaining_heights = chains->chain_num % thread_num;
   const struct ThreadInputContext context = {
       .chains = chains,
       .output = excluded_indexes,
@@ -51,7 +50,7 @@ static bool *get_exclusion_from_chains(const struct AlternatingChains *chains,
   };
 
   for (int i = 0; i < thread_num; i++) {
-    thread_inputs[i].chain_range = get_range(i, thread_num, imbalance);
+    thread_inputs[i].chain_range = get_range(i, thread_num, chains->chain_num);
     thread_inputs[i].context = context;
 
     pthread_create(&thread_array[i], NULL, get_exclusion_from_chain_range,
@@ -89,8 +88,8 @@ linear_solve_aggarwal_parallel_on_chains(const struct Interval *interval,
   struct AlternatingChains *chains =
       alternating_chains_get(interval, imbalance);
 
-  bool *exclusion_array = get_exclusion_from_chains(
-      chains, thread_num, interval->length, imbalance);
+  bool *exclusion_array =
+      get_exclusion_from_chains(chains, thread_num, interval->length);
   alternating_chains_free(chains);
 
   struct Mapping *mapping =

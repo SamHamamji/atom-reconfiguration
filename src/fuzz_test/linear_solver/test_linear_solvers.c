@@ -21,7 +21,7 @@ static void print_failed_test_case(
     const struct LinearSolver *initial_linear_solver,
     const struct Mapping *mapping, const struct LinearSolver *linear_solver,
     int test_case_num) {
-  printf("Mappings do not match! Failed test case %d.\n", test_case_num);
+  printf("Mappings do not match!\n");
   printf("Interval:\n");
   interval_print(interval);
   printf("Mapping from %s:\n", initial_linear_solver->name);
@@ -75,7 +75,11 @@ bool fuzz_test_linear_solvers(const struct LinearSolversFuzzTestConfig config) {
     timer_stop(&timer);
   }
 
-  printf("%d linear solver tests passed!\n", test_case_num);
+  if (success) {
+    printf("%d linear solver tests passed!\n", test_case_num);
+  } else {
+    printf("🔴 Failed linear solver test case %d.\n", test_case_num);
+  }
 
-  return true;
+  return success;
 }

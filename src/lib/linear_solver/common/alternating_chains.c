@@ -1,5 +1,6 @@
 #include "alternating_chains.h"
 
+#include <assert.h>
 #include <stdlib.h>
 
 void alternating_chains_free(struct AlternatingChains *chains) {
@@ -14,6 +15,7 @@ alternating_chains_get(const struct Interval *interval, int imbalance) {
       malloc(sizeof(struct AlternatingChains));
   alternating_chains->right_partners = malloc(interval->length * sizeof(int));
   alternating_chains->chain_start_indexes = malloc(imbalance * sizeof(int));
+  alternating_chains->chain_num = imbalance;
 
   alternating_chains_compute_range(interval, alternating_chains,
                                    (struct Range){0, imbalance});
@@ -57,8 +59,6 @@ void alternating_chains_compute_range(const struct Interval *interval,
   free(current_chain_node);
 }
 
-// Gets excluded source index from a chain
-// Uses relative minimum cost and early stopping to increase performance
 int alternating_chains_get_exclusion(const struct AlternatingChains *chains,
                                      int chain_index, int max_exclusion_index) {
   int current_exclusion_cost = 0;
@@ -103,11 +103,12 @@ int *alternating_chains_get_exclusion_from_range(
 
 bool *
 alternating_chains_get_exclusion_array(const struct AlternatingChains *chains,
-                                       int interval_length, int imbalance) {
+                                       int interval_length) {
   bool *exclusion_array = calloc(sizeof(bool), interval_length);
   int max_exclusion_index = interval_length;
 
-  for (int chain_index = imbalance - 1; chain_index >= 0; chain_index--) {
+  for (int chain_index = chains->chain_num - 1; chain_index >= 0;
+       chain_index--) {
     int excluded = alternating_chains_get_exclusion(chains, chain_index,
                                                     max_exclusion_index);
     exclusion_array[excluded] = true;

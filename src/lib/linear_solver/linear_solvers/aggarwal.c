@@ -16,8 +16,8 @@ struct Mapping *linear_solve_aggarwal(const struct Interval *interval,
   struct AlternatingChains *chains =
       alternating_chains_get(interval, imbalance);
 
-  bool *exclusion_array = alternating_chains_get_exclusion_array(
-      chains, interval->length, imbalance);
+  bool *exclusion_array =
+      alternating_chains_get_exclusion_array(chains, interval->length);
   alternating_chains_free(chains);
 
   struct Mapping *mapping =

@@ -78,8 +78,8 @@ linear_solve_aggarwal_parallel_on_neutral(const struct Interval *interval,
   struct AlternatingChains *chains =
       alternating_chains_get(interval, imbalance);
 
-  bool *exclusion_array = alternating_chains_get_exclusion_array(
-      chains, interval->length, imbalance);
+  bool *exclusion_array =
+      alternating_chains_get_exclusion_array(chains, interval->length);
   alternating_chains_free(chains);
 
   struct Mapping *mapping = get_mapping_from_exclusion_array(

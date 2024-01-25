@@ -2,9 +2,12 @@
 
 #include "./alternating_chains.h"
 
-void alternating_chains_print(const struct AlternatingChains *chains,
-                              int imbalance) {
-  for (int i = 0; i < imbalance; i++) {
+void alternating_chains_print(const struct AlternatingChains *chains) {
+  if (chains->chain_num == 0) {
+    printf("Empty alternating chains\n");
+    return;
+  }
+  for (int i = 0; i < chains->chain_num; i++) {
     printf("%d: ", i);
     int current = chains->chain_start_indexes[i];
     do {
