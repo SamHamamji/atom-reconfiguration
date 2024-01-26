@@ -7,7 +7,7 @@ def compute_mean_for_duplicates(
     dataframe: pd.DataFrame, grouped_column: str
 ) -> pd.DataFrame:
     return (
-        dataframe.groupby(dataframe.columns.drop(grouped_column).to_list())
+        dataframe.groupby(dataframe.columns.drop(grouped_column).to_list(), sort=False)
         .mean()
         .reset_index()
     )

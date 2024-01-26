@@ -1,32 +1,67 @@
 import typing
 import pandas as pd
 import plotly.express as px
-
 from dash import dcc, html
+
 from CsvHeader import CsvHeader
 from data_processing import compute_mean_for_duplicates
 
 
-class GraphConfig(typing.NamedTuple):
+class ScatterGridConfig(typing.NamedTuple):
     x: CsvHeader
     y: CsvHeader
     color: CsvHeader
     header: CsvHeader
-    trendline: str | None = "lowess"
+    trendline: str = "lowess"
+    trendline_options: dict = {"frac": 0.3}
     title_generator: typing.Callable[[str], str] = lambda x: x
 
 
-class GridElement(html.Div):
-    def __init__(self, dataframe: pd.DataFrame, config: GraphConfig, header_value: str):
+class ScatterElement(html.Div):
+    def __init__(
+        self, dataframe: pd.DataFrame, config: ScatterGridConfig, header_value: str
+    ):
         value_data = dataframe[dataframe[config.header.value] == header_value]
         figure = px.scatter(
             value_data,
             x=config.x.value,
             y=config.y.value,
-            color=value_data[config.color.value],
-            color_continuous_scale=px.colors.sequential.Turbo_r,
+            color=value_data[config.color.value] if config.color else None,
+            color_continuous_scale=px.colors.sequential.Turbo_r
+            if config.color
+            else None,
             trendline=config.trendline,
-            trendline_options={"frac": 0.3},
+            trendline_options=config.trendline_options,
+        )
+        html.Div.__init__(
+            self,
+            [
+                html.H3(
+                    f"{config.header.value}: {config.title_generator(header_value)}"
+                ),
+                dcc.Graph(figure=figure),
+            ],
+            className="grid-item",
+        )
+
+
+class HistogramGridConfig(typing.NamedTuple):
+    x: CsvHeader
+    y: CsvHeader
+    header: CsvHeader
+    title_generator: typing.Callable[[str], str] = lambda x: x
+
+
+class HistogramElement(html.Div):
+    def __init__(
+        self, dataframe: pd.DataFrame, config: ScatterGridConfig, header_value: str
+    ):
+        value_data = dataframe[dataframe[config.header.value] == header_value]
+        figure = px.histogram(
+            value_data,
+            x=config.x.value,
+            y=config.y.value,
+            histfunc="avg",
         )
         html.Div.__init__(
             self,
@@ -41,30 +76,25 @@ class GridElement(html.Div):
 
 
 class LinearSolverGrid(html.Div):
-    graphConfig = GraphConfig(
-        x=CsvHeader.IMBALANCE_PERCENT,
+    config = ScatterGridConfig(
+        x=CsvHeader.LENGTH,
         y=CsvHeader.TIME_TAKEN,
-        color=CsvHeader.LENGTH,
+        color=CsvHeader.IMBALANCE_PERCENT,
         header=CsvHeader.LINEAR_SOLVER,
     )
 
     def __init__(self, dataframe: pd.DataFrame):
-        linear_solver_names = (
-            dataframe[CsvHeader.LINEAR_SOLVER.value].sort_values().unique()
+        new_dataframe = dataframe.sort_values(
+            by=self.config.color.value, ascending=False, inplace=False
         )
-
-        new_dataframe = dataframe.copy()
-        new_dataframe.sort_values(
-            by=CsvHeader.LENGTH.value, ascending=False, inplace=True
-        )
-        new_dataframe[CsvHeader.LENGTH.value] = new_dataframe[
-            CsvHeader.LENGTH.value
+        new_dataframe[self.config.color.value] = new_dataframe[
+            self.config.color.value
         ].astype(str)
 
         grid = html.Div(
             [
-                GridElement(new_dataframe, self.graphConfig, linear_solver_name)
-                for linear_solver_name in linear_solver_names
+                ScatterElement(new_dataframe, self.config, linear_solver)
+                for linear_solver in dataframe[CsvHeader.LINEAR_SOLVER.value].unique()
             ],
             className="grid",
         )
@@ -73,7 +103,7 @@ class LinearSolverGrid(html.Div):
 
 
 class HeatMapGrid(html.Div):
-    graphConfig = GraphConfig(
+    config = ScatterGridConfig(
         x=CsvHeader.LENGTH,
         y=CsvHeader.IMBALANCE_PERCENT,
         color=CsvHeader.TIME_TAKEN,
@@ -82,26 +112,21 @@ class HeatMapGrid(html.Div):
     )
 
     def __init__(self, dataframe: pd.DataFrame):
-        linear_solver_names = (
-            dataframe[CsvHeader.LINEAR_SOLVER.value].sort_values().unique()
-        )
-
         grid = html.Div(
             [
-                GridElement(dataframe, self.graphConfig, linear_solver_name)
-                for linear_solver_name in linear_solver_names
+                ScatterElement(dataframe, self.config, linear_solver)
+                for linear_solver in dataframe[CsvHeader.LINEAR_SOLVER.value].unique()
             ],
             className="grid",
         )
-        grid_title = html.H1("Performance map by linear solver")
+        grid_title = html.H1("Performance heatmap by linear solver")
         html.Div.__init__(self, [grid_title, grid])
 
 
 class LengthGrid(html.Div):
-    graphConfig = GraphConfig(
-        x=CsvHeader.IMBALANCE_PERCENT,
+    config = HistogramGridConfig(
+        x=CsvHeader.LINEAR_SOLVER,
         y=CsvHeader.TIME_TAKEN,
-        color=CsvHeader.LINEAR_SOLVER,
         header=CsvHeader.LENGTH,
     )
 
@@ -113,7 +138,7 @@ class LengthGrid(html.Div):
         )
 
         grid = html.Div(
-            [GridElement(dataframe, self.graphConfig, length) for length in lengths],
+            [HistogramElement(dataframe, self.config, length) for length in lengths],
             className="grid",
         )
         grid_title = html.H1("Performance by length")
@@ -121,7 +146,7 @@ class LengthGrid(html.Div):
 
 
 class ImbalanceGrid(html.Div):
-    graphConfig = GraphConfig(
+    config = ScatterGridConfig(
         x=CsvHeader.LENGTH,
         y=CsvHeader.TIME_TAKEN,
         color=CsvHeader.LINEAR_SOLVER,
@@ -130,18 +155,15 @@ class ImbalanceGrid(html.Div):
     )
 
     def __init__(self, dataframe: pd.DataFrame):
-        imbalance_percentages = (
-            dataframe[CsvHeader.IMBALANCE_PERCENT.value].sort_values().unique()
-        )
-
         grid = html.Div(
             [
-                GridElement(dataframe, self.graphConfig, imbalance)
-                for imbalance in imbalance_percentages
+                ScatterElement(dataframe, self.config, imbalance)
+                for imbalance in dataframe[CsvHeader.IMBALANCE_PERCENT.value].unique()
             ],
             className="grid",
         )
-        html.Div.__init__(self, [html.H1("Performance by imbalance"), grid])
+        grid_title = html.H1("Performance by imbalance")
+        html.Div.__init__(self, [grid_title, grid])
 
 
 class OverviewElement(html.Div):
