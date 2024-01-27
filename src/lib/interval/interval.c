@@ -41,24 +41,15 @@ bool interval_target_region_is_compact(const struct Interval *interval) {
   return true;
 }
 
-static void interval_swap_source(struct Interval *interval, int a, int b) {
-  bool temp = interval->array[a].is_source;
-  interval->array[a].is_source = interval->array[b].is_source;
-  interval->array[b].is_source = temp;
-}
-
-static void interval_swap_target(struct Interval *interval, int a, int b) {
-  bool temp = interval->array[a].is_target;
-  interval->array[a].is_target = interval->array[b].is_target;
-  interval->array[b].is_target = temp;
-}
-
 static void interval_shuffle(struct Interval *interval) {
   for (int i = 0; i < interval->length; i++) {
+    struct Point current = interval->array[i];
     int source_index = rand() % interval->length;
     int target_index = rand() % interval->length;
-    interval_swap_source(interval, i, source_index);
-    interval_swap_target(interval, i, target_index);
+    interval->array[i].is_source = interval->array[source_index].is_source;
+    interval->array[i].is_target = interval->array[target_index].is_target;
+    interval->array[source_index].is_source = current.is_source;
+    interval->array[target_index].is_target = current.is_target;
   }
 }
 

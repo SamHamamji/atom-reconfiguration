@@ -10,7 +10,7 @@ build-type := dev
 
 # Compiler flags
 library-flags := -lm -lpthread
-debugging-flags := -Wall -Wextra -fsanitize=undefined,address -Wfatal-errors -g -Og
+debugging-flags := -Wall -Wextra -Wpedantic -fsanitize=undefined,address -Wfatal-errors -g -Og
 optimization-flags := -O3
 default-flags := $(library-flags)
 
@@ -18,12 +18,10 @@ ifeq ($(build-type), dev)
 	default-flags += $(debugging-flags)
 else ifeq ($(build-type), release)
 	default-flags += $(optimization-flags)
-else ifeq ($(build-type), pedantic)
-	default-flags += $(debugging-flags) -pedantic
 else ifeq ($(build-type), scan-build)
 	c-compiler := scan-build $(c-compiler)
 else
-	$(error "Invalid build type. Valid options are: dev, release, pedantic, scan-build")
+	$(error "Invalid build type. Valid options are: dev, release, scan-build")
 endif
 
 # Folders

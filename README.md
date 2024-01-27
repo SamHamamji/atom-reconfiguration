@@ -5,7 +5,7 @@
 ### Compiling
 Default build type is `dev`.
 ```sh
-make all <build-type=dev|release|pedantic|scan-build>
+make all <build-type=dev|release|scan-build>
 ```
 
 ### Running main file

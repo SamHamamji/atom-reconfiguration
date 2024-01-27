@@ -41,8 +41,6 @@ static bool *get_exclusion_from_chains(const struct AlternatingChains *chains,
   struct ThreadInput *thread_inputs =
       malloc(thread_num * sizeof(struct ThreadInput));
 
-  const int heights_per_thread = chains->chain_num / thread_num;
-  const int remaining_heights = chains->chain_num % thread_num;
   const struct ThreadInputContext context = {
       .chains = chains,
       .output = excluded_indexes,

@@ -160,7 +160,7 @@ struct Mapping *linear_solve_aggarwal_parallel(const struct Interval *interval,
       .total_counts = malloc(sizeof(struct Counts)),
       .thread_counts_array = malloc(thread_num * sizeof(struct Counts)),
       .first_indexes = malloc(thread_num * sizeof(struct ThreadIndexes)),
-      .semaphores = malloc(thread_num * sizeof(pthread_mutex_t)),
+      .semaphores = malloc(thread_num * sizeof(sem_t)),
       .thread_num = thread_num,
   };
 

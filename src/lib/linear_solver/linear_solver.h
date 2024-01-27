@@ -21,14 +21,14 @@ extern LinearSolverFunction linear_solve_aggarwal_parallel;
 extern LinearSolverFunction linear_solve_aggarwal_parallel_on_chains;
 extern LinearSolverFunction linear_solve_aggarwal_parallel_on_neutral;
 
-struct NoParams {};
+typedef void NoParams;
 struct ParallelParams {
   int thread_num;
 };
-typedef struct NoParams IterativeParams;
-typedef struct NoParams KarpLiParams;
+typedef NoParams IterativeParams;
+typedef NoParams KarpLiParams;
 typedef struct ParallelParams KarpLiParallelParams;
-typedef struct NoParams AggarwalParams;
+typedef NoParams AggarwalParams;
 typedef struct ParallelParams AggarwalParallelParams;
 typedef struct ParallelParams AggarwalParallelOnChainsParams;
 typedef struct ParallelParams AggarwalParallelOnNeutralParams;
