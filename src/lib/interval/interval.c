@@ -1,6 +1,5 @@
 #include <assert.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "interval.h"
 
@@ -53,20 +52,17 @@ static void interval_shuffle(struct Interval *interval) {
   }
 }
 
-static struct Interval *new_interval(const struct Point *points, int length) {
+static struct Interval *new_interval(int length) {
   struct Interval *interval = malloc(sizeof(struct Interval));
   interval->array = malloc(length * sizeof(struct Point));
   interval->length = length;
-
-  memcpy(interval->array, points, length * sizeof(struct Point));
 
   return interval;
 }
 
 static struct Interval *generate_interval(int length) {
-  struct Interval *interval = malloc(sizeof(struct Interval));
-  interval->length = length;
-  interval->array = calloc(length, sizeof(struct Point));
+  struct Interval *interval = new_interval(length);
+
   for (int i = 0; i < length; i++) {
     interval->array[i] = (struct Point){
         .is_source = (bool)(rand() % 2),
@@ -79,9 +75,7 @@ static struct Interval *generate_interval(int length) {
 static struct Interval *generate_interval_by_imbalance(int length,
                                                        int imbalance) {
   assert(-length <= imbalance && imbalance <= length);
-  struct Interval *interval = malloc(sizeof(struct Interval));
-  interval->length = length;
-  interval->array = malloc(interval->length * sizeof(struct Point));
+  struct Interval *interval = new_interval(length);
 
   int i = 0;
   for (; i < imbalance; i++) {

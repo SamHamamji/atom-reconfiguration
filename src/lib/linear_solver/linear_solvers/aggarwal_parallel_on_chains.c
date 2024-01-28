@@ -36,7 +36,7 @@ static void *get_exclusion_from_chain_range(void *args) {
 
 static bool *get_exclusion_from_chains(const struct AlternatingChains *chains,
                                        int thread_num, int interval_length) {
-  int *excluded_indexes = malloc(sizeof(int) * chains->chain_num);
+  int *excluded_indexes = malloc(chains->chain_num * sizeof(int));
   pthread_t *thread_array = malloc(thread_num * sizeof(pthread_t));
   struct ThreadInput *thread_inputs =
       malloc(thread_num * sizeof(struct ThreadInput));

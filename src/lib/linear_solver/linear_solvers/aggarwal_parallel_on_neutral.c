@@ -38,11 +38,8 @@ get_mapping_from_exclusion_array(const struct Interval *interval,
   const struct ThreadInputContext context = {
       .interval = interval,
       .exclusion_array = exclusion_array,
-      .mapping = malloc(sizeof(struct Mapping)),
+      .mapping = mapping_new(target_num),
   };
-
-  context.mapping->pairs = malloc(target_num * sizeof(struct Pair));
-  context.mapping->pair_count = target_num;
 
   for (int i = 0; i < thread_num; i++) {
     thread_inputs[i].context = context;

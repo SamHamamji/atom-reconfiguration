@@ -4,8 +4,8 @@
 #include "./lib/grid/grid.h"
 #include "./lib/red_rec/red_rec.h"
 #include "./lib/utils/seed.h"
+#include "lib/grid/reconfiguration.h"
 #include "lib/point/point.h"
-#include "lib/red_rec/reconfiguration.h"
 
 // static struct Grid *grid_1 = &(struct Grid){
 //     (struct Point[]){
@@ -86,7 +86,7 @@ int main() {
   struct Reconfiguration *reconfiguration = red_rec(grid);
 
   if (reconfiguration != NULL) {
-    reconfiguration_apply(reconfiguration, grid);
+    grid_apply_reconfiguration(grid, reconfiguration);
     reconfiguration_free(reconfiguration);
     printf("Final grid:\n");
     grid_print(grid);

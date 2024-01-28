@@ -1,8 +1,6 @@
-#include <stdlib.h>
-
+#include "./test_linear_solvers.h"
 #include "../../lib/linear_solver/linear_solver.h"
 #include "../../lib/utils/timer.h"
-#include "./test_linear_solvers.h"
 #include "performance.h"
 
 static double test_linear_solver_performance_on_interval(
@@ -21,13 +19,9 @@ static double test_linear_solver_performance_on_interval(
 
 struct PerformanceArray *test_linear_solvers_performance(
     const struct PerformanceTestCasesConfig *config) {
-  struct PerformanceArray *performance_array =
-      malloc(sizeof(struct PerformanceArray));
-  performance_array->length = config->linear_solvers_num * config->lengths_num *
-                              config->imbalance_percentages_num *
-                              config->repetition_num;
-  performance_array->performances =
-      malloc(performance_array->length * sizeof(struct Performance));
+  struct PerformanceArray *performance_array = performance_array_new(
+      config->linear_solvers_num * config->lengths_num *
+      config->imbalance_percentages_num * config->repetition_num);
 
   int test_case_index = 0;
   for (int i = 0; i < config->lengths_num; i++) {

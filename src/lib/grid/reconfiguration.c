@@ -1,15 +1,10 @@
 #include <assert.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "../interval/mapping.h"
-#include "move.h"
 #include "reconfiguration.h"
-
-struct Reconfiguration {
-  struct Move *moves;
-  int move_count;
-};
 
 struct Reconfiguration *reconfiguration_new(int max_move_count) {
   assert(max_move_count >= 0);
@@ -23,72 +18,10 @@ struct Reconfiguration *reconfiguration_new(int max_move_count) {
   return reconfiguration;
 }
 
-void reconfiguration_free(struct Reconfiguration *reconfiguration) {
-  if (reconfiguration == NULL) {
-    return;
-  }
-  free(reconfiguration->moves);
-  free(reconfiguration);
-}
-
-void reconfiguration_apply_move(struct Reconfiguration *reconfiguration,
-                                struct Grid *grid, int index) {
-  if (reconfiguration == NULL) {
-    return;
-  }
-  move_apply(grid, reconfiguration->moves[index]);
-}
-
-void reconfiguration_apply_move_range(
-    const struct Reconfiguration *reconfiguration, struct Grid *grid,
-    struct Range range) {
-  for (int i = range.start; i < range.exclusive_end; i++) {
-    move_apply(grid, reconfiguration->moves[i]);
-  }
-}
-
-void reconfiguration_apply_last_moves(
-    const struct Reconfiguration *reconfiguration, struct Grid *grid,
-    int move_count) {
-  if (reconfiguration == NULL) {
-    return;
-  }
-  reconfiguration_apply_move_range(
-      reconfiguration, grid,
-      (struct Range){
-          .start = reconfiguration->move_count - move_count,
-          .exclusive_end = reconfiguration->move_count,
-      });
-}
-
-void reconfiguration_apply(const struct Reconfiguration *reconfiguration,
-                           struct Grid *grid) {
-  if (reconfiguration == NULL) {
-    return;
-  }
-  reconfiguration_apply_move_range(
-      reconfiguration, grid,
-      (struct Range){
-          .start = 0,
-          .exclusive_end = reconfiguration->move_count,
-      });
-}
-
 void reconfiguration_add_move(struct Reconfiguration *reconfiguration,
                               struct Move move) {
   reconfiguration->moves[reconfiguration->move_count] = move;
   reconfiguration->move_count++;
-}
-
-struct Move
-reconfiguration_get_move(const struct Reconfiguration *reconfiguration,
-                         int index) {
-  return reconfiguration->moves[index];
-}
-
-int reconfiguration_get_move_count(
-    const struct Reconfiguration *reconfiguration) {
-  return reconfiguration->move_count;
 }
 
 void reconfiguration_add_mapping(struct Reconfiguration *reconfiguration,
@@ -106,7 +39,7 @@ void reconfiguration_add_mapping(struct Reconfiguration *reconfiguration,
       };
       if (!move_is_complete[i] && move_is_valid(grid, current_move)) {
         reconfiguration_add_move(reconfiguration, current_move);
-        reconfiguration_apply_last_moves(reconfiguration, grid, 1);
+        grid_apply_move(grid, current_move);
         move_is_complete[i] = true;
         move_executed = true;
       }
@@ -132,4 +65,70 @@ void reconfiguration_filter_identical(struct Reconfiguration *reconfiguration) {
     filtered_i++;
   }
   reconfiguration->move_count = filtered_i;
+}
+
+void reconfiguration_free(struct Reconfiguration *reconfiguration) {
+  if (reconfiguration == NULL) {
+    return;
+  }
+  free(reconfiguration->moves);
+  free(reconfiguration);
+}
+
+static bool coordinates_are_equal(struct Coordinates a, struct Coordinates b) {
+  return a.col == b.col && a.row == b.row;
+}
+
+bool move_is_valid(const struct Grid *grid, struct Move move) {
+  if (!grid_get_point(grid, move.origin).is_source) {
+    return false;
+  }
+  bool move_is_horizontal = move.origin.row == move.destination.row;
+  bool move_is_vertical = move.origin.col == move.destination.col;
+  if (!move_is_horizontal && !move_is_vertical) {
+    return false;
+  }
+
+  struct Coordinates current = move.origin;
+  while (!coordinates_are_equal(current, move.destination)) {
+    if (move_is_horizontal) {
+      current.col += move.destination.col > move.origin.col ? 1 : -1;
+    } else {
+      current.row += move.destination.row > move.origin.row ? 1 : -1;
+    }
+    if (grid_get_point(grid, current).is_source) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+void grid_apply_move(struct Grid *grid, struct Move move) {
+  assert(move_is_valid(grid, move));
+
+  grid->elements[move.origin.col * grid->height + move.origin.row].is_source =
+      false;
+  grid->elements[move.destination.col * grid->height + move.destination.row]
+      .is_source = true;
+}
+
+void grid_apply_move_range(struct Grid *grid,
+                           const struct Reconfiguration *reconfiguration,
+                           struct Range range) {
+  for (int i = range.start; i < range.exclusive_end; i++) {
+    grid_apply_move(grid, reconfiguration->moves[i]);
+  }
+}
+
+void grid_apply_reconfiguration(struct Grid *grid,
+                                const struct Reconfiguration *reconfiguration) {
+  if (reconfiguration == NULL) {
+    return;
+  }
+  grid_apply_move_range(grid, reconfiguration,
+                        (struct Range){
+                            .start = 0,
+                            .exclusive_end = reconfiguration->move_count,
+                        });
 }

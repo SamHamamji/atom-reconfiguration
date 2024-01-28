@@ -14,7 +14,9 @@ struct PerformanceArray {
   int length;
 };
 
-void performance_write_to_csv(const struct PerformanceArray *performance,
-                              const char *file_name);
+struct PerformanceArray *performance_array_new(int length);
 
 void performance_array_free(struct PerformanceArray *performance_array);
+
+void performance_write_to_csv(const struct PerformanceArray *performance,
+                              const char *file_name);

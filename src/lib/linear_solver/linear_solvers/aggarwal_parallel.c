@@ -109,12 +109,8 @@ static void *solve_interval_range(void *args) {
   free(excluded_indexes);
 
   if (input->thread_index == 0) {
-    input->context->mapping = malloc(sizeof(struct Mapping));
-    int pair_count = input->context->total_counts->target_num;
-    *input->context->mapping = (struct Mapping){
-        .pairs = malloc(pair_count * sizeof(struct Pair)),
-        .pair_count = pair_count,
-    };
+    input->context->mapping =
+        mapping_new(input->context->total_counts->target_num);
   }
 
   pthread_barrier_wait(&barrier);

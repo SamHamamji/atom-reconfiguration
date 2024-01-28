@@ -3,33 +3,6 @@
 
 #include "./grid.h"
 
-static struct Grid *generate_grid(int width, int height) {
-  struct Grid *grid = malloc(sizeof(struct Grid));
-  grid->width = width;
-  grid->height = height;
-  grid->elements = malloc(width * height * sizeof(struct Point));
-  for (int i = 0; i < width * height; i++) {
-    grid->elements[i].is_source = (bool)(rand() % 2);
-    grid->elements[i].is_target = (bool)(rand() % 2);
-  }
-  return grid;
-}
-
-static struct Grid *generate_compact_target_region_grid(int width, int height) {
-  struct Grid *grid = malloc(sizeof(struct Grid));
-  grid->width = width;
-  grid->height = height;
-  grid->elements = malloc(width * height * sizeof(struct Point));
-  for (int col = 0; col < width; col++) {
-    for (int row = 0; row < height; row++) {
-      grid_set_source(grid, (struct Coordinates){col, row}, (bool)(rand() % 2));
-      grid_set_target(grid, (struct Coordinates){col, row},
-                      (height / 4 < row) && (row < height * 3 / 4));
-    }
-  }
-  return grid;
-}
-
 /**
  * Returns whether the target region is compact, i.e. row contains either all
  * targets or all non targets and rows with target points are consecutive
@@ -89,19 +62,9 @@ struct Point grid_get_point(const struct Grid *grid,
   return grid->elements[coords.col * grid->height + coords.row];
 }
 
-void grid_set_point(struct Grid *grid, struct Coordinates coords,
-                    struct Point value) {
+static void grid_set_point(struct Grid *grid, struct Coordinates coords,
+                           struct Point value) {
   grid->elements[coords.col * grid->height + coords.row] = value;
-}
-
-void grid_set_source(struct Grid *grid, struct Coordinates coords,
-                     bool is_source) {
-  grid->elements[coords.col * grid->height + coords.row].is_source = is_source;
-}
-
-void grid_set_target(struct Grid *grid, struct Coordinates coords,
-                     bool is_target) {
-  grid->elements[coords.col * grid->height + coords.row].is_target = is_target;
 }
 
 struct Counts *grid_get_column_counts(const struct Grid *grid) {
@@ -124,6 +87,36 @@ bool grid_is_solved(const struct Grid *grid) {
     }
   }
   return true;
+}
+
+static struct Grid *generate_grid(int width, int height) {
+  struct Grid *grid = malloc(sizeof(struct Grid));
+  grid->width = width;
+  grid->height = height;
+  grid->elements = malloc(width * height * sizeof(struct Point));
+  for (int i = 0; i < width * height; i++) {
+    grid->elements[i].is_source = (bool)(rand() % 2);
+    grid->elements[i].is_target = (bool)(rand() % 2);
+  }
+  return grid;
+}
+
+static struct Grid *generate_compact_target_region_grid(int width, int height) {
+  struct Grid *grid = malloc(sizeof(struct Grid));
+  grid->width = width;
+  grid->height = height;
+  grid->elements = malloc(width * height * sizeof(struct Point));
+  for (int col = 0; col < width; col++) {
+    for (int row = 0; row < height; row++) {
+      grid_set_point(
+          grid, (struct Coordinates){col, row},
+          (struct Point){
+              .is_source = (bool)(rand() % 2),
+              .is_target = (height / 4 < row) && (row < height * 3 / 4),
+          });
+    }
+  }
+  return grid;
 }
 
 const struct GridFactory grid_factory = {

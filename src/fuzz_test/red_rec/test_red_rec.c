@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../../lib/red_rec/reconfiguration.h"
+#include "../../lib/grid/reconfiguration.h"
 #include "../../lib/red_rec/red_rec.h"
 #include "../../lib/utils/colors.h"
 #include "../../lib/utils/timer.h"
@@ -37,7 +37,7 @@ bool fuzz_test_red_rec(const struct RedRecFuzzTestConfig config) {
     struct Grid *initial_grid = grid_get_copy(grid);
 
     struct Reconfiguration *reconfiguration = red_rec(initial_grid);
-    reconfiguration_apply(reconfiguration, grid);
+    grid_apply_reconfiguration(grid, reconfiguration);
 
     if (reconfiguration != NULL && !grid_is_solved(grid)) {
       success = false;

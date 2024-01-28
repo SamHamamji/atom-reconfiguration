@@ -1,14 +1,11 @@
 #include <assert.h>
-#include <stdlib.h>
 
 #include "solve_neutral_interval.h"
 
 struct Mapping *solve_neutral_interval(const struct Interval *interval,
                                        const bool *exclusion_array,
                                        int target_num) {
-  struct Mapping *mapping = malloc(sizeof(struct Mapping));
-  mapping->pairs = malloc(target_num * sizeof(struct Pair));
-  mapping->pair_count = target_num;
+  struct Mapping *mapping = mapping_new(target_num);
 
   solve_neutral_interval_range(
       interval, exclusion_array,

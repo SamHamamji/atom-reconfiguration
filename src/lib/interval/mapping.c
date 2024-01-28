@@ -2,6 +2,15 @@
 
 #include "mapping.h"
 
+struct Mapping *mapping_new(int pair_count) {
+  struct Mapping *mapping = malloc(sizeof(struct Mapping));
+  *mapping = (struct Mapping){
+      .pairs = malloc(pair_count * sizeof(struct Pair)),
+      .pair_count = pair_count,
+  };
+  return mapping;
+}
+
 void mapping_free(struct Mapping *mapping) {
   if (mapping == NULL) {
     return;
@@ -42,11 +51,4 @@ bool mapping_equals(const struct Mapping *a, const struct Mapping *b) {
 
   free(pair_is_matched);
   return true;
-}
-
-struct Mapping *mapping_get_null() {
-  struct Mapping *mapping = malloc(sizeof(struct Mapping));
-  mapping->pair_count = 0;
-  mapping->pairs = NULL;
-  return mapping;
 }

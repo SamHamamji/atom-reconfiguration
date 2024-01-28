@@ -12,6 +12,7 @@ struct Mapping {
   int pair_count;
 };
 
+struct Mapping *mapping_new(int pair_count);
 void mapping_free(struct Mapping *mapping);
 bool mapping_equals(const struct Mapping *a, const struct Mapping *b);
 
