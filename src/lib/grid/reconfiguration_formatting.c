@@ -12,6 +12,12 @@ void reconfiguration_print(const struct Reconfiguration *reconfiguration) {
     printf("NULL reconfiguration\n");
     return;
   }
+
+  if (reconfiguration->move_count == 0) {
+    printf("Empty reconfiguration\n");
+    return;
+  }
+
   for (int i = 0; i < reconfiguration->move_count; i++) {
     struct Move move = reconfiguration->moves[i];
     printf("(%d, %d) -> (%d, %d)", move.origin.col, move.origin.row,

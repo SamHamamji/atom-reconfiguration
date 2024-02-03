@@ -14,14 +14,9 @@ static int compare_column_pairs(struct ColumnPair a, struct ColumnPair b,
    * 2. minimizes the number of columns between the donor and the receiver
    * 3. maximizes the receiver surplus (closest to saturation)
    */
-  int exchanged_sources_a =
-      min(counts_get_imbalance(column_counts[a.donor_index]),
-          abs(counts_get_imbalance(column_counts[a.receiver_index])));
-  int exchanged_sources_b =
-      min(counts_get_imbalance(column_counts[b.donor_index]),
-          abs(counts_get_imbalance(column_counts[b.receiver_index])));
-  if (exchanged_sources_a != exchanged_sources_b) {
-    return exchanged_sources_a - exchanged_sources_b;
+
+  if (a.exchanged_sources_num != b.exchanged_sources_num) {
+    return a.exchanged_sources_num - b.exchanged_sources_num;
   }
 
   int column_distance_a = abs(a.donor_index - a.receiver_index);
@@ -45,6 +40,7 @@ struct ColumnPair column_pair_get_best(struct Grid *grid,
   struct ColumnPair best_column_pair = {
       .donor_index = -1,
       .receiver_index = -1,
+      .exchanged_sources_num = -1,
   };
 
   for (int current_column = 1; current_column < grid->width; current_column++) {
@@ -63,6 +59,9 @@ struct ColumnPair column_pair_get_best(struct Grid *grid,
               previous_column_is_receiver ? current_column : previous_column,
           .receiver_index =
               previous_column_is_receiver ? previous_column : current_column,
+          .exchanged_sources_num =
+              min(abs(counts_get_imbalance(column_counts[previous_column])),
+                  abs(counts_get_imbalance(column_counts[current_column]))),
       };
 
       if (best_column_pair.donor_index == -1 ||
