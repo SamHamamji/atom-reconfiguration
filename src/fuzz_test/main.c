@@ -4,6 +4,7 @@
 
 #include "../lib/grid/grid.h"
 #include "../lib/linear_solver/linear_solver.h"
+#include "../lib/utils/max_min.h"
 #include "../lib/utils/seed.h"
 #include "./linear_solver/test_linear_solvers.h"
 #include "./red_rec/test_red_rec.h"
@@ -59,7 +60,8 @@ static struct LinearSolversFuzzTestConfig linear_solvers_config = {
 };
 
 static struct Grid *grid_generator(int width, int height) {
-  return grid_factory.generate_compact_target_region(width, height);
+  return grid_factory.generate_compact_target_region(width, height,
+                                                     rand() % max(height, 1));
 }
 
 static struct RedRecFuzzTestConfig red_rec_config = {
@@ -75,6 +77,8 @@ int main(void) {
   if (!fuzz_test_linear_solvers(linear_solvers_config)) {
     return EXIT_FAILURE;
   }
+
+  seed_set_to_time();
   if (!fuzz_test_red_rec(red_rec_config)) {
     return EXIT_FAILURE;
   }

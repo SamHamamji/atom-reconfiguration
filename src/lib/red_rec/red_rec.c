@@ -136,10 +136,9 @@ static void execute_delayed_move(struct Grid *grid,
   mapping_free(vertical_mapping);
 }
 
-static void reconfigure_receiver(struct Grid *grid,
-                                 struct Reconfiguration *reconfiguration,
-                                 int receiver_index,
-                                 struct Range target_region_range) {
+static void reconfigure_receiver_sources(
+    struct Grid *grid, struct Reconfiguration *reconfiguration,
+    int receiver_index, struct Range target_region_range) {
   struct Point *receiver = grid_get_column(grid, receiver_index);
   struct Point *receiver_alias = malloc(grid->height * sizeof(struct Point));
   for (int i = 0; i < grid->height; i++) {
@@ -164,17 +163,17 @@ get_receiver_sources_target_range(const struct Grid *grid,
                                   const struct DelayedMoves *delayed_moves,
                                   struct ColumnPair column_pair) {
   struct Point *receiver = grid_get_column(grid, column_pair.receiver_index);
-  struct Counts receiver_counts = interval_get_counts(
-      &(struct Interval){.array = receiver, .length = grid->height});
-
-  struct SourceLocations receiver_sources =
-      get_column_source_locations(grid, column_pair.receiver_index);
+  struct Point *donor = grid_get_column(grid, column_pair.donor_index);
+  struct Point *receiver_alias = malloc(grid->height * sizeof(struct Point));
 
   struct SourceLocations delayed_moves_sources =
       get_delayed_moves_source_locations(grid, delayed_moves, column_pair);
 
-  struct SourceLocations last_donor_sources =
-      get_column_source_locations(grid, column_pair.donor_index);
+  struct SourceLocations receiver_sources =
+      get_column_source_locations(grid, column_pair.receiver_index);
+
+  receiver_sources.upper_reservoir += delayed_moves_sources.upper_reservoir;
+  receiver_sources.lower_reservoir += delayed_moves_sources.lower_reservoir;
 
   struct Range target_range = {
       .start = INT_MAX,
@@ -182,19 +181,65 @@ get_receiver_sources_target_range(const struct Grid *grid,
   };
 
   for (int i = 0; i < grid->height; i++) {
-    if (receiver[i].is_target) {
-      target_range.start =
-          i + delayed_moves_sources.upper_reservoir +
-          min(last_donor_sources.upper_reservoir,
-              receiver_counts.target_num - receiver_counts.source_num -
-                  delayed_moves_sources.upper_reservoir -
-                  delayed_moves_sources.lower_reservoir);
-      target_range.exclusive_end =
-          target_range.start + receiver_counts.source_num;
+    receiver_alias[i] = (struct Point){
+        .is_source = (donor[i].is_source && !donor[i].is_target) ||
+                     (receiver[i].is_source && receiver[i].is_target),
+        .is_target = receiver[i].is_target,
+    };
+    target_range = (struct Range){
+        .start = min(target_range.start, (receiver[i].is_target) ? i : INT_MAX),
+        .exclusive_end = max(target_range.exclusive_end,
+                             (receiver[i].is_target) ? i + 1 : INT_MIN),
+    };
+  }
+
+  for (int i = target_range.start; i < target_range.exclusive_end; i++) {
+    if (receiver_sources.upper_reservoir == 0) {
       break;
     }
+    if (!receiver_alias[i].is_source) {
+      receiver_alias[i].is_source = true;
+      receiver_sources.upper_reservoir--;
+      receiver_sources.target_region++;
+    }
   }
-  return target_range;
+
+  for (int i = target_range.exclusive_end - 1; i >= target_range.start; i--) {
+    if (receiver_sources.lower_reservoir == 0) {
+      break;
+    }
+    if (!receiver_alias[i].is_source) {
+      receiver_alias[i].is_source = true;
+      receiver_sources.lower_reservoir--;
+      receiver_sources.target_region++;
+    }
+  }
+
+  assert(receiver_sources.upper_reservoir == 0);
+  assert(receiver_sources.lower_reservoir == 0);
+
+  struct Mapping *mapping = linear_solve_aggarwal(
+      &(struct Interval){.array = receiver_alias, .length = grid->height},
+      NULL);
+
+  int donor_upper_included_sources = 0;
+  for (int i = 0; i < mapping->pair_count; i++) {
+    if (mapping->pairs[i].source >= mapping->pairs[0].target) {
+      break;
+    }
+    donor_upper_included_sources++;
+  }
+
+  free(receiver_alias);
+  mapping_free(mapping);
+
+  return (struct Range){
+      .start = target_range.start + donor_upper_included_sources +
+               delayed_moves_sources.upper_reservoir,
+      .exclusive_end = target_range.start + donor_upper_included_sources -
+                       delayed_moves_sources.lower_reservoir +
+                       receiver_sources.target_region,
+  };
 }
 
 static void solve_receiver(struct Grid *grid,
@@ -204,10 +249,9 @@ static void solve_receiver(struct Grid *grid,
   struct Range target_range =
       get_receiver_sources_target_range(grid, delayed_moves, column_pair);
 
-  reconfigure_receiver(grid, reconfiguration, column_pair.receiver_index,
-                       target_range);
+  reconfigure_receiver_sources(grid, reconfiguration,
+                               column_pair.receiver_index, target_range);
 
-  // Solve delayed moves
   for (int i = 0; i < delayed_moves->length; i++) {
     if (delayed_moves->array[i].receiver_index == column_pair.receiver_index) {
       struct SourceLocations source_locations = get_column_source_locations(
@@ -252,7 +296,6 @@ struct Reconfiguration *red_rec(const struct Grid *grid) {
   struct ColumnPair best_pair =
       column_pair_get_best(copy, column_counts, column_is_solved);
   while (best_pair.receiver_index != -1 && best_pair.donor_index != -1) {
-
     int receiver_deficit =
         abs(counts_get_imbalance(column_counts[best_pair.receiver_index]));
 

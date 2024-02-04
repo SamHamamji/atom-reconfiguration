@@ -3,19 +3,6 @@
 
 #include "./grid.h"
 
-/**
- * Returns whether the target region is compact, i.e. row contains either all
- * targets or all non targets and rows with target points are consecutive
- *
- * i.e. this is compact:
- * . S . . S
- * . . . S .
- * T T B T T
- * B B T B T
- * T T T T T
- * S S . . S
- * . S . . S
- */
 bool grid_target_region_is_compact(const struct Grid *grid) {
   if (grid->height == 0 || grid->width == 0) {
     return true;
@@ -101,18 +88,24 @@ static struct Grid *generate_grid(int width, int height) {
   return grid;
 }
 
-static struct Grid *generate_compact_target_region_grid(int width, int height) {
+static struct Grid *
+generate_compact_target_region_grid(int width, int height,
+                                    int target_region_height) {
   struct Grid *grid = malloc(sizeof(struct Grid));
-  grid->width = width;
-  grid->height = height;
-  grid->elements = malloc(width * height * sizeof(struct Point));
+  *grid = (struct Grid){
+      .elements = malloc(width * height * sizeof(struct Point)),
+      .width = width,
+      .height = height,
+  };
+
   for (int col = 0; col < width; col++) {
     for (int row = 0; row < height; row++) {
       grid_set_point(
           grid, (struct Coordinates){col, row},
           (struct Point){
               .is_source = (bool)(rand() % 2),
-              .is_target = (height / 4 < row) && (row < height * 3 / 4),
+              .is_target = ((height - target_region_height) / 2 <= row) &&
+                           (row < (height + target_region_height) / 2),
           });
     }
   }

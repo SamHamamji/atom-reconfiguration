@@ -48,5 +48,5 @@ int main(void) {
   if (!test_linear_solvers(linear_solvers, linear_solvers_num)) {
     return EXIT_FAILURE;
   }
-  return 0;
+  return EXIT_SUCCESS;
 }

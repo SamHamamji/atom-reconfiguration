@@ -78,8 +78,9 @@ static struct Interval *generate_interval_by_imbalance(int length,
   struct Interval *interval = new_interval(length);
 
   int i = 0;
-  for (; i < imbalance; i++) {
-    interval->array[i] = (struct Point)SOURCE;
+  for (; i < abs(imbalance); i++) {
+    interval->array[i] =
+        (imbalance > 0) ? (struct Point)SOURCE : (struct Point)TARGET;
   }
 
   while (i < length) {
