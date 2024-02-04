@@ -53,9 +53,8 @@ bool test_linear_solvers(const struct LinearSolver *linear_solvers[],
       failed_tests++;
     }
   }
-  if (failed_tests == 0) {
-    printf("🟢 All tests passed.\n");
-  } else {
+
+  if (failed_tests != 0) {
     printf("🔴 %d/%d tests failed!\n", failed_tests, linear_solver_num);
   }
   return failed_tests == 0;

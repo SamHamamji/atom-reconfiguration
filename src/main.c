@@ -5,7 +5,7 @@
 #include "./lib/red_rec/red_rec.h"
 #include "./lib/utils/seed.h"
 #include "lib/grid/reconfiguration.h"
-#include "lib/point/point.h"
+// #include "lib/point/point.h"
 
 // static struct Grid *grid_1 = &(struct Grid){
 //     (struct Point[]){
@@ -41,62 +41,65 @@
 //     .height = 11,
 // };
 
-static struct Grid *grid_2 = &(struct Grid){
-    (struct Point[]){
-        EMPTY,  SOURCE, BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   EMPTY,
-        SOURCE, EMPTY,  EMPTY,  EMPTY,  BOTH,   BOTH,   BOTH,   BOTH,   BOTH,
-        BOTH,   EMPTY,  EMPTY,  SOURCE, SOURCE, SOURCE, BOTH,   BOTH,   BOTH,
-        BOTH,   BOTH,   BOTH,   EMPTY,  EMPTY,  EMPTY,  EMPTY,  EMPTY,  BOTH,
-        BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   EMPTY,  EMPTY,  EMPTY,  EMPTY,
-        EMPTY,  BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   EMPTY,  EMPTY,
-        EMPTY,  EMPTY,  EMPTY,  BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   BOTH,
-        EMPTY,  EMPTY,  EMPTY,  EMPTY,  EMPTY,  BOTH,   BOTH,   BOTH,   BOTH,
-        BOTH,   BOTH,   EMPTY,  EMPTY,  EMPTY,  EMPTY,  EMPTY,  BOTH,   BOTH,
-        BOTH,   BOTH,   BOTH,   BOTH,   EMPTY,  EMPTY,  EMPTY,  EMPTY,  EMPTY,
-        BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   EMPTY,  EMPTY,  EMPTY,
-        EMPTY,  EMPTY,  BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   EMPTY,
-        EMPTY,  EMPTY,  EMPTY,  EMPTY,  BOTH,   BOTH,   BOTH,   BOTH,   BOTH,
-        BOTH,   EMPTY,  EMPTY,  EMPTY,  EMPTY,  EMPTY,  BOTH,   BOTH,   BOTH,
-        BOTH,   BOTH,   BOTH,   EMPTY,  EMPTY,  EMPTY,  EMPTY,  EMPTY,  BOTH,
-        BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   EMPTY,  EMPTY,  EMPTY,  EMPTY,
-        EMPTY,  TARGET, TARGET, TARGET, TARGET, TARGET, TARGET, EMPTY,  EMPTY,
-        EMPTY,  SOURCE, EMPTY,  BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   BOTH,
-        SOURCE, EMPTY,  EMPTY,  EMPTY,  EMPTY,  BOTH,   BOTH,   BOTH,   BOTH,
-        BOTH,   BOTH,   EMPTY,  EMPTY,  EMPTY,  EMPTY,  EMPTY,  BOTH,   BOTH,
-        BOTH,   BOTH,   BOTH,   BOTH,   EMPTY,  EMPTY,  SOURCE, EMPTY,  EMPTY,
-        BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   EMPTY,  SOURCE, EMPTY,
-        EMPTY,  EMPTY,  BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   EMPTY,
-        SOURCE, EMPTY,  EMPTY,  EMPTY,  BOTH,   BOTH,   BOTH,   BOTH,   BOTH,
-        BOTH,   EMPTY,  EMPTY,  EMPTY,  EMPTY,  EMPTY,  BOTH,   BOTH,   BOTH,
-        BOTH,   BOTH,   BOTH,   EMPTY,  EMPTY,  EMPTY,
-    },
-    .width = 21,
-    .height = 11,
-};
+// static struct Grid *grid_2 = &(struct Grid){
+//     (struct Point[]){
+//         EMPTY,  SOURCE, BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   BOTH, EMPTY,
+//         SOURCE, EMPTY,  EMPTY,  EMPTY,  BOTH,   BOTH,   BOTH,   BOTH,   BOTH,
+//         BOTH,   EMPTY,  EMPTY,  SOURCE, SOURCE, SOURCE, BOTH,   BOTH,   BOTH,
+//         BOTH,   BOTH,   BOTH,   EMPTY,  EMPTY,  EMPTY,  EMPTY,  EMPTY,  BOTH,
+//         BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   EMPTY,  EMPTY,  EMPTY, EMPTY,
+//         EMPTY,  BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   EMPTY, EMPTY,
+//         EMPTY,  EMPTY,  EMPTY,  BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   BOTH,
+//         EMPTY,  EMPTY,  EMPTY,  EMPTY,  EMPTY,  BOTH,   BOTH,   BOTH,   BOTH,
+//         BOTH,   BOTH,   EMPTY,  EMPTY,  EMPTY,  EMPTY,  EMPTY,  BOTH,   BOTH,
+//         BOTH,   BOTH,   BOTH,   BOTH,   EMPTY,  EMPTY,  EMPTY,  EMPTY, EMPTY,
+//         BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   EMPTY,  EMPTY, EMPTY,
+//         EMPTY,  EMPTY,  BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   BOTH, EMPTY,
+//         EMPTY,  EMPTY,  EMPTY,  EMPTY,  BOTH,   BOTH,   BOTH,   BOTH,   BOTH,
+//         BOTH,   EMPTY,  EMPTY,  EMPTY,  EMPTY,  EMPTY,  BOTH,   BOTH,   BOTH,
+//         BOTH,   BOTH,   BOTH,   EMPTY,  EMPTY,  EMPTY,  EMPTY,  EMPTY,  BOTH,
+//         BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   EMPTY,  EMPTY,  EMPTY, EMPTY,
+//         EMPTY,  TARGET, TARGET, TARGET, TARGET, TARGET, TARGET, EMPTY, EMPTY,
+//         EMPTY,  SOURCE, EMPTY,  BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   BOTH,
+//         SOURCE, EMPTY,  EMPTY,  EMPTY,  EMPTY,  BOTH,   BOTH,   BOTH,   BOTH,
+//         BOTH,   BOTH,   EMPTY,  EMPTY,  EMPTY,  EMPTY,  EMPTY,  BOTH,   BOTH,
+//         BOTH,   BOTH,   BOTH,   BOTH,   EMPTY,  EMPTY,  SOURCE, EMPTY, EMPTY,
+//         BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   EMPTY,  SOURCE,
+//         EMPTY, EMPTY,  EMPTY,  BOTH,   BOTH,   BOTH,   BOTH,   BOTH,   BOTH,
+//         EMPTY, SOURCE, EMPTY,  EMPTY,  EMPTY,  BOTH,   BOTH,   BOTH,   BOTH,
+//         BOTH, BOTH,   EMPTY,  EMPTY,  EMPTY,  EMPTY,  EMPTY,  BOTH,   BOTH,
+//         BOTH, BOTH,   BOTH,   BOTH,   EMPTY,  EMPTY,  EMPTY,
+//     },
+//     .width = 21,
+//     .height = 11,
+// };
 
 int main() {
   seed_set_to_time();
 
-  // struct Grid *grid = grid_factory.generate_compact_target_region(20, 20);
+  struct Grid *grid = grid_factory.generate_compact_target_region(20, 20, 10);
   // struct Grid *grid = grid_1;
-  struct Grid *grid = grid_2;
+  // struct Grid *grid = grid_2;
   printf("Initial grid:\n");
   grid_print(grid);
 
   struct Reconfiguration *reconfiguration = red_rec(grid);
 
+  grid_apply_reconfiguration(grid, reconfiguration);
+  reconfiguration_free(reconfiguration);
+
   if (reconfiguration != NULL) {
-    grid_apply_reconfiguration(grid, reconfiguration);
-    reconfiguration_free(reconfiguration);
     printf("Final grid:\n");
     grid_print(grid);
-    if (!grid_is_solved(grid)) {
+    if (grid_is_solved(grid)) {
+      printf("Grid solved successfully!\n");
+    } else {
       printf("Grid not solved!\n");
-      exit(1);
+      return EXIT_FAILURE;
     }
   } else {
     printf("No solution found!\n");
   }
 
-  return 0;
+  return EXIT_SUCCESS;
 }

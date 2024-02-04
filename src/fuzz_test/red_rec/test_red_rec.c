@@ -34,9 +34,9 @@ bool fuzz_test_red_rec(const struct RedRecFuzzTestConfig config) {
     struct Grid *grid =
         config.grid_generator(get_random_int(config.width_range),
                               get_random_int(config.height_range));
-    struct Grid *initial_grid = grid_get_copy(grid);
+    struct Reconfiguration *reconfiguration = red_rec(grid);
 
-    struct Reconfiguration *reconfiguration = red_rec(initial_grid);
+    struct Grid *initial_grid = grid_get_copy(grid);
     grid_apply_reconfiguration(grid, reconfiguration);
 
     if (reconfiguration != NULL && !grid_is_solved(grid)) {
@@ -52,7 +52,8 @@ bool fuzz_test_red_rec(const struct RedRecFuzzTestConfig config) {
   }
 
   if (success) {
-    printf("%d red-rec tests passed!\n", test_case_num);
+    printf("%d red-rec tests passed in %.2f seconds!\n", test_case_num,
+           config.time_limit_in_seconds);
   } else {
     printf("🔴 Failed red-rec test case %d.\n", test_case_num);
   }

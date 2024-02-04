@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "../lib/linear_solver/linear_solver.h"
@@ -48,5 +49,8 @@ int main(void) {
   if (!test_linear_solvers(linear_solvers, linear_solvers_num)) {
     return EXIT_FAILURE;
   }
+  printf("\n");
+
+  printf("🟢 All tests passed.\n");
   return EXIT_SUCCESS;
 }

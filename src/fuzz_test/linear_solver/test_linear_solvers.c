@@ -76,7 +76,8 @@ bool fuzz_test_linear_solvers(const struct LinearSolversFuzzTestConfig config) {
   }
 
   if (success) {
-    printf("%d linear solver tests passed!\n", test_case_num);
+    printf("%d linear solver tests passed in %.2f seconds!\n", test_case_num,
+           config.time_limit_in_seconds);
   } else {
     printf("🔴 Failed linear solver test case %d.\n", test_case_num);
   }

@@ -8,6 +8,6 @@ void seed_set(unsigned int seed) {
 }
 
 void seed_set_to_time() {
-  unsigned int seed = (unsigned int)time(NULL);
+  unsigned int seed = time(NULL);
   seed_set(seed);
 }
