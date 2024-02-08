@@ -2,9 +2,10 @@
 #include <stdlib.h>
 
 #include "./lib/grid/grid.h"
-#include "./lib/red_rec/red_rec.h"
+#include "./lib/grid_solver/grid_solver.h"
 #include "./lib/utils/seed.h"
 #include "lib/grid/reconfiguration.h"
+#include "lib/linear_solver/linear_solver.h"
 // #include "lib/point/point.h"
 
 // static struct Grid *grid_1 = &(struct Grid){
@@ -83,23 +84,34 @@ int main() {
   printf("Initial grid:\n");
   grid_print(grid);
 
-  struct Reconfiguration *reconfiguration = red_rec(grid);
+  const RedRecParams params = {
+      .linear_solver =
+          &(struct LinearSolver){
+              .solve = linear_solve_aggarwal,
+              .params = NULL,
+              .name = "",
+          },
+  };
+
+  struct Reconfiguration *reconfiguration = red_rec(grid, &params);
 
   grid_apply_reconfiguration(grid, reconfiguration);
   reconfiguration_free(reconfiguration);
 
-  if (reconfiguration != NULL) {
+  int exit_status = EXIT_SUCCESS;
+
+  if (reconfiguration == NULL) {
+    printf("No solution available.\n");
+  } else if (grid_is_solved(grid)) {
     printf("Final grid:\n");
     grid_print(grid);
-    if (grid_is_solved(grid)) {
-      printf("Grid solved successfully!\n");
-    } else {
-      printf("Grid not solved!\n");
-      return EXIT_FAILURE;
-    }
+    printf("Grid solved successfully!\n");
   } else {
-    printf("No solution found!\n");
+    printf("Grid not solved!\n");
+    exit_status = EXIT_FAILURE;
   }
 
-  return EXIT_SUCCESS;
+  grid_free(grid);
+
+  return exit_status;
 }

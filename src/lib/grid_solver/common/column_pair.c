@@ -1,13 +1,13 @@
 #include <stdlib.h>
 
-#include "../utils/max_min.h"
-#include "./column_pair.h"
+#include "../../utils/max_min.h"
+#include "column_pair.h"
 
 /** Returns a positive number if the first element is greater than the second,
  * and vice versa
  */
 static int compare_column_pairs(struct ColumnPair a, struct ColumnPair b,
-                                struct Counts *column_counts) {
+                                const struct Counts *column_counts) {
   /**
    * Comparisons by priority
    * 1. maximizes the number of exchanged tokens

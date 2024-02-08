@@ -1,5 +1,6 @@
 #include "./range.h"
 #include "./max_min.h"
+#include <stdlib.h>
 
 inline static int get_range_start(int range_index, int range_num,
                                   int total_length) {
@@ -27,4 +28,8 @@ inline int get_range_index(int index, int range_num, int total_length) {
   } else {
     return (index - remaining_length) / subinterval_length;
   }
+}
+
+int get_random_int_in_range(struct Range range) {
+  return range.start + rand() % max(1, range.exclusive_end - range.start);
 }

@@ -1,6 +1,5 @@
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "../../lib/interval/interval.h"
 #include "../../lib/interval/mapping.h"
@@ -8,13 +7,6 @@
 #include "../../lib/utils/colors.h"
 #include "../../lib/utils/timer.h"
 #include "./test_linear_solvers.h"
-
-static int get_random_int(struct Range range) {
-  if (range.start == range.exclusive_end) {
-    return range.start;
-  }
-  return range.start + rand() % (range.exclusive_end - range.start);
-}
 
 static void print_failed_test_case(
     const struct Interval *interval, const struct Mapping *initial_mapping,
@@ -38,17 +30,15 @@ bool fuzz_test_linear_solvers(const struct LinearSolversFuzzTestConfig config) {
   struct Timer timer;
   timer_start(&timer);
 
-  int test_case_num = 0;
   bool success = true;
+  int test_case_num = 1;
   while (success && timer_get_seconds(&timer) < config.time_limit_in_seconds) {
-    test_case_num++;
-
-    int length = get_random_int(config.length_range);
-    struct Interval *interval =
-        config.interval_generator(length, get_random_int((struct Range){
-                                              .start = -length,
-                                              .exclusive_end = length,
-                                          }));
+    int length = get_random_int_in_range(config.length_range);
+    struct Interval *interval = config.interval_generator(
+        length, get_random_int_in_range((struct Range){
+                    .start = -length,
+                    .exclusive_end = length,
+                }));
 
     const struct LinearSolver *initial_linear_solver = config.linear_solvers[0];
 
@@ -72,6 +62,7 @@ bool fuzz_test_linear_solvers(const struct LinearSolversFuzzTestConfig config) {
     mapping_free(initial_mapping);
     interval_free(interval);
 
+    test_case_num++;
     timer_stop(&timer);
   }
 

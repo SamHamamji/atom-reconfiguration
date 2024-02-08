@@ -3,13 +3,14 @@
 #include <stdlib.h>
 
 #include "../lib/grid/grid.h"
+#include "../lib/grid_solver/grid_solver.h"
 #include "../lib/linear_solver/linear_solver.h"
 #include "../lib/utils/max_min.h"
 #include "../lib/utils/seed.h"
+#include "./grid_solver/test_grid_solvers.h"
 #include "./linear_solver/test_linear_solvers.h"
-#include "./red_rec/test_red_rec.h"
 
-const struct LinearSolver *linear_solvers[] = {
+const static struct LinearSolver *linear_solvers[] = {
     &(struct LinearSolver){
         .solve = linear_solve_iterative,
         .params = NULL,
@@ -59,14 +60,33 @@ static struct LinearSolversFuzzTestConfig linear_solvers_config = {
     .time_limit_in_seconds = 5.0,
 };
 
+static RedRecParams red_rec_params = {
+    .linear_solver =
+        &(struct LinearSolver){
+            .solve = linear_solve_aggarwal,
+            .params = NULL,
+            .name = "Aggarwal solver",
+        },
+};
+
+const static struct GridSolver *grid_solvers[] = {
+    &(struct GridSolver){
+        .solve = red_rec,
+        .params = &red_rec_params,
+        .name = "Red Rec",
+    },
+};
+
 static struct Grid *grid_generator(int width, int height) {
   return grid_factory.generate_compact_target_region(width, height,
                                                      rand() % max(height, 1));
 }
 
-static struct RedRecFuzzTestConfig red_rec_config = {
+static struct GridSolversFuzzTestConfig grid_solvers_config = {
     .width_range = {0, 35},
     .height_range = {0, 35},
+    .grid_solvers = grid_solvers,
+    .grid_solvers_num = sizeof(grid_solvers) / sizeof(grid_solvers[0]),
     .time_limit_in_seconds = 5.0,
     .grid_generator = grid_generator,
 };
@@ -80,7 +100,7 @@ int main(void) {
   printf("\n");
 
   seed_set_to_time();
-  if (!fuzz_test_red_rec(red_rec_config)) {
+  if (!fuzz_test_grid_solvers(grid_solvers_config)) {
     return EXIT_FAILURE;
   }
   printf("\n");

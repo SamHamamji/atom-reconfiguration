@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 
-#include "../grid/grid.h"
+#include "../../grid/grid.h"
 
 struct ColumnPair {
   int donor_index;

@@ -7,3 +7,4 @@ struct Range {
 
 struct Range get_range(int range_index, int range_num, int total_length);
 int get_range_index(int index, int range_num, int total_length);
+int get_random_int_in_range(struct Range range);
