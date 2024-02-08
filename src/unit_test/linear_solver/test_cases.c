@@ -2,6 +2,13 @@
 
 #include "test_cases.h"
 
+// This is used because arrays of size 0 are forbidden
+#define EMPTY_INTERVAL                                                         \
+  &(struct Interval) { .array = NULL, .length = 0 }
+
+#define EMPTY_MAPPING                                                          \
+  &(struct Mapping) { .pairs = NULL, .pair_count = 0 }
+
 #define INTERVAL(points_array)                                                 \
   &(struct Interval) {                                                         \
     .array = points_array,                                                     \
@@ -117,29 +124,24 @@ static struct LinearSolverTestCase test_8 = {
 
 // Test 9
 static struct Point interval_9[] = {SOURCE, SOURCE};
-static struct Pair pairs_9[] = {};
 
 static struct LinearSolverTestCase test_9 = {
     .input = INTERVAL(interval_9),
-    .expected_output = MAPPING(pairs_9),
+    .expected_output = EMPTY_MAPPING,
 };
 
 // Test 10
 static struct Point interval_10[] = {EMPTY};
-static struct Pair pairs_10[] = {};
 
 static struct LinearSolverTestCase test_10 = {
     .input = INTERVAL(interval_10),
-    .expected_output = MAPPING(pairs_10),
+    .expected_output = EMPTY_MAPPING,
 };
 
 // Test 11
-static struct Point interval_11[] = {};
-static struct Pair pairs_11[] = {};
-
 static struct LinearSolverTestCase test_11 = {
-    .input = INTERVAL(interval_11),
-    .expected_output = MAPPING(pairs_11),
+    .input = EMPTY_INTERVAL,
+    .expected_output = EMPTY_MAPPING,
 };
 
 // Test 12

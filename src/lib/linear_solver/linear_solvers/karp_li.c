@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <limits.h>
 #include <stdlib.h>
 
@@ -44,6 +45,8 @@ static bool *get_exclusion_array(const struct Interval *interval,
 
 struct Mapping *linear_solve_karp_li(const struct Interval *interval,
                                      const void *params) {
+  assert(params == NULL);
+
   int *height_array = get_height_array(interval);
   if (get_imbalance_from_height_array(interval, height_array) < 0) {
     free(height_array);

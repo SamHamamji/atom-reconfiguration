@@ -6,6 +6,9 @@ int *get_height_array(const struct Interval *interval) {
   if (interval->length < 0) {
     return NULL;
   }
+  if (interval->length == 0) {
+    return malloc(0);
+  }
 
   int *height_array = malloc(interval->length * sizeof(int));
   height_array[0] = (int)interval->array[0].is_source;
@@ -20,6 +23,8 @@ int *get_height_array(const struct Interval *interval) {
 
 inline int get_imbalance_from_height_array(const struct Interval *interval,
                                            const int *height_array) {
-  return height_array[interval->length - 1] -
-         (int)interval->array[interval->length - 1].is_target;
+  return (interval->length != 0)
+             ? height_array[interval->length - 1] -
+                   (int)interval->array[interval->length - 1].is_target
+             : 0;
 }

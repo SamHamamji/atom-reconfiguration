@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdlib.h>
 
 #include "../../interval/interval.h"
@@ -7,6 +8,8 @@
 
 struct Mapping *linear_solve_aggarwal(const struct Interval *interval,
                                       const void *params) {
+  assert(params == NULL);
+
   struct Counts counts = interval_get_counts(interval);
   int imbalance = counts_get_imbalance(counts);
   if (imbalance < 0) {
