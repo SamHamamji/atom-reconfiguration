@@ -1,6 +1,7 @@
 # Custom
 performance_results/
 obj/
+bin/
 
 # C
 # Prerequisites

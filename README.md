@@ -5,33 +5,33 @@
 ### Compiling
 Default build type is `dev`.
 ```sh
-make all <build-type=dev|release|scan-build>
+make all <BUILD_TYPE=dev|release|scan-build>
 ```
 
 ### Running main file
 ```sh
-./build/main.out
+./bin/main.out
 ```
 
 ### Running unit tests
 ```sh
-./build/unit-test.out
+./bin/unit_test.out
 ```
 
 ### Running fuzz tests
 ```sh
-./build/fuzz-test.out
+./bin/fuzz_test.out
 ```
 
 ### Running performance tests
 ```sh
-./build/performance-test.out
+./bin/performance_test.out
 ```
 
 ### Visualizing performance results
 Note that `file` is a required argument, while `port` is optional. 
 ```sh
-make visualize file=<path-to-performance-results> port=<any-unused-port>
+make visualize file=<path_to_performance_results> port=<any_unused_port>
 ```
 
 ## License
