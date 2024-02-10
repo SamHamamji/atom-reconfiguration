@@ -7,15 +7,15 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build unit tests
-      run: make build/unit-test.out
+      run: make bin/unit_test.out
     - name: Run unit tests
-      run: ./build/unit-test.out
+      run: ./bin/unit_test.out
   fuzz-test:
     name: Run fuzz tests
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - name: Build fuzz tests
-      run: make build/fuzz-test.out
+      run: make bin/fuzz_test.out
     - name: Run fuzz tests
-      run: ./build/fuzz-test.out
+      run: ./bin/fuzz_test.out
