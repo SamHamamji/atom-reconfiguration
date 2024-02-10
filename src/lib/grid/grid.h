@@ -42,6 +42,8 @@ struct GridFactory {
   struct Grid *(*generate)(int width, int height);
   struct Grid *(*generate_compact_target_region)(int width, int height,
                                                  int target_region_height);
+  struct Grid *(*generate_compact_target_region_by_imbalance)(
+      int width, int height, int target_region_height, int imbalance);
 };
 
 extern const struct GridFactory grid_factory;

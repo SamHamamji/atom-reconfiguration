@@ -178,6 +178,9 @@ static struct Range get_receiver_sources_range(
       .lower_reservoir = receiver_sources.lower_reservoir +
                          delayed_moves_sources.lower_reservoir,
   };
+  // struct SourceLocations total_sources = receiver_sources;
+  // total_sources.upper_reservoir = delayed_moves_sources.upper_reservoir;
+  // total_sources.lower_reservoir = delayed_moves_sources.lower_reservoir;
 
   struct Range target_range = {
       .start = INT_MAX,

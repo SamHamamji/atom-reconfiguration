@@ -10,14 +10,15 @@ BIN_DIR := bin
 OBJ_DIR := obj
 
 # Binaries
-BINS := main unit_test fuzz_test performance_test
+BINS := main unit_test fuzz_test linear_performance_test grid_performance_test
 
 # Source files
-SRC_main := $(SRC_DIR)/main.c
 SRC_lib := $(shell find $(SRC_DIR)/lib -name "*.c")
+SRC_main := $(SRC_DIR)/main.c
 SRC_unit_test := $(shell find $(SRC_DIR)/unit_test -name "*.c")
 SRC_fuzz_test := $(shell find $(SRC_DIR)/fuzz_test -name "*.c")
-SRC_performance_test := $(shell find $(SRC_DIR)/performance_test -name "*.c")
+SRC_linear_performance_test := $(shell find $(SRC_DIR)/performance_test/linear_solver -name "*.c")
+SRC_grid_performance_test := $(shell find $(SRC_DIR)/performance_test/grid_solver -name "*.c")
 
 SRC_TO_OBJ = $(1:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 PYTHON_VISUALIZATION_FILE := $(SRC_DIR)/visualization/main.py

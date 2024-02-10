@@ -78,7 +78,8 @@
 int main() {
   seed_set_to_time();
 
-  struct Grid *grid = grid_factory.generate_compact_target_region(20, 20, 10);
+  struct Grid *grid = grid_factory.generate_compact_target_region_by_imbalance(
+      20, 20, 10, -200);
   // struct Grid *grid = grid_1;
   // struct Grid *grid = grid_2;
   printf("Initial grid:\n");

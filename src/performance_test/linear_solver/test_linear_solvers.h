@@ -7,7 +7,8 @@ struct PerformanceTestCasesConfig {
   const int *interval_lengths;
   const double *imbalance_percentages;
   const struct LinearSolver **linear_solvers;
-  struct Interval *(*interval_generator)(int length, int imbalance);
+  struct Interval *(*interval_generator)(int length,
+                                         double imbalance_percentage);
   int lengths_num;
   int imbalance_percentages_num;
   int linear_solvers_num;

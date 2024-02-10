@@ -27,10 +27,8 @@ struct PerformanceArray *test_linear_solvers_performance(
   for (int i = 0; i < config->lengths_num; i++) {
     for (int j = 0; j < config->imbalance_percentages_num; j++) {
       for (int k = 0; k < config->repetition_num; k++) {
-        int imbalance = (int)(config->interval_lengths[i] *
-                              config->imbalance_percentages[j] / 100);
-        struct Interval *interval =
-            config->interval_generator(config->interval_lengths[i], imbalance);
+        struct Interval *interval = config->interval_generator(
+            config->interval_lengths[i], config->imbalance_percentages[j]);
         for (int linear_solver_index = 0;
              linear_solver_index < config->linear_solvers_num;
              linear_solver_index++) {

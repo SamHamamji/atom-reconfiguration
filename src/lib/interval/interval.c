@@ -45,8 +45,10 @@ static void interval_shuffle(struct Interval *interval) {
     struct Point current = interval->array[i];
     int source_index = rand() % interval->length;
     int target_index = rand() % interval->length;
-    interval->array[i].is_source = interval->array[source_index].is_source;
-    interval->array[i].is_target = interval->array[target_index].is_target;
+    interval->array[i] = (struct Point){
+        .is_source = interval->array[source_index].is_source,
+        .is_target = interval->array[target_index].is_target,
+    };
     interval->array[source_index].is_source = current.is_source;
     interval->array[target_index].is_target = current.is_target;
   }

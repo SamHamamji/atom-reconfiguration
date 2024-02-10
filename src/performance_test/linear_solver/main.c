@@ -4,22 +4,23 @@
 #include <sys/stat.h>
 #include <time.h>
 
-#include "../lib/linear_solver/linear_solver.h"
-#include "../lib/utils/seed.h"
-#include "linear_solver/performance.h"
-#include "linear_solver/test_linear_solvers.h"
+#include "../../lib/linear_solver/linear_solver.h"
+#include "../../lib/utils/seed.h"
+#include "./performance.h"
+#include "./test_linear_solvers.h"
 
 const char output_dir_name[] = "performance_results";
 const char output_file_format[] = "./%s/%u.csv";
 
-static inline struct Interval *interval_generator(const int length,
-                                                  const int imbalance) {
-  return interval_factory.generate_by_imbalance(length, imbalance);
+static inline struct Interval *interval_generator(int length,
+                                                  double imbalance_percentage) {
+  return interval_factory.generate_by_imbalance(
+      length, (int)(length * imbalance_percentage / 100));
 }
 
 static const int lengths[] = {
-    10000,   20000,   40000,   80000,    160000,   320000,   640000,
-    1280000, 2560000, 5120000, 10000000, 20000000, 40000000, 80000000,
+    10000, 20000, 40000, 80000, 160000, 320000, 640000,
+    // 1280000, 2560000, 5120000, 10000000, 20000000, 40000000, 80000000,
 };
 
 static const double imbalance_percentages[] = {
@@ -74,7 +75,7 @@ static const struct PerformanceTestCasesConfig config = {
     .repetition_num = 2,
 };
 
-char *get_output_file_name(unsigned int seed) {
+static char *get_output_file_name(unsigned int seed) {
   char *output_file_name =
       malloc(sizeof(output_dir_name) + sizeof(output_file_format) +
              (int)log10(seed) + 1);
