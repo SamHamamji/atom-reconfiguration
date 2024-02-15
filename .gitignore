@@ -2,6 +2,7 @@
 performance_results/
 obj/
 bin/
+jobs/
 
 # C
 # Prerequisites
