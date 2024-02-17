@@ -10,7 +10,7 @@
 #include "./performance.h"
 #include "./test_grid_solvers.h"
 
-const char output_dir_name[] = "performance_results";
+const char output_dir_name[] = "performance_results/grid_solvers";
 const char output_file_format[] = "./%s/%u.csv";
 
 static inline struct Grid *grid_generator(struct GridSize size,
@@ -22,8 +22,11 @@ static inline struct Grid *grid_generator(struct GridSize size,
 }
 
 static const struct GridSize sizes[] = {
-    // {100, 100}, {150, 100}, {200, 100}, {100, 150}, {150, 150},
-    // {200, 150}, {100, 200}, {150, 200}, {200, 200},
+    {200, 200},  {400, 200},  {600, 200},  {800, 200},  {1000, 200},
+    {200, 400},  {400, 400},  {600, 400},  {800, 400},  {1000, 400},
+    {200, 600},  {400, 600},  {600, 600},  {800, 600},  {1000, 600},
+    {200, 800},  {400, 800},  {600, 800},  {800, 800},  {1000, 800},
+    {200, 1000}, {400, 1000}, {600, 1000}, {800, 1000}, {1000, 1000},
 };
 
 static const double imbalance_percentages[] = {
@@ -56,7 +59,7 @@ static const struct PerformanceTestCasesConfig config = {
     .imbalance_percentages_num =
         sizeof(imbalance_percentages) / sizeof(imbalance_percentages[0]),
     .grid_solvers_num = sizeof(grid_solvers) / sizeof(grid_solvers[0]),
-    .repetition_num = 1,
+    .repetition_num = 5,
 };
 
 static char *get_output_file_name(unsigned int seed) {

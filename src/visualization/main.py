@@ -1,7 +1,9 @@
 import argparse
 
-from app import PerformanceVisualizationApp
+from apps.linear_solver_app import LinearSolverApp
+from apps.grid_solver_app import GridSolverApp
 from data_processing import read_data
+from DataFrameType import DataFrameType, get_dataframe_type
 
 parser = argparse.ArgumentParser(
     description="Visualize linear solvers performance results",
@@ -23,5 +25,11 @@ parser.add_argument(
 if __name__ == "__main__":
     args = parser.parse_args()
     dataframe = read_data(args.file)
-    app = PerformanceVisualizationApp(dataframe)
+    dataframe_type = get_dataframe_type(dataframe)
+
+    if dataframe_type == DataFrameType.LINEAR_SOLVER:
+        app = LinearSolverApp(dataframe)
+    elif dataframe_type == DataFrameType.GRID_SOLVER:
+        app = GridSolverApp(dataframe)
+
     app.run(debug=True, port=args.port)

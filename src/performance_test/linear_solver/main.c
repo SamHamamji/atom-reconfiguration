@@ -9,7 +9,7 @@
 #include "./performance.h"
 #include "./test_linear_solvers.h"
 
-const char output_dir_name[] = "performance_results";
+const char output_dir_name[] = "performance_results/linear_solvers";
 const char output_file_format[] = "./%s/%u.csv";
 
 static inline struct Interval *interval_generator(int length,
