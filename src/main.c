@@ -30,7 +30,7 @@ int main() {
   seed_set_to_time();
 
   struct Grid *grid = grid_factory.generate_compact_target_region(
-      config.height, config.width, config.target_region_size);
+      config.width, config.height, config.target_region_size);
   printf("Initial grid:\n");
   grid_print(grid);
 

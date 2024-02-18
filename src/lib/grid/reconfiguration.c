@@ -1,6 +1,5 @@
 #include <assert.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "../interval/mapping.h"
@@ -24,32 +23,52 @@ void reconfiguration_add_move(struct Reconfiguration *reconfiguration,
   reconfiguration->move_count++;
 }
 
+/**
+ * Requirement: Assumes `mapping` is sorted by `source`.
+ */
 void reconfiguration_add_mapping(struct Reconfiguration *reconfiguration,
                                  struct Grid *grid,
                                  const struct Mapping *mapping,
                                  int column_index) {
-  bool *move_is_complete = calloc(mapping->pair_count, sizeof(bool));
-  bool move_executed = true;
-  while (move_executed) {
-    move_executed = false;
-    for (int i = 0; i < mapping->pair_count; i++) {
-      struct Move current_move = (struct Move){
-          .origin = {.col = column_index, .row = mapping->pairs[i].source},
-          .destination = {.col = column_index, .row = mapping->pairs[i].target},
-      };
-      if (!move_is_complete[i] && move_is_valid(grid, current_move)) {
-        reconfiguration_add_move(reconfiguration, current_move);
-        grid_apply_move(grid, current_move);
-        move_is_complete[i] = true;
-        move_executed = true;
-      }
-    }
-    if (!move_executed) {
-      break;
+  int stack_head = 0;
+  struct Pair *delayed_stack =
+      malloc(mapping->pair_count * sizeof(struct Pair));
+
+  for (int i = 0; i < mapping->pair_count; i++) {
+    bool move_is_valid =
+        (mapping->pairs[i].source >= mapping->pairs[i].target) ||
+        (i + 1 < mapping->pair_count &&
+         mapping->pairs[i + 1].source > mapping->pairs[i].target);
+    if (move_is_valid) {
+      reconfiguration_add_move(
+          reconfiguration,
+          (struct Move){
+              .origin = {.col = column_index, .row = mapping->pairs[i].source},
+              .destination = {.col = column_index,
+                              .row = mapping->pairs[i].target},
+          });
+      grid_apply_move(grid,
+                      reconfiguration->moves[reconfiguration->move_count - 1]);
+    } else {
+      delayed_stack[stack_head] = mapping->pairs[i];
+      stack_head++;
     }
   }
 
-  free(move_is_complete);
+  while (stack_head > 0) {
+    reconfiguration_add_move(
+        reconfiguration,
+        (struct Move){
+            .origin = {.col = column_index,
+                       .row = delayed_stack[stack_head - 1].source},
+            .destination = {.col = column_index,
+                            .row = delayed_stack[stack_head - 1].target},
+        });
+    grid_apply_move(grid,
+                    reconfiguration->moves[reconfiguration->move_count - 1]);
+    stack_head--;
+  }
+  free(delayed_stack);
 }
 
 void reconfiguration_filter_identical(struct Reconfiguration *reconfiguration) {

@@ -81,9 +81,6 @@ static void execute_delayed_move(struct Grid *grid,
   struct Point *donor = grid_get_column(grid, column_pair.donor_index);
   struct Point *receiver = grid_get_column(grid, column_pair.receiver_index);
 
-  struct Mapping *vertical_mapping =
-      mapping_new(column_pair.exchanged_sources_num);
-
   int upper_sources = 0;
   for (int i = fixed_sources_range.start - 1; i >= 0; i--) {
     if (!receiver[fixed_sources_range.start - upper_sources - 1].is_target) {
@@ -95,13 +92,18 @@ static void execute_delayed_move(struct Grid *grid,
           .origin = {.col = column_pair.donor_index, .row = i},
           .destination = {.col = column_pair.receiver_index, .row = i},
       };
+      struct Move vertical_move = {
+          .origin = {.col = column_pair.receiver_index, .row = i},
+          .destination = {.col = column_pair.receiver_index,
+                          .row = fixed_sources_range.start - upper_sources - 1},
+      };
+
       reconfiguration_add_move(reconfiguration, horizontal_move);
       grid_apply_move(grid, horizontal_move);
 
-      vertical_mapping->pairs[upper_sources] = (struct Pair){
-          .source = i,
-          .target = fixed_sources_range.start - upper_sources - 1,
-      };
+      reconfiguration_add_move(reconfiguration, vertical_move);
+      grid_apply_move(grid, vertical_move);
+
       upper_sources++;
     }
   }
@@ -121,18 +123,17 @@ static void execute_delayed_move(struct Grid *grid,
       reconfiguration_add_move(reconfiguration, horizontal_move);
       grid_apply_move(grid, horizontal_move);
 
-      vertical_mapping->pairs[upper_sources + lower_sources] = (struct Pair){
-          .source = i,
-          .target = fixed_sources_range.exclusive_end + lower_sources,
+      struct Move vertical_move = {
+          .origin = {.col = column_pair.receiver_index, .row = i},
+          .destination = {.col = column_pair.receiver_index,
+                          .row = fixed_sources_range.exclusive_end +
+                                 lower_sources},
       };
+      reconfiguration_add_move(reconfiguration, vertical_move);
+      grid_apply_move(grid, vertical_move);
       lower_sources++;
     }
   }
-
-  reconfiguration_add_mapping(reconfiguration, grid, vertical_mapping,
-                              column_pair.receiver_index);
-
-  mapping_free(vertical_mapping);
 }
 
 static void reconfigure_receiver_sources(
