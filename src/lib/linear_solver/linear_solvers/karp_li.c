@@ -9,10 +9,10 @@
 static bool *get_exclusion_array(const struct Interval *interval,
                                  const int *height_array) {
   const int imbalance = get_imbalance_from_height_array(interval, height_array);
-  int max_profit_index_per_height[imbalance];
+  int *max_profit_index_per_height = malloc(imbalance * sizeof(int));
   int i = interval->length - 1;
 
-  for (int height = imbalance; height >= 1; height--) {
+  for (int height = imbalance; height > 0; height--) {
     max_profit_index_per_height[height - 1] = INT_MAX;
     int profit = INT_MAX;
 
@@ -39,6 +39,8 @@ static bool *get_exclusion_array(const struct Interval *interval,
   for (int height = 1; height <= imbalance; height++) {
     exclusion_array[max_profit_index_per_height[height - 1]] = true;
   }
+
+  free(max_profit_index_per_height);
 
   return exclusion_array;
 }

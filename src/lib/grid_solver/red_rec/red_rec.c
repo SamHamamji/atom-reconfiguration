@@ -139,9 +139,6 @@ static void reconfigure_receiver_sources(
     struct Grid *grid, struct Reconfiguration *reconfiguration,
     int receiver_index, struct Range target_region_range,
     const RedRecParams *params) {
-  // printf("RECONFIGURING RECEIVER %d, target region: %d-%d \n",
-  // receiver_index, target_region_range.start,
-  // target_region_range.exclusive_end);
   struct Point *receiver = grid_get_column(grid, receiver_index);
   struct Point *receiver_alias = malloc(grid->height * sizeof(struct Point));
   for (int i = 0; i < grid->height; i++) {
@@ -171,16 +168,9 @@ static struct Range get_receiver_sources_range(
   struct SourceLocations receiver_sources =
       get_column_source_locations(grid, column_pair.receiver_index);
 
-  struct SourceLocations total_sources = {
-      .upper_reservoir = receiver_sources.upper_reservoir +
-                         delayed_moves_sources.upper_reservoir,
-      .target_region = receiver_sources.target_region,
-      .lower_reservoir = receiver_sources.lower_reservoir +
-                         delayed_moves_sources.lower_reservoir,
-  };
-  // struct SourceLocations total_sources = receiver_sources;
-  // total_sources.upper_reservoir = delayed_moves_sources.upper_reservoir;
-  // total_sources.lower_reservoir = delayed_moves_sources.lower_reservoir;
+  struct SourceLocations total_sources = receiver_sources;
+  total_sources.upper_reservoir += delayed_moves_sources.upper_reservoir;
+  total_sources.lower_reservoir += delayed_moves_sources.lower_reservoir;
 
   struct Range target_range = {
       .start = INT_MAX,
@@ -225,9 +215,6 @@ static struct Range get_receiver_sources_range(
       total_sources.target_region++;
     }
   }
-
-  // interval_print(
-  //     &(struct Interval){.array = receiver_alias, .length = grid->height});
 
   assert(total_sources.upper_reservoir == 0);
   assert(total_sources.lower_reservoir == 0);
@@ -300,7 +287,6 @@ struct Reconfiguration *red_rec(const struct Grid *grid, const void *params) {
     total_counts.target_num += column_counts[i].target_num;
   }
 
-  // printf("TOTAL SURPLUS: %d\n", counts_get_imbalance(total_counts));
   if (counts_get_imbalance(total_counts) < 0) {
     free(column_counts);
     return NULL;
@@ -314,30 +300,20 @@ struct Reconfiguration *red_rec(const struct Grid *grid, const void *params) {
   solve_self_sufficient_columns(copy, reconfiguration, column_is_solved,
                                 column_counts, red_rec_params);
 
-  // grid_print(copy);
-  // print_column_imbalances(copy, column_counts);
-
   struct DelayedMoves *delayed_moves =
       delayed_moves_new(copy->width * copy->height);
 
   struct ColumnPair best_pair =
       column_pair_get_best(copy, column_counts, column_is_solved);
   while (best_pair.receiver_index != -1 && best_pair.donor_index != -1) {
-    // printf("Matching %d WITH %d (%d)\n", best_pair.donor_index,
-    //        best_pair.receiver_index, best_pair.exchanged_sources_num);
-
     int receiver_deficit =
         abs(counts_get_imbalance(column_counts[best_pair.receiver_index]));
 
     if (best_pair.exchanged_sources_num != receiver_deficit) {
       delayed_moves_add(delayed_moves, best_pair);
-      // printf("DELAYING MOVE...\n");
-      // delayed_moves_print(delayed_moves);
     } else {
       solve_receiver(copy, reconfiguration, delayed_moves, best_pair, params);
       column_is_solved[best_pair.receiver_index] = true;
-      // grid_print(copy);
-      // print_column_imbalances(copy, column_counts);
     }
 
     column_counts[best_pair.donor_index].source_num -=

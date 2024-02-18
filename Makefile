@@ -27,7 +27,7 @@ PYTHON_VISUALIZATION_FILE := $(SRC_DIR)/visualization/main.py
 LIB_FLAGS := -lm -lpthread
 DEBUGGING_FLAGS := -Wall -Wextra -Wpedantic -Wunused -fsanitize=undefined,address -g -Og
 OPTIMIZATION_FLAGS := -O3
-CFLAGS := -std=c2x $(LIB_FLAGS)
+CFLAGS := -std=gnu2x $(LIB_FLAGS)
 
 ifeq ($(BUILD_TYPE), dev)
 	CFLAGS += $(DEBUGGING_FLAGS)
@@ -51,7 +51,7 @@ $(foreach b,$(BINS),$(eval $(BIN_DIR)/$b.out: \
 # Compile source files to object files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	@mkdir -p $(@D)
-	@$(CC) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 # Create directories
 $(OBJ_DIR) $(BIN_DIR):

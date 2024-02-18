@@ -10,7 +10,7 @@
 #include "./grid_solver/test_grid_solvers.h"
 #include "./linear_solver/test_linear_solvers.h"
 
-const static struct LinearSolver *linear_solvers[] = {
+static const struct LinearSolver *linear_solvers[] = {
     &(struct LinearSolver){
         .solve = linear_solve_iterative,
         .params = NULL,
@@ -69,7 +69,7 @@ static RedRecParams red_rec_params = {
         },
 };
 
-const static struct GridSolver *grid_solvers[] = {
+static const struct GridSolver *grid_solvers[] = {
     &(struct GridSolver){
         .solve = red_rec,
         .params = &red_rec_params,

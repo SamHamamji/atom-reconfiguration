@@ -11,8 +11,7 @@
 static void print_failed_test_case(
     const struct Interval *interval, const struct Mapping *initial_mapping,
     const struct LinearSolver *initial_linear_solver,
-    const struct Mapping *mapping, const struct LinearSolver *linear_solver,
-    int test_case_num) {
+    const struct Mapping *mapping, const struct LinearSolver *linear_solver) {
   printf("Mappings do not match!\n");
   printf("Interval:\n");
   interval_print(interval);
@@ -54,7 +53,7 @@ bool fuzz_test_linear_solvers(const struct LinearSolversFuzzTestConfig config) {
       if (!mapping_equals(initial_mapping, mapping)) {
         success = false;
         print_failed_test_case(interval, initial_mapping, initial_linear_solver,
-                               mapping, linear_solver, test_case_num);
+                               mapping, linear_solver);
       }
       mapping_free(mapping);
     }
