@@ -1,6 +1,5 @@
 #include "alternating_chains.h"
 
-#include <assert.h>
 #include <stdlib.h>
 
 void alternating_chains_free(struct AlternatingChains *chains) {
