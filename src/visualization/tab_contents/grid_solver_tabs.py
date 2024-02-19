@@ -27,16 +27,19 @@ class OverviewElement(html.Div):
                     ),
                     "Overview by length",
                 ),
-                ScatterElement(
-                    dataframe,
-                    ScatterGridConfig(
-                        x=CsvHeader.HEIGHT,
-                        y=CsvHeader.TIME_TAKEN,
-                        color=CsvHeader.WIDTH,
-                        header=None,
-                    ),
-                    "Overview by width and height",
-                ),
+            ],
+        )
+
+
+class DimensionsElement(html.Div):
+    def __init__(self, dataframe: pd.DataFrame):
+        dataframe[CsvHeader.LENGTH.value] = (
+            dataframe[CsvHeader.WIDTH.value] * dataframe[CsvHeader.HEIGHT.value]
+        )
+        html.Div.__init__(
+            self,
+            [
+                html.H1("Performance by width and height"),
                 ScatterElement(
                     dataframe,
                     ScatterGridConfig(
@@ -45,7 +48,17 @@ class OverviewElement(html.Div):
                         color=CsvHeader.HEIGHT,
                         header=None,
                     ),
-                    "Overview by width and height",
+                    "Performance over width by height",
+                ),
+                ScatterElement(
+                    dataframe,
+                    ScatterGridConfig(
+                        x=CsvHeader.HEIGHT,
+                        y=CsvHeader.TIME_TAKEN,
+                        color=CsvHeader.WIDTH,
+                        header=None,
+                    ),
+                    "Performance over height by width",
                 ),
             ],
         )
