@@ -8,6 +8,7 @@
 
 struct Mapping *linear_solve_aggarwal(const struct Interval *interval,
                                       const void *params) {
+  (void)params; // to avoid unused parameter warning
   assert(params == NULL);
 
   struct Counts counts = interval_get_counts(interval);

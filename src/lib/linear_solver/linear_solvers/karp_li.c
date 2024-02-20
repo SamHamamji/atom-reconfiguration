@@ -47,6 +47,7 @@ static bool *get_exclusion_array(const struct Interval *interval,
 
 struct Mapping *linear_solve_karp_li(const struct Interval *interval,
                                      const void *params) {
+  (void)params; // to avoid unused parameter warning
   assert(params == NULL);
 
   int *height_array = get_height_array(interval);
