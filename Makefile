@@ -25,9 +25,10 @@ PYTHON_VISUALIZATION_FILE := $(SRC_DIR)/visualization/main.py
 
 # Compiler flags
 LIB_FLAGS := -lm -lpthread
-DEBUGGING_FLAGS := -Wall -Wextra -Wpedantic -Wunused -fsanitize=undefined,address -g -Og
-OPTIMIZATION_FLAGS := -O3
-CFLAGS := -std=gnu2x $(LIB_FLAGS)
+WARNING_FLAGS := -Wall -Wextra -Wpedantic -Wno-unused
+DEBUGGING_FLAGS := -fsanitize=undefined,address -g -Og
+OPTIMIZATION_FLAGS := -O3 -DNDEBUG
+CFLAGS := -std=gnu2x $(LIB_FLAGS) $(WARNING_FLAGS)
 
 ifeq ($(BUILD_TYPE), dev)
 	CFLAGS += $(DEBUGGING_FLAGS)
