@@ -47,7 +47,7 @@ struct ColumnPair column_pair_get_best(const struct Grid *grid,
     if (counts_get_imbalance(column_counts[current_column]) == 0) {
       continue;
     }
-    // TODO: THIS IS A KIND OF BOTTLENECK TOO
+
     int previous_imbalance =
         counts_get_imbalance(column_counts[previous_column]);
     int current_imbalance = counts_get_imbalance(column_counts[current_column]);
