@@ -30,7 +30,7 @@ bool fuzz_test_linear_solvers(const struct LinearSolversFuzzTestConfig config) {
   timer_start(&timer);
 
   bool success = true;
-  int test_case_num = 1;
+  int test_case_num = 0;
   while (success && timer_get_seconds(&timer) < config.time_limit_in_seconds) {
     int length = get_random_int_in_range(config.length_range);
     struct Interval *interval = config.interval_generator(

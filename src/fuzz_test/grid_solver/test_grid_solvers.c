@@ -25,7 +25,7 @@ bool fuzz_test_grid_solvers(const struct GridSolversFuzzTestConfig config) {
   timer_start(&timer);
 
   bool success = true;
-  int test_case_num = 1;
+  int test_case_num = 0;
   while (success && timer_get_seconds(&timer) < config.time_limit_in_seconds) {
     struct Grid *initial_grid =
         config.grid_generator(get_random_int_in_range(config.width_range),
