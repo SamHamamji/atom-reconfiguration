@@ -36,6 +36,11 @@ struct Counts *grid_get_column_counts(const struct Grid *grid);
 bool grid_target_region_is_compact(const struct Grid *grid);
 bool grid_is_solved(const struct Grid *grid);
 
+/**
+ * Asserts that the grid has a compact target region
+ */
+struct Range grid_get_compact_target_region_range(const struct Grid *grid);
+
 void grid_print(const struct Grid *grid);
 
 struct GridFactory {

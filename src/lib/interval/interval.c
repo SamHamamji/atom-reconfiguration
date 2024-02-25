@@ -31,10 +31,8 @@ bool interval_target_region_is_compact(const struct Interval *interval) {
       if (last_target_is_found) {
         return false;
       }
-    } else {
-      if (first_target_is_found) {
-        last_target_is_found = true;
-      }
+    } else if (first_target_is_found) {
+      last_target_is_found = true;
     }
   }
   return true;

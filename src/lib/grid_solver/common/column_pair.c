@@ -1,13 +1,14 @@
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include "../../utils/max_min.h"
 #include "column_pair.h"
 
-/** Returns a positive number if the first element is greater than the second,
+/**
+ * Returns a positive number if the first element is greater than the second,
  * and vice versa
  */
-static int compare_column_pairs(struct ColumnPair a, struct ColumnPair b,
-                                const struct Counts *column_counts) {
+static int compare_column_pairs(struct ColumnPair a, struct ColumnPair b) {
   /**
    * Comparisons by priority
    * 1. maximizes the number of exchanged tokens
@@ -25,52 +26,60 @@ static int compare_column_pairs(struct ColumnPair a, struct ColumnPair b,
     return column_distance_b - column_distance_a;
   }
 
-  int a_receiver_remaining_deficit =
-      abs(counts_get_imbalance(column_counts[a.receiver_index]));
-  int b_receiver_remaining_deficit =
-      abs(counts_get_imbalance(column_counts[b.receiver_index]));
-
-  return b_receiver_remaining_deficit - a_receiver_remaining_deficit;
+  return b.receiver_deficit - a.receiver_deficit;
 }
 
-struct ColumnPair column_pair_get_best(struct Grid *grid,
-                                       struct Counts *column_counts,
-                                       bool *column_is_solved) {
-  int previous_column = 0;
+bool column_pair_exists(struct ColumnPair pair) {
+  return pair.exchanged_sources_num >= 0;
+}
+
+struct ColumnPair column_pair_get_best(const struct Grid *grid,
+                                       const struct Counts *column_counts) {
   struct ColumnPair best_column_pair = {
       .donor_index = -1,
       .receiver_index = -1,
       .exchanged_sources_num = -1,
+      .receiver_deficit = 0,
   };
 
+  int previous_column = 0;
   for (int current_column = 1; current_column < grid->width; current_column++) {
-    if (column_is_solved[current_column] &&
-        counts_get_imbalance(column_counts[current_column]) == 0) {
+    if (counts_get_imbalance(column_counts[current_column]) == 0) {
       continue;
     }
-    bool previous_column_is_receiver =
-        counts_get_imbalance(column_counts[previous_column]) < 0;
-    bool current_column_is_receiver =
-        counts_get_imbalance(column_counts[current_column]) < 0;
+    // TODO: THIS IS A KIND OF BOTTLENECK TOO
+    int previous_imbalance =
+        counts_get_imbalance(column_counts[previous_column]);
+    int current_imbalance = counts_get_imbalance(column_counts[current_column]);
+
+    bool previous_column_is_receiver = previous_imbalance < 0;
+    bool current_column_is_receiver = current_imbalance < 0;
 
     if (previous_column_is_receiver != current_column_is_receiver) {
-      struct ColumnPair pair = (struct ColumnPair){
-          .donor_index =
-              previous_column_is_receiver ? current_column : previous_column,
-          .receiver_index =
-              previous_column_is_receiver ? previous_column : current_column,
-          .exchanged_sources_num =
-              min(abs(counts_get_imbalance(column_counts[previous_column])),
-                  abs(counts_get_imbalance(column_counts[current_column]))),
-      };
+      struct ColumnPair pair =
+          previous_column_is_receiver
+              ? ((struct ColumnPair){
+                    .donor_index = current_column,
+                    .receiver_index = previous_column,
+                    .exchanged_sources_num =
+                        min(-previous_imbalance, current_imbalance),
+                    .receiver_deficit = -previous_imbalance,
+                })
+              : ((struct ColumnPair){
+                    .donor_index = previous_column,
+                    .receiver_index = current_column,
+                    .exchanged_sources_num =
+                        min(previous_imbalance, -current_imbalance),
+                    .receiver_deficit = -current_imbalance,
+                });
 
-      if (best_column_pair.donor_index == -1 ||
-          best_column_pair.receiver_index == -1 ||
-          compare_column_pairs(pair, best_column_pair, column_counts) > 0) {
+      if (!column_pair_exists(best_column_pair) ||
+          compare_column_pairs(pair, best_column_pair) > 0) {
         best_column_pair = pair;
       }
     }
     previous_column = current_column;
   }
+
   return best_column_pair;
 }

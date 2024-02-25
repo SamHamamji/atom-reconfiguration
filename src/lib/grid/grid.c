@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -66,6 +67,32 @@ bool grid_target_region_is_compact(const struct Grid *grid) {
       .array = grid_get_column(grid, 0),
       .length = grid->height,
   });
+}
+
+struct Range grid_get_compact_target_region_range(const struct Grid *grid) {
+  assert(grid_target_region_is_compact(grid));
+
+  struct Range target_range = {
+      .start = INT_MAX,
+      .exclusive_end = INT_MIN,
+  };
+
+  if (grid->width == 0 || grid->height == 0) {
+    return target_range;
+  }
+
+  struct Point *column = grid_get_column(grid, 0);
+
+  int i = 0;
+  while (i < grid->height && !column[i].is_target) {
+    i++;
+  }
+  target_range.start = i;
+  while (i < grid->height && column[i].is_target) {
+    i++;
+  }
+  target_range.exclusive_end = i;
+  return target_range;
 }
 
 bool grid_is_solved(const struct Grid *grid) {
