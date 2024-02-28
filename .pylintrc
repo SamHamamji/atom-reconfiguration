@@ -1,0 +1,1 @@
+init-hook='import site; sys.path.append(site.getsitepackages()[0])'
