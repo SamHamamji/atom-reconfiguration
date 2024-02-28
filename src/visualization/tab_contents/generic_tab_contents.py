@@ -7,28 +7,27 @@ from CsvHeader import CsvHeader
 from data_processing import compute_mean_for_duplicates
 
 
-class ScatterGridConfig(typing.NamedTuple):
+class ScatterConfig(typing.NamedTuple):
     x: CsvHeader
     y: CsvHeader
     color: CsvHeader
-    header: CsvHeader | None
+    header: typing.Optional[CsvHeader]
     trendline: str = "lowess"
     trendline_options: dict = {"frac": 0.3}
-    title_generator: typing.Callable[[str], str] = lambda x: x
+    title_generator: typing.Callable[[typing.Optional[str]], str] = lambda x: str(x)
 
 
 class ScatterElement(html.Div):
     def __init__(
         self,
         df: pd.DataFrame,
-        config: ScatterGridConfig,
-        header_value: str,
+        config: ScatterConfig,
+        header_value: typing.Optional[str] = None,
+        title: typing.Optional[str] = None,
     ):
         if config.header is not None:
             df = df[df[config.header.value] == header_value]
             title = f"{config.header.value}: {config.title_generator(header_value)}"
-        else:
-            title = header_value
 
         df = df.copy()
         df[config.color.value] = df[config.color.value].astype(str)
@@ -53,7 +52,7 @@ class ScatterElement(html.Div):
         )
 
 
-class HistogramGridConfig(typing.NamedTuple):
+class HistogramConfig(typing.NamedTuple):
     x: CsvHeader
     y: CsvHeader
     header: CsvHeader
@@ -61,9 +60,7 @@ class HistogramGridConfig(typing.NamedTuple):
 
 
 class HistogramElement(html.Div):
-    def __init__(
-        self, df: pd.DataFrame, config: HistogramGridConfig, header_value: str
-    ):
+    def __init__(self, df: pd.DataFrame, config: HistogramConfig, header_value: str):
         value_data = df[df[config.header.value] == header_value]
         figure = px.histogram(
             value_data,

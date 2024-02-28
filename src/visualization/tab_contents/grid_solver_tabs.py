@@ -3,7 +3,7 @@ from dash import html
 
 from CsvHeader import CsvHeader
 from tab_contents.generic_tab_contents import (
-    ScatterGridConfig,
+    ScatterConfig,
     ScatterElement,
 )
 
@@ -19,7 +19,7 @@ class OverviewElement(html.Div):
                 html.H1("Performance overview"),
                 ScatterElement(
                     dataframe,
-                    ScatterGridConfig(
+                    ScatterConfig(
                         x=CsvHeader.LENGTH,
                         y=CsvHeader.TIME_TAKEN,
                         color=CsvHeader.GRID_SOLVER,
@@ -31,34 +31,34 @@ class OverviewElement(html.Div):
         )
 
 
-class DimensionsElement(html.Div):
+class DimensionsGrid(html.Div):
+    width_by_height_config = ScatterConfig(
+        x=CsvHeader.WIDTH,
+        y=CsvHeader.TIME_TAKEN,
+        color=CsvHeader.HEIGHT,
+        header=CsvHeader.GRID_SOLVER,
+    )
+
+    height_by_width_config = ScatterConfig(
+        x=CsvHeader.HEIGHT,
+        y=CsvHeader.TIME_TAKEN,
+        color=CsvHeader.WIDTH,
+        header=CsvHeader.GRID_SOLVER,
+    )
+
     def __init__(self, dataframe: pd.DataFrame):
-        dataframe[CsvHeader.LENGTH.value] = (
-            dataframe[CsvHeader.WIDTH.value] * dataframe[CsvHeader.HEIGHT.value]
-        )
-        html.Div.__init__(
-            self,
+        grid_solvers = dataframe[CsvHeader.GRID_SOLVER.value].unique()
+
+        grid = html.Div(
             [
-                html.H1("Performance by width and height"),
-                ScatterElement(
-                    dataframe,
-                    ScatterGridConfig(
-                        x=CsvHeader.WIDTH,
-                        y=CsvHeader.TIME_TAKEN,
-                        color=CsvHeader.HEIGHT,
-                        header=None,
-                    ),
-                    "Performance over width by height",
-                ),
-                ScatterElement(
-                    dataframe,
-                    ScatterGridConfig(
-                        x=CsvHeader.HEIGHT,
-                        y=CsvHeader.TIME_TAKEN,
-                        color=CsvHeader.WIDTH,
-                        header=None,
-                    ),
-                    "Performance over height by width",
-                ),
+                ScatterElement(dataframe, config, grid_solver)
+                for grid_solver in grid_solvers
+                for config in (
+                    DimensionsGrid.width_by_height_config,
+                    DimensionsGrid.height_by_width_config,
+                )
             ],
+            className="grid",
         )
+        grid_title = html.H1("Performance by width and height")
+        html.Div.__init__(self, [grid_title, grid])

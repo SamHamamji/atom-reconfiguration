@@ -3,15 +3,15 @@ from dash import html
 
 from CsvHeader import CsvHeader
 from tab_contents.generic_tab_contents import (
-    ScatterGridConfig,
+    ScatterConfig,
     ScatterElement,
-    HistogramGridConfig,
+    HistogramConfig,
     HistogramElement,
 )
 
 
 class OverviewElement(html.Div):
-    config = ScatterGridConfig(
+    config = ScatterConfig(
         x=CsvHeader.LENGTH,
         y=CsvHeader.TIME_TAKEN,
         color=CsvHeader.LINEAR_SOLVER,
@@ -29,7 +29,7 @@ class OverviewElement(html.Div):
 
 
 class LinearSolverGrid(html.Div):
-    config = ScatterGridConfig(
+    config = ScatterConfig(
         x=CsvHeader.LENGTH,
         y=CsvHeader.TIME_TAKEN,
         color=CsvHeader.IMBALANCE_PERCENT,
@@ -53,7 +53,7 @@ class LinearSolverGrid(html.Div):
 
 
 class ImbalanceGrid(html.Div):
-    config = ScatterGridConfig(
+    config = ScatterConfig(
         x=CsvHeader.LENGTH,
         y=CsvHeader.TIME_TAKEN,
         color=CsvHeader.LINEAR_SOLVER,
@@ -74,7 +74,7 @@ class ImbalanceGrid(html.Div):
 
 
 class LengthGrid(html.Div):
-    config = HistogramGridConfig(
+    config = HistogramConfig(
         x=CsvHeader.LINEAR_SOLVER,
         y=CsvHeader.TIME_TAKEN,
         header=CsvHeader.LENGTH,

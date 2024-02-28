@@ -1,9 +1,7 @@
 import pandas as pd
 from dash import html
 
-from apps.app import App
-
-
+from .app import App
 from tab_contents.linear_solver_tabs import (
     OverviewElement,
     ImbalanceGrid,
