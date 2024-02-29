@@ -2,6 +2,8 @@
 
 #include <stdbool.h>
 
+#include "../../lib/grid/grid.h"
+#include "../../lib/grid_solver/grid_solver.h"
 #include "../../lib/utils/range.h"
 
 struct GridSolversFuzzTestConfig {

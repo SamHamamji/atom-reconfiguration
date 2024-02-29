@@ -2,6 +2,8 @@
 
 #include <stdbool.h>
 
+#include "../../lib/interval/interval.h"
+#include "../../lib/linear_solver/linear_solver.h"
 #include "../../lib/utils/range.h"
 
 struct LinearSolversFuzzTestConfig {
