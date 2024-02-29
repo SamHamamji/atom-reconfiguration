@@ -14,19 +14,17 @@ const char output_file_format[] = "./%s/%u.csv";
 
 static inline struct Interval *interval_generator(int length,
                                                   double imbalance_percentage) {
-  return interval_factory.generate_by_imbalance(
+  return interval_factory.generate_compact_target_region(
       length, (int)(length * imbalance_percentage / 100));
 }
 
 static const int lengths[] = {
-    10000, 20000, 40000, 80000, 160000, 320000, 640000,
-    // 1280000, 2560000, 5120000, 10000000, 20000000, 40000000, 80000000,
+    10000,   20000,   40000,   80000,    160000,   320000,   640000,
+    1280000, 2560000, 5120000, 10000000, 20000000, 40000000, 80000000,
 };
 
 static const double imbalance_percentages[] = {
-    0, 1, 5, 25, 100,
-    // 0, 1, 3, 9, 27, 100,
-    // 0, 1, 4, 16, 64,
+    0, 1, 3, 9, 27, // 100,
 };
 
 static const struct LinearSolver *config_linear_solvers[] = {
@@ -52,13 +50,13 @@ static const struct LinearSolver *config_linear_solvers[] = {
     },
     &(struct LinearSolver){
         .solve = linear_solve_aggarwal_parallel,
-        .params = &(AggarwalParallelOnChainsParams){.thread_num = 6},
-        .name = "Aggarwal solver parallel (6 threads)",
+        .params = &(AggarwalParallelOnChainsParams){.thread_num = 8},
+        .name = "Aggarwal solver parallel (8 threads)",
     },
     &(struct LinearSolver){
         .solve = linear_solve_aggarwal_parallel,
-        .params = &(AggarwalParallelOnChainsParams){.thread_num = 8},
-        .name = "Aggarwal solver parallel (8 threads)",
+        .params = &(AggarwalParallelOnChainsParams){.thread_num = 16},
+        .name = "Aggarwal solver parallel (16 threads)",
     },
 };
 
@@ -72,7 +70,7 @@ static const struct PerformanceTestCasesConfig config = {
         sizeof(imbalance_percentages) / sizeof(imbalance_percentages[0]),
     .linear_solvers_num =
         sizeof(config_linear_solvers) / sizeof(config_linear_solvers[0]),
-    .repetition_num = 2,
+    .repetition_num = 10,
 };
 
 static char *get_output_file_name(unsigned int seed) {

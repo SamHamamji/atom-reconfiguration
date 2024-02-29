@@ -22,15 +22,30 @@ static inline struct Grid *grid_generator(struct GridSize size,
 }
 
 static const struct GridSize sizes[] = {
-    {200, 200},  {400, 200},  {600, 200},  {800, 200},  {1000, 200},
-    {200, 400},  {400, 400},  {600, 400},  {800, 400},  {1000, 400},
-    {200, 600},  {400, 600},  {600, 600},  {800, 600},  {1000, 600},
-    {200, 800},  {400, 800},  {600, 800},  {800, 800},  {1000, 800},
-    {200, 1000}, {400, 1000}, {600, 1000}, {800, 1000}, {1000, 1000},
+    {500, 500},   {1000, 500},  {1500, 500},  {2000, 500},  {2500, 500},
+    {3000, 500},  {3500, 500},  {4000, 500},  {4500, 500},  {5000, 500},
+    {500, 1000},  {1000, 1000}, {1500, 1000}, {2000, 1000}, {2500, 1000},
+    {3000, 1000}, {3500, 1000}, {4000, 1000}, {4500, 1000}, {5000, 1000},
+    {500, 1500},  {1000, 1500}, {1500, 1500}, {2000, 1500}, {2500, 1500},
+    {3000, 1500}, {3500, 1500}, {4000, 1500}, {4500, 1500}, {5000, 1500},
+    {500, 2000},  {1000, 2000}, {1500, 2000}, {2000, 2000}, {2500, 2000},
+    {3000, 2000}, {3500, 2000}, {4000, 2000}, {4500, 2000}, {5000, 2000},
+    {500, 2500},  {1000, 2500}, {1500, 2500}, {2000, 2500}, {2500, 2500},
+    {3000, 2500}, {3500, 2500}, {4000, 2500}, {4500, 2500}, {5000, 2500},
+    {500, 3000},  {1000, 3000}, {1500, 3000}, {2000, 3000}, {2500, 3000},
+    {3000, 3000}, {3500, 3000}, {4000, 3000}, {4500, 3000}, {5000, 3000},
+    {500, 3500},  {1000, 3500}, {1500, 3500}, {2000, 3500}, {2500, 3500},
+    {3000, 3500}, {3500, 3500}, {4000, 3500}, {4500, 3500}, {5000, 3500},
+    {500, 4000},  {1000, 4000}, {1500, 4000}, {2000, 4000}, {2500, 4000},
+    {3000, 4000}, {3500, 4000}, {4000, 4000}, {4500, 4000}, {5000, 4000},
+    {500, 4500},  {1000, 4500}, {1500, 4500}, {2000, 4500}, {2500, 4500},
+    {3000, 4500}, {3500, 4500}, {4000, 4500}, {4500, 4500}, {5000, 4500},
+    {500, 5000},  {1000, 5000}, {1500, 5000}, {2000, 5000}, {2500, 5000},
+    {3000, 5000}, {3500, 5000}, {4000, 5000}, {4500, 5000}, {5000, 5000},
 };
 
 static const double imbalance_percentages[] = {
-    0, 1, 5, 25, 50,
+    0, 1, 2, 5, 25, 50,
 };
 
 static const struct GridSolver *grid_solvers[] = {
@@ -40,13 +55,54 @@ static const struct GridSolver *grid_solvers[] = {
             &(RedRecParams){
                 .linear_solver =
                     &(struct LinearSolver){
-                        .solve = linear_solve_aggarwal_parallel,
-                        .params =
-                            &(AggarwalParallelOnChainsParams){.thread_num = 1},
-                        .name = "Aggarwal solver parallel (1 thread)",
+                        .solve = linear_solve_aggarwal,
+                        .params = NULL,
+                        .name = "Aggarwal solver serial",
                     },
             },
         .name = "Red rec (aggarwal serial)",
+    },
+    &(struct GridSolver){
+        .solve = red_rec,
+        .params =
+            &(RedRecParams){
+                .linear_solver =
+                    &(struct LinearSolver){
+                        .solve = linear_solve_aggarwal_parallel,
+                        .params =
+                            &(AggarwalParallelOnChainsParams){.thread_num = 1},
+                        .name = "Aggarwal solver parallel (1 threads)",
+                    },
+            },
+        .name = "Red rec (aggarwal parallel 1 threads)",
+    },
+    &(struct GridSolver){
+        .solve = red_rec,
+        .params =
+            &(RedRecParams){
+                .linear_solver =
+                    &(struct LinearSolver){
+                        .solve = linear_solve_aggarwal_parallel,
+                        .params =
+                            &(AggarwalParallelOnChainsParams){.thread_num = 2},
+                        .name = "Aggarwal solver parallel (2 threads)",
+                    },
+            },
+        .name = "Red rec (aggarwal parallel 2 threads)",
+    },
+    &(struct GridSolver){
+        .solve = red_rec,
+        .params =
+            &(RedRecParams){
+                .linear_solver =
+                    &(struct LinearSolver){
+                        .solve = linear_solve_aggarwal_parallel,
+                        .params =
+                            &(AggarwalParallelOnChainsParams){.thread_num = 4},
+                        .name = "Aggarwal solver parallel (4 threads)",
+                    },
+            },
+        .name = "Red rec (aggarwal parallel 4 threads)",
     },
 };
 
