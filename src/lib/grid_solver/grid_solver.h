@@ -13,8 +13,13 @@ struct GridSolver {
 };
 
 extern GridSolverFunction red_rec;
+extern GridSolverFunction red_rec_parallel;
 
-struct RedRecParams {
+typedef struct {
   struct LinearSolver *linear_solver;
-};
-typedef struct RedRecParams RedRecParams;
+} RedRecParams;
+
+typedef struct {
+  struct LinearSolver *linear_solver;
+  int thread_num;
+} RedRecParallelParams;
