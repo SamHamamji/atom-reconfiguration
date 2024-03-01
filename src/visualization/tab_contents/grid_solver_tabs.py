@@ -5,14 +5,13 @@ from CsvHeader import CsvHeader
 from tab_contents.generic_tab_contents import (
     ScatterConfig,
     ScatterElement,
+    HistogramConfig,
+    HistogramElement,
 )
 
 
 class OverviewElement(html.Div):
     def __init__(self, dataframe: pd.DataFrame):
-        dataframe[CsvHeader.LENGTH.value] = (
-            dataframe[CsvHeader.WIDTH.value] * dataframe[CsvHeader.HEIGHT.value]
-        )
         html.Div.__init__(
             self,
             [
@@ -20,12 +19,11 @@ class OverviewElement(html.Div):
                 ScatterElement(
                     dataframe,
                     ScatterConfig(
-                        x=CsvHeader.LENGTH,
+                        x=CsvHeader.GRID_SIZE,
                         y=CsvHeader.TIME_TAKEN,
                         color=CsvHeader.GRID_SOLVER,
                         header=None,
                     ),
-                    "Overview by length",
                 ),
             ],
         )
@@ -61,4 +59,26 @@ class DimensionsGrid(html.Div):
             className="grid",
         )
         grid_title = html.H1("Performance by width and height")
+        html.Div.__init__(self, [grid_title, grid])
+
+
+class SizeGrid(html.Div):
+    config = HistogramConfig(
+        x=CsvHeader.GRID_SOLVER,
+        y=CsvHeader.TIME_TAKEN,
+        header=CsvHeader.GRID_SIZE,
+    )
+
+    def __init__(self, dataframe: pd.DataFrame):
+        sizes = (
+            dataframe[CsvHeader.GRID_SIZE.value]
+            .sort_values(key=lambda x: x.astype(int))
+            .unique()
+        )
+
+        grid = html.Div(
+            [HistogramElement(dataframe, self.config, size) for size in sizes],
+            className="grid",
+        )
+        grid_title = html.H1("Performance by grid size")
         html.Div.__init__(self, [grid_title, grid])

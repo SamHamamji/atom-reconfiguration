@@ -12,7 +12,7 @@ from tab_contents.generic_tab_contents import (
 
 class OverviewElement(html.Div):
     config = ScatterConfig(
-        x=CsvHeader.LENGTH,
+        x=CsvHeader.INTERVAL_LENGTH,
         y=CsvHeader.TIME_TAKEN,
         color=CsvHeader.LINEAR_SOLVER,
         header=None,
@@ -30,7 +30,7 @@ class OverviewElement(html.Div):
 
 class LinearSolverGrid(html.Div):
     config = ScatterConfig(
-        x=CsvHeader.LENGTH,
+        x=CsvHeader.INTERVAL_LENGTH,
         y=CsvHeader.TIME_TAKEN,
         color=CsvHeader.IMBALANCE_PERCENT,
         header=CsvHeader.LINEAR_SOLVER,
@@ -54,7 +54,7 @@ class LinearSolverGrid(html.Div):
 
 class ImbalanceGrid(html.Div):
     config = ScatterConfig(
-        x=CsvHeader.LENGTH,
+        x=CsvHeader.INTERVAL_LENGTH,
         y=CsvHeader.TIME_TAKEN,
         color=CsvHeader.LINEAR_SOLVER,
         header=CsvHeader.IMBALANCE_PERCENT,
@@ -77,12 +77,12 @@ class LengthGrid(html.Div):
     config = HistogramConfig(
         x=CsvHeader.LINEAR_SOLVER,
         y=CsvHeader.TIME_TAKEN,
-        header=CsvHeader.LENGTH,
+        header=CsvHeader.INTERVAL_LENGTH,
     )
 
     def __init__(self, dataframe: pd.DataFrame):
         lengths = (
-            dataframe[CsvHeader.LENGTH.value]
+            dataframe[CsvHeader.INTERVAL_LENGTH.value]
             .sort_values(key=lambda x: x.astype(int))
             .unique()
         )

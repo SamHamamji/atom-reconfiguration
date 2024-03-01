@@ -13,7 +13,7 @@ class DataFrameType(Enum):
 columns_per_dataframe_type: dict[DataFrameType, list[str]] = {
     DataFrameType.LINEAR_SOLVER: [
         CsvHeader.LINEAR_SOLVER.value,
-        CsvHeader.LENGTH.value,
+        CsvHeader.INTERVAL_LENGTH.value,
         CsvHeader.IMBALANCE_PERCENT.value,
         CsvHeader.TIME_TAKEN.value,
     ],
