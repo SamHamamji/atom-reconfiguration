@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "delayed_moves.h"
+#include "red_rec_utils.h"
 
 struct DelayedMoves *delayed_moves_new(int max_length) {
   assert(max_length >= 0);

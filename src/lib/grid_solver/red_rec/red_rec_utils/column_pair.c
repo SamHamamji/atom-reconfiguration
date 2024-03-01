@@ -1,8 +1,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "../../utils/max_min.h"
-#include "column_pair.h"
+#include "../../../utils/max_min.h"
+#include "red_rec_utils.h"
 
 /**
  * Returns a positive number if the first element is greater than the second,
