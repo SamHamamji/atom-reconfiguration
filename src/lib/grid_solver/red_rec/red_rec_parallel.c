@@ -166,6 +166,8 @@ struct Reconfiguration *red_rec_parallel(const struct Grid *grid,
 
   if (counts_get_imbalance(total_counts) < 0) {
     free(column_counts);
+    reconfiguration_free(reconfiguration);
+    grid_free(grid_copy);
     return NULL;
   }
 
