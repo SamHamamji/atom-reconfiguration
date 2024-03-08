@@ -42,7 +42,8 @@ static void solve_receiver(struct Grid *grid,
   }
 }
 
-struct Reconfiguration *red_rec(const struct Grid *grid, const void *params) {
+struct Reconfiguration *red_rec_deferred_solving(const struct Grid *grid,
+                                                 const void *params) {
   assert(grid_target_region_is_compact(grid));
   assert(params != NULL);
 
@@ -71,12 +72,12 @@ struct Reconfiguration *red_rec(const struct Grid *grid, const void *params) {
 
   struct DelayedMoves delayed_moves = delayed_moves_new(grid_copy);
   struct ColumnPair best_pair = column_pair_get_best(grid_copy, column_counts);
+  struct ReceiverOrder *receiver_order = receiver_order_new(grid_copy->width);
   while (column_pair_exists(best_pair)) {
     delayed_moves_add(delayed_moves, best_pair);
+
     if (best_pair.exchanged_sources_num == best_pair.receiver_deficit) {
-      solve_receiver(grid_copy, reconfiguration,
-                     delayed_moves.array[best_pair.receiver_index],
-                     target_range, params);
+      receiver_order_push(receiver_order, best_pair.receiver_index);
     }
 
     column_counts[best_pair.donor_index].source_num -=
@@ -87,10 +88,17 @@ struct Reconfiguration *red_rec(const struct Grid *grid, const void *params) {
     best_pair = column_pair_get_best(grid_copy, column_counts);
   }
 
+  for (int i = 0; i < receiver_order->receiver_num; i++) {
+    solve_receiver(grid_copy, reconfiguration,
+                   delayed_moves.array[receiver_order->receiver_indexes[i]],
+                   target_range, params);
+  }
+
   reconfiguration_filter_identical(reconfiguration);
 
   free(column_counts);
   delayed_moves_free(delayed_moves);
+  receiver_order_free(receiver_order);
   grid_free(grid_copy);
   return reconfiguration;
 }

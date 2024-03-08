@@ -13,6 +13,7 @@ struct GridSolver {
 };
 
 extern GridSolverFunction red_rec;
+extern GridSolverFunction red_rec_deferred_solving;
 extern GridSolverFunction red_rec_parallel;
 
 typedef struct {

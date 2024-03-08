@@ -15,6 +15,24 @@ static const struct GridSolver *grid_solvers[] = {
         .params = &(RedRecParams){.linear_solver = &default_linear_solver},
         .name = "Red Rec",
     },
+    &(struct GridSolver){
+        .solve = red_rec_deferred_solving,
+        .params =
+            &(RedRecParallelParams){
+                .linear_solver = &default_linear_solver,
+                .thread_num = 3,
+            },
+        .name = "Red Rec deferred solving",
+    },
+    &(struct GridSolver){
+        .solve = red_rec_parallel,
+        .params =
+            &(RedRecParallelParams){
+                .linear_solver = &default_linear_solver,
+                .thread_num = 3,
+            },
+        .name = "Red Rec parallel",
+    },
 };
 
 static struct Grid *grid_generator(int width, int height) {

@@ -53,3 +53,13 @@ void solve_self_sufficient_column(struct Grid *grid,
                                   struct Reconfiguration *reconfiguration,
                                   int column_index,
                                   const struct LinearSolver *linear_solver);
+
+struct ReceiverOrder {
+  int *receiver_indexes;
+  int receiver_num;
+};
+
+struct ReceiverOrder *receiver_order_new(int max_receiver_num);
+void receiver_order_free(struct ReceiverOrder *receiver_order);
+void receiver_order_push(struct ReceiverOrder *receiver_order,
+                         int receiver_index);

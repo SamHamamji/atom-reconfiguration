@@ -53,7 +53,6 @@ static void solve_receiver(struct Grid *grid,
                            struct Reconfiguration *reconfiguration,
                            struct ReceiverDelayedMoves delayed_moves,
                            struct Range target_range,
-                           struct ColumnPair column_pair,
                            const RedRecParallelParams *params) {
   int receiver_pivot = get_receiver_pivot(grid, delayed_moves, target_range,
                                           params->linear_solver);
@@ -63,10 +62,11 @@ static void solve_receiver(struct Grid *grid,
       .exclusive_end = receiver_pivot,
   };
 
+  int receiver_index = delayed_moves.pairs[0].receiver_index;
   execute_move(grid, reconfiguration, fixed_sources_range,
                (struct ColumnPair){
-                   .donor_index = column_pair.receiver_index,
-                   .receiver_index = column_pair.receiver_index,
+                   .donor_index = receiver_index,
+                   .receiver_index = receiver_index,
                });
 
   for (int i = 0; i < delayed_moves.length; i++) {
@@ -198,7 +198,7 @@ struct Reconfiguration *red_rec_parallel(const struct Grid *grid,
     if (best_pair.exchanged_sources_num == best_pair.receiver_deficit) {
       solve_receiver(grid_copy, context.reconfiguration,
                      delayed_moves.array[best_pair.receiver_index],
-                     context.target_range, best_pair, params);
+                     context.target_range, params);
     }
 
     shared.column_counts[best_pair.donor_index].source_num -=

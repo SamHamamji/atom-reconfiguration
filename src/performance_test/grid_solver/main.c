@@ -60,49 +60,62 @@ static const struct GridSolver *grid_solvers[] = {
                         .name = "Aggarwal solver serial",
                     },
             },
-        .name = "Red rec (aggarwal serial)",
+        .name = "Red rec",
     },
     &(struct GridSolver){
-        .solve = red_rec,
+        .solve = red_rec_deferred_solving,
         .params =
             &(RedRecParams){
                 .linear_solver =
                     &(struct LinearSolver){
-                        .solve = linear_solve_aggarwal_parallel,
-                        .params =
-                            &(AggarwalParallelOnChainsParams){.thread_num = 1},
-                        .name = "Aggarwal solver parallel (1 threads)",
+                        .solve = linear_solve_aggarwal,
+                        .params = NULL,
+                        .name = "Aggarwal solver serial",
                     },
             },
-        .name = "Red rec (aggarwal parallel 1 threads)",
+        .name = "Red rec deferred solving",
     },
     &(struct GridSolver){
-        .solve = red_rec,
+        .solve = red_rec_parallel,
         .params =
-            &(RedRecParams){
+            &(RedRecParallelParams){
                 .linear_solver =
                     &(struct LinearSolver){
-                        .solve = linear_solve_aggarwal_parallel,
-                        .params =
-                            &(AggarwalParallelOnChainsParams){.thread_num = 2},
-                        .name = "Aggarwal solver parallel (2 threads)",
+                        .solve = linear_solve_aggarwal,
+                        .params = NULL,
+                        .name = "Aggarwal solver",
                     },
+                .thread_num = 1,
             },
-        .name = "Red rec (aggarwal parallel 2 threads)",
+        .name = "Red rec parallel (1 threads)",
     },
     &(struct GridSolver){
-        .solve = red_rec,
+        .solve = red_rec_parallel,
         .params =
-            &(RedRecParams){
+            &(RedRecParallelParams){
                 .linear_solver =
                     &(struct LinearSolver){
-                        .solve = linear_solve_aggarwal_parallel,
-                        .params =
-                            &(AggarwalParallelOnChainsParams){.thread_num = 4},
-                        .name = "Aggarwal solver parallel (4 threads)",
+                        .solve = linear_solve_aggarwal,
+                        .params = NULL,
+                        .name = "Aggarwal solver",
                     },
+                .thread_num = 3,
             },
-        .name = "Red rec (aggarwal parallel 4 threads)",
+        .name = "Red rec parallel (3 threads)",
+    },
+    &(struct GridSolver){
+        .solve = red_rec_parallel,
+        .params =
+            &(RedRecParallelParams){
+                .linear_solver =
+                    &(struct LinearSolver){
+                        .solve = linear_solve_aggarwal,
+                        .params = NULL,
+                        .name = "Aggarwal solver",
+                    },
+                .thread_num = 8,
+            },
+        .name = "Red rec parallel (8 threads)",
     },
 };
 

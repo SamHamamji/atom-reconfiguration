@@ -19,7 +19,7 @@ static void print_failed_test_case(const struct Grid *initial_grid,
 }
 
 bool fuzz_test_grid_solvers(const struct GridSolversFuzzTestConfig config) {
-  printf(BOLD "Testing red-rec...\n" RESET);
+  printf(BOLD "Testing grid solvers...\n" RESET);
 
   struct Timer timer;
   timer_start(&timer);
