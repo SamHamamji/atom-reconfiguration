@@ -34,13 +34,18 @@ solve_receiver(struct Grid *grid, struct Reconfiguration *reconfiguration,
                    .receiver_index = column_pair.receiver_index,
                });
 
-  // Solve delayed moves
+  // Execute delayed moves and delete them
+  int filtered_i = 0;
   for (int i = 0; i < delayed_moves->length; i++) {
     if (delayed_moves->array[i].receiver_index == column_pair.receiver_index) {
       execute_move(grid, reconfiguration, fixed_sources_range,
                    delayed_moves->array[i]);
+    } else {
+      delayed_moves->array[filtered_i] = delayed_moves->array[i];
+      filtered_i++;
     }
   }
+  delayed_moves->length = filtered_i;
 
   execute_move(grid, reconfiguration, fixed_sources_range, column_pair);
 }
