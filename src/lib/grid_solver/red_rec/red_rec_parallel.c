@@ -155,6 +155,7 @@ struct Reconfiguration *red_rec_parallel(const struct Grid *grid,
       .column_counts = malloc(grid->width * sizeof(struct Counts)),
       .total_counts = malloc(sizeof(struct Counts)),
   };
+  *shared.total_counts = (struct Counts){0, 0};
 
   struct ThreadInput *thread_inputs =
       malloc(thread_num * sizeof(struct ThreadInput));
