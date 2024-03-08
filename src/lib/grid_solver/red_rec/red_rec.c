@@ -16,12 +16,14 @@ static void solve_self_sufficient_columns(
   }
 }
 
-static void
-solve_receiver(struct Grid *grid, struct Reconfiguration *reconfiguration,
-               struct DelayedMoves *delayed_moves, struct Range target_range,
-               struct ColumnPair column_pair, const RedRecParams *params) {
+static void solve_receiver(struct Grid *grid,
+                           struct Reconfiguration *reconfiguration,
+                           struct ReceiverDelayedMoves delayed_moves,
+                           struct Range target_range,
+                           struct ColumnPair column_pair,
+                           const RedRecParams *params) {
   int receiver_pivot = get_receiver_pivot(grid, delayed_moves, target_range,
-                                          column_pair, params->linear_solver);
+                                          params->linear_solver);
 
   struct Range *fixed_sources_range = &(struct Range){
       .start = receiver_pivot,
@@ -34,20 +36,10 @@ solve_receiver(struct Grid *grid, struct Reconfiguration *reconfiguration,
                    .receiver_index = column_pair.receiver_index,
                });
 
-  // Execute delayed moves and delete them
-  int filtered_i = 0;
-  for (int i = 0; i < delayed_moves->length; i++) {
-    if (delayed_moves->array[i].receiver_index == column_pair.receiver_index) {
-      execute_move(grid, reconfiguration, fixed_sources_range,
-                   delayed_moves->array[i]);
-    } else {
-      delayed_moves->array[filtered_i] = delayed_moves->array[i];
-      filtered_i++;
-    }
+  for (int i = 0; i < delayed_moves.length; i++) {
+    execute_move(grid, reconfiguration, fixed_sources_range,
+                 delayed_moves.pairs[i]);
   }
-  delayed_moves->length = filtered_i;
-
-  execute_move(grid, reconfiguration, fixed_sources_range, column_pair);
 }
 
 struct Reconfiguration *red_rec(const struct Grid *grid, const void *params) {
@@ -77,16 +69,14 @@ struct Reconfiguration *red_rec(const struct Grid *grid, const void *params) {
   solve_self_sufficient_columns(grid_copy, reconfiguration, column_counts,
                                 red_rec_params);
 
-  struct DelayedMoves *delayed_moves =
-      delayed_moves_new(grid_copy->width * grid_copy->height);
-
+  struct DelayedMoves delayed_moves = delayed_moves_new(grid_copy);
   struct ColumnPair best_pair = column_pair_get_best(grid_copy, column_counts);
   while (column_pair_exists(best_pair)) {
-    if (best_pair.exchanged_sources_num != best_pair.receiver_deficit) {
-      delayed_moves_add(delayed_moves, best_pair);
-    } else {
-      solve_receiver(grid_copy, reconfiguration, delayed_moves, target_range,
-                     best_pair, params);
+    delayed_moves_add(delayed_moves, best_pair);
+    if (best_pair.exchanged_sources_num == best_pair.receiver_deficit) {
+      solve_receiver(grid_copy, reconfiguration,
+                     delayed_moves.array[best_pair.receiver_index],
+                     target_range, best_pair, params);
     }
 
     column_counts[best_pair.donor_index].source_num -=

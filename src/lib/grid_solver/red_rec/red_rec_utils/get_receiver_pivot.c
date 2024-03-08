@@ -28,27 +28,6 @@ get_column_source_locations(const struct Grid *grid, int column_index) {
   return column_source_locations;
 }
 
-static struct SourceLocations
-get_delayed_moves_source_locations(const struct Grid *grid,
-                                   const struct DelayedMoves *delayed_moves,
-                                   int receiver_column_index) {
-  struct SourceLocations source_locations = {0, 0, 0};
-
-  for (int i = 0; i < delayed_moves->length; i++) {
-    if (delayed_moves->array[i].receiver_index == receiver_column_index) {
-      struct SourceLocations donor_source_locations =
-          get_column_source_locations(grid,
-                                      delayed_moves->array[i].donor_index);
-      source_locations.upper_reservoir +=
-          donor_source_locations.upper_reservoir;
-      source_locations.lower_reservoir +=
-          donor_source_locations.lower_reservoir;
-    }
-  }
-
-  return source_locations;
-}
-
 /**
  * Returns a column representing the receiver with its sources and the sources
  * from its delayed donors squished into its target region. The last donor's
@@ -56,31 +35,38 @@ get_delayed_moves_source_locations(const struct Grid *grid,
  * It is meant to decide know which sources from the last donor are meant to be
  * used while minimizing the vertically moved distance.
  */
-static struct Point *get_receiver_squished_sources_alias(
-    const struct Grid *grid, const struct DelayedMoves *delayed_moves,
-    struct Range target_range, struct ColumnPair column_pair) {
-  struct Point *receiver = grid_get_column(grid, column_pair.receiver_index);
-  struct Point *donor = grid_get_column(grid, column_pair.donor_index);
+static struct Point *get_receiver_with_squished_sources_alias(
+    const struct Grid *grid, const struct ReceiverDelayedMoves delayed_moves,
+    struct Range target_range) {
+  int last_donor_index =
+      delayed_moves.pairs[delayed_moves.length - 1].donor_index;
+  int receiver_index = delayed_moves.pairs[0].receiver_index;
+  struct Point *receiver = grid_get_column(grid, receiver_index);
+  struct Point *last_donor = grid_get_column(grid, last_donor_index);
 
   struct Point *receiver_alias = malloc(grid->height * sizeof(struct Point));
   for (int i = 0; i < grid->height; i++) {
     receiver_alias[i] = (struct Point){
-        .is_source = (donor[i].is_source && !donor[i].is_target) ||
+        .is_source = (last_donor[i].is_source && !last_donor[i].is_target) ||
                      (receiver[i].is_source && receiver[i].is_target),
         .is_target = receiver[i].is_target,
     };
   }
 
-  struct SourceLocations receiver_sources =
-      get_column_source_locations(grid, column_pair.receiver_index);
+  struct SourceLocations squished_sources =
+      get_column_source_locations(grid, receiver_index);
 
-  struct SourceLocations total_sources = get_delayed_moves_source_locations(
-      grid, delayed_moves, column_pair.receiver_index);
-  total_sources.upper_reservoir += receiver_sources.upper_reservoir;
-  total_sources.lower_reservoir += receiver_sources.lower_reservoir;
+  // Get all sources except for last donor
+  for (int i = 0; i < delayed_moves.length - 1; i++) {
+    struct SourceLocations source_locations =
+        get_column_source_locations(grid, delayed_moves.pairs[i].donor_index);
+    squished_sources.upper_reservoir += source_locations.upper_reservoir;
+    squished_sources.lower_reservoir += source_locations.lower_reservoir;
+  }
 
+  // Squish the sources in the target range
   struct Range squished_sources_range = target_range;
-  for (int i = 0; i < total_sources.upper_reservoir; i++) {
+  for (int i = 0; i < squished_sources.upper_reservoir; i++) {
     while (receiver_alias[squished_sources_range.start].is_source) {
       squished_sources_range.start++;
     }
@@ -88,7 +74,7 @@ static struct Point *get_receiver_squished_sources_alias(
     squished_sources_range.start++;
   }
 
-  for (int i = 0; i < total_sources.lower_reservoir; i++) {
+  for (int i = 0; i < squished_sources.lower_reservoir; i++) {
     while (receiver_alias[squished_sources_range.exclusive_end - 1].is_source) {
       squished_sources_range.exclusive_end--;
     }
@@ -102,11 +88,11 @@ static struct Point *get_receiver_squished_sources_alias(
 }
 
 int get_receiver_pivot(const struct Grid *grid,
-                       const struct DelayedMoves *delayed_moves,
-                       struct Range target_range, struct ColumnPair column_pair,
+                       const struct ReceiverDelayedMoves delayed_moves,
+                       struct Range target_range,
                        const struct LinearSolver *linear_solver) {
-  struct Point *receiver_alias = get_receiver_squished_sources_alias(
-      grid, delayed_moves, target_range, column_pair);
+  struct Point *receiver_alias = get_receiver_with_squished_sources_alias(
+      grid, delayed_moves, target_range);
 
   struct Mapping *mapping = linear_solver->solve(
       &(struct Interval){.array = receiver_alias, .length = grid->height},
