@@ -4,7 +4,7 @@
 
 typedef void GridSolverParams;
 typedef struct Reconfiguration *
-GridSolverFunction(const struct Grid *grid, const GridSolverParams *params);
+GridSolverFunction(struct Grid *grid, const GridSolverParams *params);
 
 struct GridSolver {
   const char *name;

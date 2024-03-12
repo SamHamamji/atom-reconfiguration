@@ -31,10 +31,6 @@ struct ThreadInput {
   int thread_index;
 };
 
-static void thread_input_context_free(struct ThreadInputContext context) {
-  grid_free(context.grid);
-}
-
 static void thread_sync_variables_free(struct ThreadSyncVariables sync) {
   pthread_barrier_destroy(sync.barrier);
   pthread_mutex_destroy(sync.reconfiguration_mutex);
@@ -125,15 +121,13 @@ static void *red_rec_parallel_thread(void *thread_input) {
   pthread_exit(NULL);
 }
 
-struct Reconfiguration *red_rec_parallel(const struct Grid *grid,
+struct Reconfiguration *red_rec_parallel(struct Grid *grid,
                                          const void *params) {
   assert(grid_target_region_is_compact(grid));
   assert(params != NULL);
 
   int thread_num = ((RedRecParallelParams *)params)->thread_num;
   assert(thread_num > 0);
-
-  struct Grid *grid_copy = grid_get_copy(grid);
 
   struct ThreadSyncVariables sync = {
       .barrier = malloc(sizeof(pthread_barrier_t)),
@@ -145,9 +139,8 @@ struct Reconfiguration *red_rec_parallel(const struct Grid *grid,
   pthread_mutex_init(sync.total_counts_mutex, NULL);
 
   struct ThreadInputContext context = {
-      .grid = grid_copy,
-      .reconfiguration =
-          reconfiguration_new(2 * grid_copy->width * grid_copy->height),
+      .grid = grid,
+      .reconfiguration = reconfiguration_new(2 * grid->width * grid->height),
       .target_range = grid_get_compact_target_region_range(grid),
   };
 
@@ -182,7 +175,6 @@ struct Reconfiguration *red_rec_parallel(const struct Grid *grid,
   free(thread_ids);
 
   if (counts_get_imbalance(*shared.total_counts) < 0) {
-    thread_input_context_free(context);
     thread_sync_variables_free(sync);
     thread_shared_variables_free(shared);
     reconfiguration_free(context.reconfiguration);
@@ -190,13 +182,13 @@ struct Reconfiguration *red_rec_parallel(const struct Grid *grid,
     return NULL;
   }
 
-  struct DelayedMoves delayed_moves = delayed_moves_new(grid_copy);
+  struct DelayedMoves delayed_moves = delayed_moves_new(grid);
   struct ColumnPair best_pair =
-      column_pair_get_best(grid_copy, shared.column_counts);
+      column_pair_get_best(grid, shared.column_counts);
   while (column_pair_exists(best_pair)) {
     delayed_moves_add(delayed_moves, best_pair);
     if (best_pair.exchanged_sources_num == best_pair.receiver_deficit) {
-      solve_receiver(grid_copy, context.reconfiguration,
+      solve_receiver(grid, context.reconfiguration,
                      delayed_moves.array[best_pair.receiver_index],
                      context.target_range, params);
     }
@@ -206,13 +198,12 @@ struct Reconfiguration *red_rec_parallel(const struct Grid *grid,
     shared.column_counts[best_pair.receiver_index].source_num +=
         best_pair.exchanged_sources_num;
 
-    best_pair = column_pair_get_best(grid_copy, shared.column_counts);
+    best_pair = column_pair_get_best(grid, shared.column_counts);
   }
   delayed_moves_free(delayed_moves);
 
   reconfiguration_filter_identical(context.reconfiguration);
 
-  thread_input_context_free(context);
   thread_sync_variables_free(sync);
   thread_shared_variables_free(shared);
 

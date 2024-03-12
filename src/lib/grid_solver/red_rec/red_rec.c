@@ -42,7 +42,7 @@ static void solve_receiver(struct Grid *grid,
   }
 }
 
-struct Reconfiguration *red_rec(const struct Grid *grid, const void *params) {
+struct Reconfiguration *red_rec(struct Grid *grid, const void *params) {
   assert(grid_target_region_is_compact(grid));
   assert(params != NULL);
 
@@ -61,20 +61,19 @@ struct Reconfiguration *red_rec(const struct Grid *grid, const void *params) {
     return NULL;
   }
 
-  struct Grid *grid_copy = grid_get_copy(grid);
   struct Range target_range = grid_get_compact_target_region_range(grid);
   struct Reconfiguration *reconfiguration =
-      reconfiguration_new(2 * grid_copy->width * grid_copy->height);
+      reconfiguration_new(2 * grid->width * grid->height);
 
-  solve_self_sufficient_columns(grid_copy, reconfiguration, column_counts,
+  solve_self_sufficient_columns(grid, reconfiguration, column_counts,
                                 red_rec_params);
 
-  struct DelayedMoves delayed_moves = delayed_moves_new(grid_copy);
-  struct ColumnPair best_pair = column_pair_get_best(grid_copy, column_counts);
+  struct DelayedMoves delayed_moves = delayed_moves_new(grid);
+  struct ColumnPair best_pair = column_pair_get_best(grid, column_counts);
   while (column_pair_exists(best_pair)) {
     delayed_moves_add(delayed_moves, best_pair);
     if (best_pair.exchanged_sources_num == best_pair.receiver_deficit) {
-      solve_receiver(grid_copy, reconfiguration,
+      solve_receiver(grid, reconfiguration,
                      delayed_moves.array[best_pair.receiver_index],
                      target_range, params);
     }
@@ -84,13 +83,12 @@ struct Reconfiguration *red_rec(const struct Grid *grid, const void *params) {
     column_counts[best_pair.receiver_index].source_num +=
         best_pair.exchanged_sources_num;
 
-    best_pair = column_pair_get_best(grid_copy, column_counts);
+    best_pair = column_pair_get_best(grid, column_counts);
   }
 
   reconfiguration_filter_identical(reconfiguration);
 
   free(column_counts);
   delayed_moves_free(delayed_moves);
-  grid_free(grid_copy);
   return reconfiguration;
 }

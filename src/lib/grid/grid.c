@@ -95,6 +95,18 @@ struct Range grid_get_compact_target_region_range(const struct Grid *grid) {
   return target_range;
 }
 
+bool grid_is_solvable(const struct Grid *grid) {
+  int total_imbalance = 0;
+  for (int i = 0; i < grid->width; i++) {
+    total_imbalance +=
+        counts_get_imbalance(interval_get_counts(&(struct Interval){
+            .array = grid_get_column(grid, i),
+            .length = grid->height,
+        }));
+  }
+  return total_imbalance >= 0;
+}
+
 bool grid_is_solved(const struct Grid *grid) {
   for (int i = 0; i < grid->width * grid->height; i++) {
     if (grid->elements[i].is_target && !grid->elements[i].is_source) {

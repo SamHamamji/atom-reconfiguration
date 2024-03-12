@@ -34,6 +34,7 @@ struct Counts *grid_get_column_counts(const struct Grid *grid);
  * . S . . S
  */
 bool grid_target_region_is_compact(const struct Grid *grid);
+bool grid_is_solvable(const struct Grid *grid);
 bool grid_is_solved(const struct Grid *grid);
 
 /**

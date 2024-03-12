@@ -6,13 +6,15 @@
 static double
 test_grid_solver_performance_on_grid(const struct GridSolver *grid_solver,
                                      const struct Grid *grid) {
-  struct Timer timer;
+  struct Grid *grid_copy = grid_get_copy(grid);
 
+  struct Timer timer;
   timer_start(&timer);
   struct Reconfiguration *reconfiguration =
-      grid_solver->solve(grid, grid_solver->params);
+      grid_solver->solve(grid_copy, grid_solver->params);
   timer_stop(&timer);
 
+  grid_free(grid_copy);
   reconfiguration_free(reconfiguration);
 
   return timer_get_seconds(&timer);
