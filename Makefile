@@ -26,7 +26,7 @@ PYTHON_VISUALIZATION_FILE := $(SRC_DIR)/visualization/main.py
 # Compiler flags
 LIB_FLAGS := -lm -lpthread
 WARNING_FLAGS := -Wall -Wextra -Wpedantic
-DEBUGGING_FLAGS := -fsanitize=undefined,address -g -Og
+DEBUGGING_FLAGS := -fsanitize=undefined,address -Og -g3
 OPTIMIZATION_FLAGS := -O3 -DNDEBUG
 CFLAGS := -std=gnu2x $(LIB_FLAGS) $(WARNING_FLAGS)
 
