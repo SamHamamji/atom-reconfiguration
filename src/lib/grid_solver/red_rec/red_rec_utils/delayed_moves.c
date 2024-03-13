@@ -28,7 +28,7 @@ void delayed_moves_add(struct DelayedMoves delayed_moves,
 
   if (receiver_moves->pairs == NULL) {
     receiver_moves->pairs =
-        malloc((1 + delayed_moves.grid_width / 2) * sizeof(struct ColumnPair));
+        malloc((delayed_moves.grid_width - 1) * sizeof(struct ColumnPair));
   }
 
   receiver_moves->pairs[receiver_moves->length] = column_pair;
