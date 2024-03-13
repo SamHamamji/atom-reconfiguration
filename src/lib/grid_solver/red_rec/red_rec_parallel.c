@@ -121,6 +121,32 @@ static void *red_rec_parallel_thread(void *thread_input) {
   pthread_exit(NULL);
 }
 
+static void solver_receiver_columns(struct Grid *grid,
+                                    struct Reconfiguration *reconfiguration,
+                                    struct Counts *column_counts,
+                                    struct Range target_range,
+                                    const RedRecParallelParams *params) {
+  struct DelayedMoves delayed_moves = delayed_moves_new(grid);
+  struct ColumnPair best_pair = column_pair_get_best(grid, column_counts);
+  while (column_pair_exists(best_pair)) {
+    delayed_moves_add(delayed_moves, best_pair);
+    if (best_pair.exchanged_sources_num == best_pair.receiver_deficit) {
+      solve_receiver(grid, reconfiguration,
+                     delayed_moves.array[best_pair.receiver_index],
+                     target_range, params);
+    }
+
+    column_counts[best_pair.donor_index].source_num -=
+        best_pair.exchanged_sources_num;
+    column_counts[best_pair.receiver_index].source_num +=
+        best_pair.exchanged_sources_num;
+
+    best_pair = column_pair_get_best(grid, column_counts);
+  }
+
+  delayed_moves_free(delayed_moves);
+}
+
 struct Reconfiguration *red_rec_parallel(struct Grid *grid,
                                          const void *params) {
   assert(grid_target_region_is_compact(grid));
@@ -182,25 +208,8 @@ struct Reconfiguration *red_rec_parallel(struct Grid *grid,
     return NULL;
   }
 
-  struct DelayedMoves delayed_moves = delayed_moves_new(grid);
-  struct ColumnPair best_pair =
-      column_pair_get_best(grid, shared.column_counts);
-  while (column_pair_exists(best_pair)) {
-    delayed_moves_add(delayed_moves, best_pair);
-    if (best_pair.exchanged_sources_num == best_pair.receiver_deficit) {
-      solve_receiver(grid, context.reconfiguration,
-                     delayed_moves.array[best_pair.receiver_index],
-                     context.target_range, params);
-    }
-
-    shared.column_counts[best_pair.donor_index].source_num -=
-        best_pair.exchanged_sources_num;
-    shared.column_counts[best_pair.receiver_index].source_num +=
-        best_pair.exchanged_sources_num;
-
-    best_pair = column_pair_get_best(grid, shared.column_counts);
-  }
-  delayed_moves_free(delayed_moves);
+  solver_receiver_columns(grid, context.reconfiguration, shared.column_counts,
+                          context.target_range, params);
 
   reconfiguration_filter_identical(context.reconfiguration);
 
