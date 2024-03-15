@@ -29,9 +29,36 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
-                .thread_num = 3,
+                .thread_num = 1,
             },
-        .name = "Red Rec parallel",
+        .name = "Red Rec parallel (1 thread)",
+    },
+    &(struct GridSolver){
+        .solve = red_rec_parallel,
+        .params =
+            &(RedRecParallelParams){
+                .linear_solver = &default_linear_solver,
+                .thread_num = 7,
+            },
+        .name = "Red Rec parallel (7 threads)",
+    },
+    &(struct GridSolver){
+        .solve = red_rec_parallel_single_consumer,
+        .params =
+            &(RedRecParallelParams){
+                .linear_solver = &default_linear_solver,
+                .thread_num = 1,
+            },
+        .name = "Red Rec parallel single consumer (1 thread)",
+    },
+    &(struct GridSolver){
+        .solve = red_rec_parallel_single_consumer,
+        .params =
+            &(RedRecParallelParams){
+                .linear_solver = &default_linear_solver,
+                .thread_num = 7,
+            },
+        .name = "Red Rec parallel single consumer (7 threads)",
     },
 };
 
@@ -41,8 +68,8 @@ static struct Grid *grid_generator(int width, int height) {
 }
 
 struct GridSolversFuzzTestConfig grid_solvers_config = {
-    .width_range = {0, 35},
-    .height_range = {0, 35},
+    .width_range = {0, 500},
+    .height_range = {0, 500},
     .grid_solvers = grid_solvers,
     .grid_solvers_num = sizeof(grid_solvers) / sizeof(grid_solvers[0]),
     .time_limit_in_seconds = 5.0,

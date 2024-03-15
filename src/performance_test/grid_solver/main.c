@@ -48,17 +48,18 @@ static const double imbalance_percentages[] = {
     0, 1, 2, 5, 25, 50,
 };
 
+static struct LinearSolver default_linear_solver = {
+    .solve = linear_solve_aggarwal,
+    .params = NULL,
+    .name = "Aggarwal solver",
+};
+
 static const struct GridSolver *grid_solvers[] = {
     &(struct GridSolver){
         .solve = red_rec,
         .params =
             &(RedRecParams){
-                .linear_solver =
-                    &(struct LinearSolver){
-                        .solve = linear_solve_aggarwal,
-                        .params = NULL,
-                        .name = "Aggarwal solver serial",
-                    },
+                .linear_solver = &default_linear_solver,
             },
         .name = "Red rec",
     },
@@ -66,12 +67,7 @@ static const struct GridSolver *grid_solvers[] = {
         .solve = red_rec_deferred_solving,
         .params =
             &(RedRecParams){
-                .linear_solver =
-                    &(struct LinearSolver){
-                        .solve = linear_solve_aggarwal,
-                        .params = NULL,
-                        .name = "Aggarwal solver serial",
-                    },
+                .linear_solver = &default_linear_solver,
             },
         .name = "Red rec deferred solving",
     },
@@ -79,12 +75,7 @@ static const struct GridSolver *grid_solvers[] = {
         .solve = red_rec_parallel,
         .params =
             &(RedRecParallelParams){
-                .linear_solver =
-                    &(struct LinearSolver){
-                        .solve = linear_solve_aggarwal,
-                        .params = NULL,
-                        .name = "Aggarwal solver",
-                    },
+                .linear_solver = &default_linear_solver,
                 .thread_num = 1,
             },
         .name = "Red rec parallel (1 threads)",
@@ -93,12 +84,7 @@ static const struct GridSolver *grid_solvers[] = {
         .solve = red_rec_parallel,
         .params =
             &(RedRecParallelParams){
-                .linear_solver =
-                    &(struct LinearSolver){
-                        .solve = linear_solve_aggarwal,
-                        .params = NULL,
-                        .name = "Aggarwal solver",
-                    },
+                .linear_solver = &default_linear_solver,
                 .thread_num = 3,
             },
         .name = "Red rec parallel (3 threads)",
@@ -107,15 +93,37 @@ static const struct GridSolver *grid_solvers[] = {
         .solve = red_rec_parallel,
         .params =
             &(RedRecParallelParams){
-                .linear_solver =
-                    &(struct LinearSolver){
-                        .solve = linear_solve_aggarwal,
-                        .params = NULL,
-                        .name = "Aggarwal solver",
-                    },
+                .linear_solver = &default_linear_solver,
                 .thread_num = 8,
             },
         .name = "Red rec parallel (8 threads)",
+    },
+    &(struct GridSolver){
+        .solve = red_rec_parallel_single_consumer,
+        .params =
+            &(RedRecParallelParams){
+                .linear_solver = &default_linear_solver,
+                .thread_num = 1,
+            },
+        .name = "Red rec parallel single consumer (1 threads)",
+    },
+    &(struct GridSolver){
+        .solve = red_rec_parallel_single_consumer,
+        .params =
+            &(RedRecParallelParams){
+                .linear_solver = &default_linear_solver,
+                .thread_num = 3,
+            },
+        .name = "Red rec parallel single consumer (3 threads)",
+    },
+    &(struct GridSolver){
+        .solve = red_rec_parallel_single_consumer,
+        .params =
+            &(RedRecParallelParams){
+                .linear_solver = &default_linear_solver,
+                .thread_num = 8,
+            },
+        .name = "Red rec parallel single consumer (8 threads)",
     },
 };
 
