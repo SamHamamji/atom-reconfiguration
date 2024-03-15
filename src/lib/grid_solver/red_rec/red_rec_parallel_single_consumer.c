@@ -239,6 +239,8 @@ struct Reconfiguration *red_rec_parallel_single_consumer(struct Grid *grid,
   sem_wait(sync.solving_receivers_semaphore);
 
   if (counts_get_imbalance(*shared.total_counts) < 0) {
+    pthread_join(thread_ids[thread_num - 1], NULL);
+
     thread_sync_variables_free(sync);
     thread_shared_variables_free(shared);
     reconfiguration_free(context.reconfiguration);
