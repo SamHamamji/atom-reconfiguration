@@ -43,14 +43,12 @@ struct ColumnPair column_pair_get_best(const struct Grid *grid,
   };
 
   int previous_column = 0;
+  int previous_imbalance = counts_get_imbalance(column_counts[0]);
   for (int current_column = 1; current_column < grid->width; current_column++) {
-    if (counts_get_imbalance(column_counts[current_column]) == 0) {
+    int current_imbalance = counts_get_imbalance(column_counts[current_column]);
+    if (current_imbalance == 0) {
       continue;
     }
-
-    int previous_imbalance =
-        counts_get_imbalance(column_counts[previous_column]);
-    int current_imbalance = counts_get_imbalance(column_counts[current_column]);
 
     bool previous_column_is_receiver = previous_imbalance < 0;
     bool current_column_is_receiver = current_imbalance < 0;
@@ -78,7 +76,9 @@ struct ColumnPair column_pair_get_best(const struct Grid *grid,
         best_column_pair = pair;
       }
     }
+
     previous_column = current_column;
+    previous_imbalance = counts_get_imbalance(column_counts[previous_column]);
   }
 
   return best_column_pair;
