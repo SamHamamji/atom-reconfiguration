@@ -18,7 +18,6 @@ struct ThreadSyncVariables {
   pthread_mutex_t *total_counts_mutex;
   pthread_mutex_t *reconfiguration_mutex;
   sem_t *delayed_moves_semaphore;
-  sem_t *solving_receivers_semaphore;
 };
 
 struct ThreadSharedVariables {
@@ -42,13 +41,11 @@ static struct ThreadSyncVariables thread_sync_variables_new(int thread_num) {
       .reconfiguration_mutex = malloc(sizeof(pthread_mutex_t)),
       .total_counts_mutex = malloc(sizeof(pthread_mutex_t)),
       .delayed_moves_semaphore = malloc(sizeof(sem_t)),
-      .solving_receivers_semaphore = malloc(sizeof(sem_t)),
   };
-  pthread_barrier_init(sync.barrier, NULL, thread_num);
+  pthread_barrier_init(sync.barrier, NULL, thread_num + 1);
   pthread_mutex_init(sync.reconfiguration_mutex, NULL);
   pthread_mutex_init(sync.total_counts_mutex, NULL);
   sem_init(sync.delayed_moves_semaphore, 0, 0);
-  sem_init(sync.solving_receivers_semaphore, 0, 0);
   return sync;
 }
 
@@ -57,12 +54,10 @@ static void thread_sync_variables_free(struct ThreadSyncVariables sync) {
   pthread_mutex_destroy(sync.reconfiguration_mutex);
   pthread_mutex_destroy(sync.total_counts_mutex);
   sem_destroy(sync.delayed_moves_semaphore);
-  sem_destroy(sync.solving_receivers_semaphore);
   free(sync.barrier);
   free(sync.reconfiguration_mutex);
   free(sync.total_counts_mutex);
   free(sync.delayed_moves_semaphore);
-  free(sync.solving_receivers_semaphore);
 }
 
 static void thread_shared_variables_free(struct ThreadSharedVariables shared) {
@@ -153,16 +148,8 @@ static void *red_rec_parallel_thread(void *thread_input) {
 
   pthread_barrier_wait(input->sync.barrier);
 
-  if (input->thread_index == input->params->thread_num - 1) {
-    sem_post(input->sync.solving_receivers_semaphore);
-  }
-
-  int total_imbalance = counts_get_imbalance(*input->shared.total_counts);
-  if (total_imbalance < 0) {
-    pthread_exit(NULL);
-  }
-
-  if (input->thread_index == input->params->thread_num - 1) {
+  if (input->thread_index == 0 &&
+      counts_get_imbalance(*input->shared.total_counts) >= 0) {
     execute_delayed_moves(input);
   }
 
@@ -232,14 +219,12 @@ struct Reconfiguration *red_rec_parallel_single_consumer(struct Grid *grid,
                    &thread_inputs[i]);
   }
 
-  for (int i = 0; i < thread_num - 1; i++) {
-    pthread_join(thread_ids[i], NULL);
-  }
-
-  sem_wait(sync.solving_receivers_semaphore);
+  pthread_barrier_wait(sync.barrier);
 
   if (counts_get_imbalance(*shared.total_counts) < 0) {
-    pthread_join(thread_ids[thread_num - 1], NULL);
+    for (int i = 0; i < thread_num; i++) {
+      pthread_join(thread_ids[i], NULL);
+    }
 
     thread_sync_variables_free(sync);
     thread_shared_variables_free(shared);
@@ -253,7 +238,9 @@ struct Reconfiguration *red_rec_parallel_single_consumer(struct Grid *grid,
   produce_delayed_moves(grid, shared.column_counts, shared.receiver_order,
                         shared.delayed_moves, sync.delayed_moves_semaphore);
 
-  pthread_join(thread_ids[thread_num - 1], NULL);
+  for (int i = 0; i < thread_num; i++) {
+    pthread_join(thread_ids[i], NULL);
+  }
 
   thread_sync_variables_free(sync);
   thread_shared_variables_free(shared);
