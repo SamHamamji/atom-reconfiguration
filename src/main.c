@@ -12,9 +12,9 @@ static const struct Config {
   int width;
   int target_region_size;
 } config = {
-    .height = 1000,
-    .width = 1000,
-    .target_region_size = 500,
+    .height = 4000,
+    .width = 4000,
+    .target_region_size = 2000,
 };
 
 static const RedRecParallelParams params = {
@@ -24,18 +24,18 @@ static const RedRecParallelParams params = {
             .params = NULL,
             .name = "",
         },
-    .thread_num = 5,
+    .thread_num = 10,
 };
 
 int main() {
   seed_set_to_time();
 
-  for (int i = 0; i < 1000; i++) {
+  for (int i = 0; i < 10; i++) {
     struct Grid *grid = grid_factory.generate_compact_target_region(
         config.width, config.height, config.target_region_size);
 
     struct Reconfiguration *reconfiguration =
-        red_rec_deferred_solving(grid, &params);
+        red_rec_parallel_multiple_consumers(grid, &params);
 
     reconfiguration_free(reconfiguration);
     grid_free(grid);

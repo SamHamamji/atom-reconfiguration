@@ -16,6 +16,7 @@ extern GridSolverFunction red_rec;
 extern GridSolverFunction red_rec_deferred_solving;
 extern GridSolverFunction red_rec_parallel;
 extern GridSolverFunction red_rec_parallel_single_consumer;
+extern GridSolverFunction red_rec_parallel_multiple_consumers;
 
 typedef struct {
   struct LinearSolver *linear_solver;

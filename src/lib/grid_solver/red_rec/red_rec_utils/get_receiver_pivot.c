@@ -57,6 +57,10 @@ static struct Point *get_receiver_with_squished_sources_alias(
         grid, delayed_moves.pairs[i].donor_index, target_range);
     squished_sources.upper_reservoir += source_locations.upper_reservoir;
     squished_sources.lower_reservoir += source_locations.lower_reservoir;
+
+    assert(source_locations.lower_reservoir +
+               source_locations.upper_reservoir ==
+           delayed_moves.pairs[i].exchanged_sources_num);
   }
 
   // Squish the sources in the target range

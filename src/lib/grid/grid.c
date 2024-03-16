@@ -116,6 +116,21 @@ bool grid_is_solved(const struct Grid *grid) {
   return true;
 }
 
+bool grid_equals(const struct Grid *a, const struct Grid *b) {
+  if (a->width != b->width || a->height != b->height) {
+    return false;
+  }
+
+  for (int i = 0; i < a->width * a->height; i++) {
+    if (a->elements[i].is_source != b->elements[i].is_source ||
+        a->elements[i].is_target != b->elements[i].is_target) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 static struct Grid *generate_grid(int width, int height) {
   struct Grid *grid = malloc(sizeof(struct Grid));
   grid->width = width;

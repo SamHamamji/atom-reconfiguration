@@ -126,6 +126,33 @@ static const struct GridSolver *grid_solvers[] = {
             },
         .name = "Red rec parallel single consumer (8 threads)",
     },
+    &(struct GridSolver){
+        .solve = red_rec_parallel_multiple_consumers,
+        .params =
+            &(RedRecParallelParams){
+                .linear_solver = &default_linear_solver,
+                .thread_num = 1,
+            },
+        .name = "Red rec parallel multiple consumer (1 threads)",
+    },
+    &(struct GridSolver){
+        .solve = red_rec_parallel_multiple_consumers,
+        .params =
+            &(RedRecParallelParams){
+                .linear_solver = &default_linear_solver,
+                .thread_num = 3,
+            },
+        .name = "Red rec parallel multiple consumer (3 threads)",
+    },
+    &(struct GridSolver){
+        .solve = red_rec_parallel_multiple_consumers,
+        .params =
+            &(RedRecParallelParams){
+                .linear_solver = &default_linear_solver,
+                .thread_num = 8,
+            },
+        .name = "Red rec parallel multiple consumer (8 threads)",
+    },
 };
 
 static const struct PerformanceTestCasesConfig config = {

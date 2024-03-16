@@ -7,34 +7,46 @@
 #include "../../lib/utils/timer.h"
 #include "./test_grid_solvers.h"
 
-static void print_failed_test_case(const struct Grid *grid,
+static void print_failed_test_case(const struct Grid *initial_grid,
+                                   const struct Grid *output_grid,
+                                   const struct Grid *reconfigured_grid,
                                    const struct GridSolver *solver,
                                    int test_case_num) {
   printf("%s failed test case %d.\n", solver->name, test_case_num);
   printf("Initial grid:\n");
-  grid_print(grid);
+  grid_print(initial_grid);
+  printf("Output grid:\n");
+  grid_print(output_grid);
+  printf("Resulting grid:\n");
+  grid_print(reconfigured_grid);
 }
 
-static bool test_grid_solver_on_grid(const struct Grid *grid,
-                                     const struct GridSolver *solver) {
-  struct Grid *grid_input = grid_get_copy(grid);
-  struct Reconfiguration *reconfiguration =
-      solver->solve(grid_input, solver->params);
+static bool test_grid_solver_on_grid(const struct Grid *initial_grid,
+                                     const struct GridSolver *solver,
+                                     int test_case_num) {
+  struct Grid *grid = grid_get_copy(initial_grid);
+  struct Grid *reconfigured_grid = NULL;
+  struct Reconfiguration *reconfiguration = solver->solve(grid, solver->params);
 
   bool success;
-  if (!grid_is_solvable(grid)) {
+  if (!grid_is_solvable(initial_grid)) {
     success = reconfiguration == NULL;
   } else {
-    struct Grid *grid_test = grid_get_copy(grid);
-    grid_apply_reconfiguration(grid_test, reconfiguration);
+    reconfigured_grid = grid_get_copy(initial_grid);
+    grid_apply_reconfiguration(reconfigured_grid, reconfiguration);
 
-    success = (reconfiguration != NULL) && grid_is_solved(grid_test) &&
-              grid_is_solved(grid_input);
+    success = (reconfiguration != NULL) && grid_is_solved(reconfigured_grid) &&
+              grid_equals(grid, reconfigured_grid);
 
-    grid_free(grid_test);
+    grid_free(reconfigured_grid);
   }
 
-  grid_free(grid_input);
+  if (!success) {
+    print_failed_test_case(initial_grid, grid, reconfigured_grid, solver,
+                           test_case_num);
+  }
+
+  grid_free(grid);
   reconfiguration_free(reconfiguration);
 
   return success;
@@ -56,9 +68,9 @@ bool fuzz_test_grid_solvers(const struct GridSolversFuzzTestConfig config) {
     for (int solver_index = 0; solver_index < config.grid_solvers_num;
          solver_index++) {
       const struct GridSolver *solver = config.grid_solvers[solver_index];
-      if (!test_grid_solver_on_grid(grid, solver)) {
+      if (!test_grid_solver_on_grid(grid, solver, test_case_num)) {
         success = false;
-        print_failed_test_case(grid, solver, test_case_num);
+        break;
       }
     }
 

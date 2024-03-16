@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "../interval/mapping.h"
 #include "reconfiguration.h"
@@ -21,6 +22,13 @@ void reconfiguration_add_move(struct Reconfiguration *reconfiguration,
                               struct Move move) {
   reconfiguration->moves[reconfiguration->move_count] = move;
   reconfiguration->move_count++;
+}
+
+void reconfiguration_merge(struct Reconfiguration *reconfiguration,
+                           const struct Reconfiguration *other) {
+  memcpy(&reconfiguration->moves[reconfiguration->move_count], other->moves,
+         other->move_count * sizeof(other->moves[0]));
+  reconfiguration->move_count += other->move_count;
 }
 
 /**
@@ -132,22 +140,13 @@ void grid_apply_move(struct Grid *grid, struct Move move) {
       .is_source = true;
 }
 
-void grid_apply_move_range(struct Grid *grid,
-                           const struct Reconfiguration *reconfiguration,
-                           struct Range range) {
-  for (int i = range.start; i < range.exclusive_end; i++) {
-    grid_apply_move(grid, reconfiguration->moves[i]);
-  }
-}
-
 void grid_apply_reconfiguration(struct Grid *grid,
                                 const struct Reconfiguration *reconfiguration) {
   if (reconfiguration == NULL) {
     return;
   }
-  grid_apply_move_range(grid, reconfiguration,
-                        (struct Range){
-                            .start = 0,
-                            .exclusive_end = reconfiguration->move_count,
-                        });
+
+  for (int i = 0; i < reconfiguration->move_count; i++) {
+    grid_apply_move(grid, reconfiguration->moves[i]);
+  }
 }
