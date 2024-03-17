@@ -1,5 +1,5 @@
-#include "./red_rec_parallel_utils.h"
 #include "../red_rec_utils/red_rec_utils.h"
+#include "./red_rec_parallel_utils.h"
 
 void compute_counts_and_solve_donors_parallel(
     struct RedRecThreadInputContext context, struct Counts *column_counts,
