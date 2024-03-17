@@ -1,20 +1,12 @@
 #include <assert.h>
-#include <pthread.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
 #include "../grid_solver.h"
+#include "./red_rec_parallel_utils/red_rec_parallel_utils.h"
 #include "./red_rec_utils/red_rec_utils.h"
 
-struct ThreadInputContext {
-  struct Grid *grid;
-  struct Reconfiguration *reconfiguration;
-  struct Range target_range;
-};
-
 struct ThreadSyncVariables {
-  pthread_barrier_t *barrier;
-  pthread_mutex_t *total_counts_mutex;
   pthread_mutex_t *reconfiguration_mutex;
 };
 
@@ -24,7 +16,7 @@ struct ThreadSharedVariables {
 };
 
 struct ThreadInput {
-  struct ThreadInputContext context;
+  struct RedRecThreadInputContext context;
   struct ThreadSyncVariables sync;
   struct ThreadSharedVariables shared;
   const RedRecParallelParams *params;
@@ -32,12 +24,8 @@ struct ThreadInput {
 };
 
 static void thread_sync_variables_free(struct ThreadSyncVariables sync) {
-  pthread_barrier_destroy(sync.barrier);
   pthread_mutex_destroy(sync.reconfiguration_mutex);
-  pthread_mutex_destroy(sync.total_counts_mutex);
-  free(sync.barrier);
   free(sync.reconfiguration_mutex);
-  free(sync.total_counts_mutex);
 }
 
 static void thread_shared_variables_free(struct ThreadSharedVariables shared) {
@@ -74,49 +62,14 @@ static void solve_receiver(struct Grid *grid,
 static void *red_rec_parallel_thread(void *thread_input) {
   struct ThreadInput *input = (struct ThreadInput *)thread_input;
 
-  // Step 1: Compute counts
   struct Range column_range =
       get_range(input->thread_index, input->params->thread_num,
                 input->context.grid->width);
 
-  for (int i = column_range.start; i < column_range.exclusive_end; i++) {
-    input->shared.column_counts[i] = interval_get_counts(&(struct Interval){
-        .array = grid_get_column(input->context.grid, i),
-        .length = input->context.grid->height,
-    });
-
-    pthread_mutex_lock(input->sync.total_counts_mutex);
-    input->shared.total_counts->source_num +=
-        input->shared.column_counts[i].source_num;
-    input->shared.total_counts->target_num +=
-        input->shared.column_counts[i].target_num;
-    pthread_mutex_unlock(input->sync.total_counts_mutex);
-  }
-
-  for (int i = column_range.start; i < column_range.exclusive_end; i++) {
-    if (counts_get_imbalance(input->shared.column_counts[i]) >= 0) {
-      struct Mapping *mapping = input->params->linear_solver->solve(
-          &(const struct Interval){
-              .array = grid_get_column(input->context.grid, i),
-              .length = input->context.grid->height,
-          },
-          input->params->linear_solver->params);
-
-      pthread_mutex_lock(input->sync.reconfiguration_mutex);
-      reconfiguration_add_mapping(input->context.reconfiguration,
-                                  input->context.grid, mapping, i);
-      pthread_mutex_unlock(input->sync.reconfiguration_mutex);
-
-      mapping_free(mapping);
-    }
-  }
-
-  pthread_barrier_wait(input->sync.barrier);
-
-  int total_imbalance = counts_get_imbalance(*input->shared.total_counts);
-  if (total_imbalance < 0) {
-    pthread_exit(NULL);
-  }
+  compute_counts_and_solve_donors_parallel(
+      input->context, input->shared.column_counts, input->shared.total_counts,
+      input->params->linear_solver, input->sync.reconfiguration_mutex,
+      column_range);
 
   pthread_exit(NULL);
 }
@@ -156,15 +109,11 @@ struct Reconfiguration *red_rec_parallel(struct Grid *grid,
   assert(thread_num > 0);
 
   struct ThreadSyncVariables sync = {
-      .barrier = malloc(sizeof(pthread_barrier_t)),
       .reconfiguration_mutex = malloc(sizeof(pthread_mutex_t)),
-      .total_counts_mutex = malloc(sizeof(pthread_mutex_t)),
   };
-  pthread_barrier_init(sync.barrier, NULL, thread_num);
   pthread_mutex_init(sync.reconfiguration_mutex, NULL);
-  pthread_mutex_init(sync.total_counts_mutex, NULL);
 
-  struct ThreadInputContext context = {
+  struct RedRecThreadInputContext context = {
       .grid = grid,
       .reconfiguration = reconfiguration_new(2 * grid->width * grid->height),
       .target_range = grid_get_compact_target_region_range(grid),

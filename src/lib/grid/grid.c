@@ -1,5 +1,4 @@
 #include <assert.h>
-#include <limits.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -73,8 +72,8 @@ struct Range grid_get_compact_target_region_range(const struct Grid *grid) {
   assert(grid_target_region_is_compact(grid));
 
   struct Range target_range = {
-      .start = INT_MAX,
-      .exclusive_end = INT_MIN,
+      .start = grid->width,
+      .exclusive_end = 0,
   };
 
   if (grid->width == 0 || grid->height == 0) {

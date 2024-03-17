@@ -5,13 +5,13 @@
 #include "../grid_solver.h"
 #include "./red_rec_utils/red_rec_utils.h"
 
-static void solve_self_sufficient_columns(
-    struct Grid *grid, struct Reconfiguration *reconfiguration,
-    const struct Counts *column_counts, const RedRecParams *params) {
+static void solve_donors(struct Grid *grid,
+                         struct Reconfiguration *reconfiguration,
+                         const struct Counts *column_counts,
+                         const RedRecParams *params) {
   for (int column_index = 0; column_index < grid->width; column_index++) {
     if (counts_get_imbalance(column_counts[column_index]) >= 0) {
-      solve_self_sufficient_column(grid, reconfiguration, column_index,
-                                   params->linear_solver);
+      solve_donor(grid, reconfiguration, column_index, params->linear_solver);
     }
   }
 }
@@ -98,8 +98,7 @@ struct Reconfiguration *red_rec_deferred_solving(struct Grid *grid,
   struct Reconfiguration *reconfiguration =
       reconfiguration_new(2 * grid->width * grid->height);
 
-  solve_self_sufficient_columns(grid, reconfiguration, column_counts,
-                                red_rec_params);
+  solve_donors(grid, reconfiguration, column_counts, red_rec_params);
 
   solver_receiver_columns(grid, reconfiguration, column_counts, target_range,
                           red_rec_params);

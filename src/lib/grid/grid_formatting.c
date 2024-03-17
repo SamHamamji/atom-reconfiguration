@@ -12,6 +12,11 @@ static int integer_length(int num) {
 }
 
 void grid_print(const struct Grid *grid) {
+  if (grid == NULL) {
+    printf("NULL grid\n");
+    return;
+  }
+
   if (grid->height == 0 || grid->width == 0) {
     printf("Empty grid\n");
     return;

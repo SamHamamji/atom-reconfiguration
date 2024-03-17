@@ -49,10 +49,8 @@ void execute_move(struct Grid *grid, struct Reconfiguration *reconfiguration,
                   struct Range *fixed_sources_range,
                   struct ColumnPair column_pair);
 
-void solve_self_sufficient_column(struct Grid *grid,
-                                  struct Reconfiguration *reconfiguration,
-                                  int column_index,
-                                  const struct LinearSolver *linear_solver);
+void solve_donor(struct Grid *grid, struct Reconfiguration *reconfiguration,
+                 int column_index, const struct LinearSolver *linear_solver);
 
 struct ReceiverOrder {
   int *receiver_indexes;

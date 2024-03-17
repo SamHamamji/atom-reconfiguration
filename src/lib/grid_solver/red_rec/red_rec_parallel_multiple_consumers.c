@@ -6,17 +6,11 @@
 #include <stdlib.h>
 
 #include "../grid_solver.h"
+#include "./red_rec_parallel_utils/red_rec_parallel_utils.h"
 #include "./red_rec_utils/red_rec_utils.h"
-
-struct ThreadInputContext {
-  struct Grid *grid;
-  struct Reconfiguration *reconfiguration;
-  struct Range target_range;
-};
 
 struct ThreadSyncVariables {
   pthread_barrier_t *barrier;
-  pthread_mutex_t *total_counts_mutex;
   pthread_mutex_t *reconfiguration_mutex;
   pthread_mutex_t *delayed_moves_mutex;
   int *delayed_moves_counter;
@@ -32,7 +26,7 @@ struct ThreadSharedVariables {
 };
 
 struct ThreadInput {
-  struct ThreadInputContext context;
+  struct RedRecThreadInputContext context;
   struct ThreadSyncVariables sync;
   struct ThreadSharedVariables shared;
   const RedRecParallelParams *params;
@@ -44,7 +38,6 @@ static struct ThreadSyncVariables thread_sync_variables_new(int thread_num,
   struct ThreadSyncVariables sync = {
       .barrier = malloc(sizeof(pthread_barrier_t)),
       .reconfiguration_mutex = malloc(sizeof(pthread_mutex_t)),
-      .total_counts_mutex = malloc(sizeof(pthread_mutex_t)),
       .delayed_moves_mutex = malloc(sizeof(pthread_mutex_t)),
       .delayed_moves_counter = malloc(sizeof(int)),
       .column_mutexes = malloc(grid_width * sizeof(pthread_mutex_t)),
@@ -52,7 +45,6 @@ static struct ThreadSyncVariables thread_sync_variables_new(int thread_num,
   };
   pthread_barrier_init(sync.barrier, NULL, thread_num + 1);
   pthread_mutex_init(sync.reconfiguration_mutex, NULL);
-  pthread_mutex_init(sync.total_counts_mutex, NULL);
   pthread_mutex_init(sync.delayed_moves_mutex, NULL);
   *sync.delayed_moves_counter = 0;
   for (int i = 0; i < grid_width; i++) {
@@ -66,7 +58,6 @@ static void thread_sync_variables_free(struct ThreadSyncVariables sync,
                                        int grid_width) {
   pthread_barrier_destroy(sync.barrier);
   pthread_mutex_destroy(sync.reconfiguration_mutex);
-  pthread_mutex_destroy(sync.total_counts_mutex);
   pthread_mutex_destroy(sync.delayed_moves_mutex);
   for (int i = 0; i < grid_width; i++) {
     pthread_mutex_destroy(&sync.column_mutexes[i]);
@@ -74,7 +65,6 @@ static void thread_sync_variables_free(struct ThreadSyncVariables sync,
   sem_destroy(sync.delayed_moves_semaphore);
   free(sync.barrier);
   free(sync.reconfiguration_mutex);
-  free(sync.total_counts_mutex);
   free(sync.delayed_moves_mutex);
   free(sync.delayed_moves_counter);
   free(sync.column_mutexes);
@@ -169,37 +159,10 @@ static void *red_rec_parallel_thread(void *thread_input) {
       get_range(input->thread_index, input->params->thread_num,
                 input->context.grid->width);
 
-  for (int i = column_range.start; i < column_range.exclusive_end; i++) {
-    input->shared.column_counts[i] = interval_get_counts(&(struct Interval){
-        .array = grid_get_column(input->context.grid, i),
-        .length = input->context.grid->height,
-    });
-
-    pthread_mutex_lock(input->sync.total_counts_mutex);
-    input->shared.total_counts->source_num +=
-        input->shared.column_counts[i].source_num;
-    input->shared.total_counts->target_num +=
-        input->shared.column_counts[i].target_num;
-    pthread_mutex_unlock(input->sync.total_counts_mutex);
-  }
-
-  for (int i = column_range.start; i < column_range.exclusive_end; i++) {
-    if (counts_get_imbalance(input->shared.column_counts[i]) >= 0) {
-      struct Mapping *mapping = input->params->linear_solver->solve(
-          &(const struct Interval){
-              .array = grid_get_column(input->context.grid, i),
-              .length = input->context.grid->height,
-          },
-          input->params->linear_solver->params);
-
-      pthread_mutex_lock(input->sync.reconfiguration_mutex);
-      reconfiguration_add_mapping(input->context.reconfiguration,
-                                  input->context.grid, mapping, i);
-      pthread_mutex_unlock(input->sync.reconfiguration_mutex);
-
-      mapping_free(mapping);
-    }
-  }
+  compute_counts_and_solve_donors_parallel(
+      input->context, input->shared.column_counts, input->shared.total_counts,
+      input->params->linear_solver, input->sync.reconfiguration_mutex,
+      column_range);
 
   pthread_barrier_wait(input->sync.barrier);
 
@@ -245,7 +208,7 @@ red_rec_parallel_multiple_consumers(struct Grid *grid, const void *params) {
   int thread_num = ((RedRecParallelParams *)params)->thread_num;
   assert(thread_num > 0);
 
-  struct ThreadInputContext context = {
+  struct RedRecThreadInputContext context = {
       .grid = grid,
       .reconfiguration = reconfiguration_new(2 * grid->width * grid->height),
       .target_range = grid_get_compact_target_region_range(grid),
