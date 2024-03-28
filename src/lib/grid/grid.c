@@ -73,7 +73,7 @@ struct Range grid_get_compact_target_region_range(const struct Grid *grid) {
 
   struct Range target_range = {
       .start = grid->width,
-      .exclusive_end = 0,
+      .exclusive_end = grid->width,
   };
 
   if (grid->width == 0 || grid->height == 0) {
@@ -91,6 +91,8 @@ struct Range grid_get_compact_target_region_range(const struct Grid *grid) {
     i++;
   }
   target_range.exclusive_end = i;
+
+  assert(target_range.start <= target_range.exclusive_end);
   return target_range;
 }
 
