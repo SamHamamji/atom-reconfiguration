@@ -25,7 +25,11 @@ make all <BUILD_TYPE=dev|release|scan-build>
 
 ### Running performance tests
 ```sh
-./bin/performance_test.out
+./bin/grid_performance_test.out
+```
+
+```sh
+./bin/linear_performance_test.out
 ```
 
 ### Visualizing performance results
