@@ -88,8 +88,8 @@ struct Reconfiguration *red_rec(struct Grid *grid, const void *params) {
   }
 
   struct Range target_range = grid_get_compact_target_region_range(grid);
-  struct Reconfiguration *reconfiguration =
-      reconfiguration_new(2 * grid->width * grid->height);
+  struct Reconfiguration *reconfiguration = reconfiguration_new(
+      2 * grid->width * (target_range.exclusive_end - target_range.start));
 
   solve_donors(grid, reconfiguration, column_counts, red_rec_params);
 

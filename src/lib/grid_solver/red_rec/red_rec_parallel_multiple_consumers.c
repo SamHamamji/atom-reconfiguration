@@ -223,9 +223,11 @@ red_rec_parallel_multiple_consumers(struct Grid *grid, const void *params) {
 
   struct RedRecThreadInputContext context = {
       .grid = grid,
-      .reconfiguration = reconfiguration_new(2 * grid->width * grid->height),
       .target_range = grid_get_compact_target_region_range(grid),
   };
+  context.reconfiguration = reconfiguration_new(
+      2 * grid->width *
+      (context.target_range.exclusive_end - context.target_range.start));
 
   struct ThreadSharedVariables shared = {
       .column_counts = malloc(grid->width * sizeof(struct Counts)),

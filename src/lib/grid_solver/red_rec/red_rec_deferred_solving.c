@@ -96,7 +96,7 @@ struct Reconfiguration *red_rec_deferred_solving(struct Grid *grid,
 
   struct Range target_range = grid_get_compact_target_region_range(grid);
   struct Reconfiguration *reconfiguration =
-      reconfiguration_new(2 * grid->width * grid->height);
+      reconfiguration_new(2 * total_counts.target_num);
 
   solve_donors(grid, reconfiguration, column_counts, red_rec_params);
 
