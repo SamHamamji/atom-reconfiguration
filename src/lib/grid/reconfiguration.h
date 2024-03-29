@@ -18,9 +18,6 @@ struct Reconfiguration *reconfiguration_new(int max_move_count);
 void reconfiguration_add_move(struct Reconfiguration *reconfiguration,
                               struct Move move);
 
-void reconfiguration_merge(struct Reconfiguration *reconfiguration,
-                           const struct Reconfiguration *other);
-
 /**
  * Unobstructs and adds a 1d obstructed `mapping` to `reconfiguration`, mutates
  * `grid` too.

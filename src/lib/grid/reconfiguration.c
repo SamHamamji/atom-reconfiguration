@@ -24,13 +24,6 @@ void reconfiguration_add_move(struct Reconfiguration *reconfiguration,
   reconfiguration->move_count++;
 }
 
-void reconfiguration_merge(struct Reconfiguration *reconfiguration,
-                           const struct Reconfiguration *other) {
-  memcpy(&reconfiguration->moves[reconfiguration->move_count], other->moves,
-         other->move_count * sizeof(other->moves[0]));
-  reconfiguration->move_count += other->move_count;
-}
-
 /**
  * Requirement: Assumes `mapping` is sorted by `source`.
  */

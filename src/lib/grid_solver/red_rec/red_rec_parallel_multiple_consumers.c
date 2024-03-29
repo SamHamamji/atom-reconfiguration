@@ -2,8 +2,8 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "../grid_solver.h"
 #include "./red_rec_parallel_utils/red_rec_parallel_utils.h"
@@ -48,7 +48,7 @@ static struct ThreadSyncVariables thread_sync_variables_new(int thread_num,
   pthread_mutex_init(sync.delayed_moves_mutex, NULL);
   *sync.delayed_moves_counter = 0;
   for (int i = 0; i < grid_width; i++) {
-    pthread_mutex_init(&sync.column_mutexes[i], 0);
+    pthread_mutex_init(&sync.column_mutexes[i], NULL);
   }
   sem_init(sync.delayed_moves_semaphore, 0, 0);
   return sync;
@@ -78,7 +78,9 @@ static void thread_shared_variables_free(struct ThreadSharedVariables shared) {
   receiver_order_free(shared.receiver_order);
 }
 
-static void solve_receiver(struct ThreadInput *input, int receiver_index) {
+static struct Reconfiguration *
+generate_receiver_reconfiguration(struct ThreadInput *input,
+                                  int receiver_index) {
   struct ReceiverDelayedMoves receiver_delayed_moves =
       input->shared.delayed_moves.array[receiver_index];
 
@@ -91,31 +93,22 @@ static void solve_receiver(struct ThreadInput *input, int receiver_index) {
       .exclusive_end = receiver_pivot,
   };
 
-  struct Reconfiguration *local_reconfiguration =
+  struct Reconfiguration *reconfiguration =
       reconfiguration_new(2 * (input->context.target_range.exclusive_end -
                                input->context.target_range.start));
 
-  execute_move(input->context.grid, local_reconfiguration, fixed_sources_range,
+  execute_move(input->context.grid, reconfiguration, fixed_sources_range,
                (struct ColumnPair){
                    .donor_index = receiver_index,
                    .receiver_index = receiver_index,
                });
 
   for (int i = 0; i < receiver_delayed_moves.length; i++) {
-    execute_move(input->context.grid, local_reconfiguration,
-                 fixed_sources_range, receiver_delayed_moves.pairs[i]);
+    execute_move(input->context.grid, reconfiguration, fixed_sources_range,
+                 receiver_delayed_moves.pairs[i]);
   }
 
-  pthread_mutex_lock(input->sync.reconfiguration_mutex);
-  reconfiguration_merge(input->context.reconfiguration, local_reconfiguration);
-  pthread_mutex_unlock(input->sync.reconfiguration_mutex);
-
-  pthread_mutex_unlock(
-      &input->sync.column_mutexes[receiver_delayed_moves
-                                      .pairs[receiver_delayed_moves.length - 1]
-                                      .donor_index]);
-
-  reconfiguration_free(local_reconfiguration);
+  return reconfiguration;
 }
 
 static void execute_delayed_moves(struct ThreadInput *input) {
@@ -147,7 +140,28 @@ static void execute_delayed_moves(struct ThreadInput *input) {
           &input->sync.column_mutexes[delayed_moves.pairs[j].donor_index]);
     }
 
-    solve_receiver(input, receiver_index);
+    struct Reconfiguration *private_reconfiguration =
+        generate_receiver_reconfiguration(input, receiver_index);
+
+    pthread_mutex_lock(input->sync.reconfiguration_mutex);
+    int reconfiguration_initial_length =
+        input->context.reconfiguration->move_count;
+    input->context.reconfiguration->move_count +=
+        private_reconfiguration->move_count;
+    pthread_mutex_unlock(input->sync.reconfiguration_mutex);
+
+    memcpy(
+        &input->context.reconfiguration->moves[reconfiguration_initial_length],
+        private_reconfiguration->moves,
+        private_reconfiguration->move_count *
+            sizeof(private_reconfiguration->moves[0]));
+
+    pthread_mutex_unlock(
+        &input->sync.column_mutexes
+             [delayed_moves.pairs[delayed_moves.length - 1].donor_index]);
+
+    reconfiguration_free(private_reconfiguration);
+
     sem_wait(input->sync.delayed_moves_semaphore);
   }
 }

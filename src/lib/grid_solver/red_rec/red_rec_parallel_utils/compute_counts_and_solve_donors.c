@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "../red_rec_utils/red_rec_utils.h"
 #include "./red_rec_parallel_utils.h"
 
@@ -25,12 +27,19 @@ void compute_counts_and_solve_donors_parallel(
   }
 
   pthread_mutex_lock(reconfiguration_mutex);
-  reconfiguration_merge(context.reconfiguration, private_reconfiguration);
+  int reconfiguration_initial_length = context.reconfiguration->move_count;
+  context.reconfiguration->move_count += private_reconfiguration->move_count;
+
   *total_counts = (struct Counts){
       .source_num = total_counts->source_num + private_counts.source_num,
       .target_num = total_counts->target_num + private_counts.target_num,
   };
   pthread_mutex_unlock(reconfiguration_mutex);
+
+  memcpy(&context.reconfiguration->moves[reconfiguration_initial_length],
+         private_reconfiguration->moves,
+         private_reconfiguration->move_count *
+             sizeof(private_reconfiguration->moves[0]));
 
   reconfiguration_free(private_reconfiguration);
 }
