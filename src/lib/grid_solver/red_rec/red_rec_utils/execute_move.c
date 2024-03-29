@@ -34,6 +34,8 @@ void execute_move(struct Grid *grid, struct Reconfiguration *reconfiguration,
       reconfiguration_add_move(reconfiguration, horizontal_move);
       reconfiguration_add_move(reconfiguration, vertical_move);
 
+      // Moves are not asserted to be valid since they might be obstructed by a
+      // source in intermediary columns, especially in a multithreaded context
       grid_apply_move(grid, horizontal_move);
       grid_apply_move(grid, vertical_move);
 

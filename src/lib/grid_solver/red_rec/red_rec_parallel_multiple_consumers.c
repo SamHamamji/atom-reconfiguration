@@ -143,18 +143,17 @@ static void execute_delayed_moves(struct ThreadInput *input) {
     struct Reconfiguration *private_reconfiguration =
         generate_receiver_reconfiguration(input, receiver_index);
 
-    pthread_mutex_lock(input->sync.reconfiguration_mutex);
-    int reconfiguration_initial_length =
-        input->context.reconfiguration->move_count;
-    input->context.reconfiguration->move_count +=
-        private_reconfiguration->move_count;
-    pthread_mutex_unlock(input->sync.reconfiguration_mutex);
+    assert(private_reconfiguration->move_count ==
+           2 * (input->context.target_range.exclusive_end -
+                input->context.target_range.start));
 
-    memcpy(
-        &input->context.reconfiguration->moves[reconfiguration_initial_length],
-        private_reconfiguration->moves,
-        private_reconfiguration->move_count *
-            sizeof(private_reconfiguration->moves[0]));
+    int destination_index = input->context.reconfiguration->move_count +
+                            i * private_reconfiguration->move_count;
+
+    memcpy(&input->context.reconfiguration->moves[destination_index],
+           private_reconfiguration->moves,
+           private_reconfiguration->move_count *
+               sizeof(private_reconfiguration->moves[0]));
 
     pthread_mutex_unlock(
         &input->sync.column_mutexes
@@ -278,6 +277,11 @@ red_rec_parallel_multiple_consumers(struct Grid *grid, const void *params) {
   for (int i = 0; i < thread_num; i++) {
     pthread_join(thread_ids[i], NULL);
   }
+
+  // Increment move count by two moves per target for every receiver column
+  context.reconfiguration->move_count +=
+      2 * shared.receiver_order->receiver_num *
+      (context.target_range.exclusive_end - context.target_range.start);
 
   thread_sync_variables_free(sync, grid->width);
   thread_shared_variables_free(shared);

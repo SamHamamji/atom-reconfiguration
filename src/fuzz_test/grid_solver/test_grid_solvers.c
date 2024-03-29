@@ -7,18 +7,27 @@
 #include "../../lib/utils/timer.h"
 #include "./test_grid_solvers.h"
 
-static void print_failed_test_case(const struct Grid *initial_grid,
-                                   const struct Grid *output_grid,
-                                   const struct Grid *reconfigured_grid,
-                                   const struct GridSolver *solver,
-                                   int test_case_num) {
+static void
+print_failed_test_case(const struct Grid *initial_grid,
+                       const struct Grid *output_grid,
+                       const struct Grid *reconfigured_grid,
+                       const struct Reconfiguration *reconfiguration,
+                       const struct GridSolver *solver, int test_case_num) {
   printf("%s failed test case %d.\n", solver->name, test_case_num);
+  if (initial_grid->width * initial_grid->height > 1000) {
+    printf("Testcase not shown because it is too big (%dx%d grid)\n",
+           initial_grid->width, initial_grid->height);
+    return;
+  }
+
   printf("Initial grid:\n");
   grid_print(initial_grid);
   printf("Output grid:\n");
   grid_print(output_grid);
   printf("Resulting grid:\n");
   grid_print(reconfigured_grid);
+  printf("Reconfiguration:\n");
+  reconfiguration_print(reconfiguration);
 }
 
 static bool test_grid_solver_on_grid(const struct Grid *initial_grid,
@@ -37,16 +46,15 @@ static bool test_grid_solver_on_grid(const struct Grid *initial_grid,
 
     success = (reconfiguration != NULL) && grid_is_solved(reconfigured_grid) &&
               grid_equals(grid, reconfigured_grid);
-
-    grid_free(reconfigured_grid);
   }
 
   if (!success) {
-    print_failed_test_case(initial_grid, grid, reconfigured_grid, solver,
-                           test_case_num);
+    print_failed_test_case(initial_grid, grid, reconfigured_grid,
+                           reconfiguration, solver, test_case_num);
   }
 
   grid_free(grid);
+  grid_free(reconfigured_grid);
   reconfiguration_free(reconfiguration);
 
   return success;

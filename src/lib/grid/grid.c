@@ -16,6 +16,10 @@ struct Grid *grid_get_copy(const struct Grid *grid) {
 }
 
 void grid_free(struct Grid *grid) {
+  if (grid == NULL) {
+    return;
+  }
+
   free(grid->elements);
   free(grid);
 }

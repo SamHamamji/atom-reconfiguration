@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "../interval/mapping.h"
+#include "grid.h"
 #include "reconfiguration.h"
 
 struct Reconfiguration *reconfiguration_new(int max_move_count) {
@@ -36,11 +37,9 @@ void reconfiguration_add_mapping(struct Reconfiguration *reconfiguration,
       malloc(mapping->pair_count * sizeof(struct Pair));
 
   for (int i = 0; i < mapping->pair_count; i++) {
-    bool move_is_valid =
-        (mapping->pairs[i].source >= mapping->pairs[i].target) ||
+    if (mapping->pairs[i].source >= mapping->pairs[i].target ||
         (i + 1 < mapping->pair_count &&
-         mapping->pairs[i + 1].source > mapping->pairs[i].target);
-    if (move_is_valid) {
+         mapping->pairs[i + 1].source > mapping->pairs[i].target)) {
       reconfiguration_add_move(
           reconfiguration,
           (struct Move){
@@ -48,6 +47,9 @@ void reconfiguration_add_mapping(struct Reconfiguration *reconfiguration,
               .destination = {.col = column_index,
                               .row = mapping->pairs[i].target},
           });
+
+      assert(move_is_valid(
+          grid, reconfiguration->moves[reconfiguration->move_count - 1]));
       grid_apply_move(grid,
                       reconfiguration->moves[reconfiguration->move_count - 1]);
     } else {
@@ -65,6 +67,9 @@ void reconfiguration_add_mapping(struct Reconfiguration *reconfiguration,
             .destination = {.col = column_index,
                             .row = delayed_stack[stack_head - 1].target},
         });
+
+    assert(move_is_valid(
+        grid, reconfiguration->moves[reconfiguration->move_count - 1]));
     grid_apply_move(grid,
                     reconfiguration->moves[reconfiguration->move_count - 1]);
     stack_head--;
@@ -125,7 +130,9 @@ bool move_is_valid(const struct Grid *grid, struct Move move) {
 }
 
 void grid_apply_move(struct Grid *grid, struct Move move) {
-  assert(move_is_valid(grid, move));
+  assert(grid_get_point(grid, move.origin).is_source);
+  assert(!(grid_get_point(grid, move.destination).is_source) ||
+         coordinates_are_equal(move.origin, move.destination));
 
   grid->elements[move.origin.col * grid->height + move.origin.row].is_source =
       false;
@@ -140,6 +147,7 @@ void grid_apply_reconfiguration(struct Grid *grid,
   }
 
   for (int i = 0; i < reconfiguration->move_count; i++) {
+    assert(move_is_valid);
     grid_apply_move(grid, reconfiguration->moves[i]);
   }
 }
