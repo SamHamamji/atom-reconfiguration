@@ -112,9 +112,10 @@ generate_receiver_reconfiguration(struct ThreadInput *input,
 }
 
 static void execute_delayed_moves(struct ThreadInput *input) {
-  sem_wait(input->sync.delayed_moves_semaphore);
 
   while (true) {
+    sem_wait(input->sync.delayed_moves_semaphore);
+
     pthread_mutex_lock(input->sync.delayed_moves_mutex);
     int i = (*input->sync.delayed_moves_counter)++;
 
@@ -127,41 +128,36 @@ static void execute_delayed_moves(struct ThreadInput *input) {
     struct ReceiverDelayedMoves delayed_moves =
         input->shared.delayed_moves.array[receiver_index];
 
-    pthread_mutex_lock(
-        &input->sync.column_mutexes
-             [delayed_moves.pairs[delayed_moves.length - 1].donor_index]);
+    int last_donor_index =
+        delayed_moves.pairs[delayed_moves.length - 1].donor_index;
+    pthread_mutex_lock(&input->sync.column_mutexes[last_donor_index]);
 
     pthread_mutex_unlock(input->sync.delayed_moves_mutex);
 
     for (int j = 0; j < delayed_moves.length - 1; j++) {
+      // Donor will be emptied and never used again
       pthread_mutex_lock(
-          &input->sync.column_mutexes[delayed_moves.pairs[j].donor_index]);
-      pthread_mutex_unlock(
           &input->sync.column_mutexes[delayed_moves.pairs[j].donor_index]);
     }
 
     struct Reconfiguration *private_reconfiguration =
         generate_receiver_reconfiguration(input, receiver_index);
 
+    pthread_mutex_unlock(&input->sync.column_mutexes[last_donor_index]);
+
     assert(private_reconfiguration->move_count ==
            2 * (input->context.target_range.exclusive_end -
                 input->context.target_range.start));
 
-    int destination_index = input->context.reconfiguration->move_count +
-                            i * private_reconfiguration->move_count;
+    int copy_destination = input->context.reconfiguration->move_count +
+                           i * private_reconfiguration->move_count;
 
-    memcpy(&input->context.reconfiguration->moves[destination_index],
+    memcpy(&input->context.reconfiguration->moves[copy_destination],
            private_reconfiguration->moves,
            private_reconfiguration->move_count *
                sizeof(private_reconfiguration->moves[0]));
 
-    pthread_mutex_unlock(
-        &input->sync.column_mutexes
-             [delayed_moves.pairs[delayed_moves.length - 1].donor_index]);
-
     reconfiguration_free(private_reconfiguration);
-
-    sem_wait(input->sync.delayed_moves_semaphore);
   }
 }
 
