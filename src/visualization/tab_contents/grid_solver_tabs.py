@@ -82,3 +82,25 @@ class SizeGrid(html.Div):
         )
         grid_title = html.H1("Performance by grid size")
         html.Div.__init__(self, [grid_title, grid])
+
+
+class ImbalanceGrid(html.Div):
+    config = ScatterConfig(
+        x=CsvHeader.GRID_SIZE,
+        y=CsvHeader.TIME_TAKEN,
+        color=CsvHeader.IMBALANCE_PERCENT,
+        header=CsvHeader.GRID_SOLVER,
+    )
+
+    def __init__(self, dataframe: pd.DataFrame):
+        grid_solvers = dataframe[CsvHeader.GRID_SOLVER.value].unique()
+
+        grid = html.Div(
+            [
+                ScatterElement(dataframe, ImbalanceGrid.config, grid_solver)
+                for grid_solver in grid_solvers
+            ],
+            className="grid",
+        )
+        grid_title = html.H1("Performance by imbalance percentage")
+        html.Div.__init__(self, [grid_title, grid])

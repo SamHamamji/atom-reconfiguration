@@ -3,13 +3,19 @@ from dash import html
 
 from .app import App
 from CsvHeader import CsvHeader
-from tab_contents.grid_solver_tabs import OverviewElement, DimensionsGrid, SizeGrid
+from tab_contents.grid_solver_tabs import (
+    OverviewElement,
+    DimensionsGrid,
+    ImbalanceGrid,
+    SizeGrid,
+)
 
 
 class GridSolverApp(App):
     tab_content_types: dict[str, type[html.Div]] = {
         "Overview": OverviewElement,
         "Dimensions Grid": DimensionsGrid,
+        "Imbalance Grid": ImbalanceGrid,
         "Size Grid": SizeGrid,
     }
 
