@@ -147,7 +147,7 @@ void grid_apply_reconfiguration(struct Grid *grid,
   }
 
   for (int i = 0; i < reconfiguration->move_count; i++) {
-    assert(move_is_valid);
+    assert(move_is_valid(grid, reconfiguration->moves[i]));
     grid_apply_move(grid, reconfiguration->moves[i]);
   }
 }
