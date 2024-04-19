@@ -12,14 +12,25 @@ struct ColumnPair {
 
 bool column_pair_exists(struct ColumnPair pair);
 
+struct ColumnPairPQ {
+  struct ColumnPair *pairs;
+  struct Counts *column_counts;
+  int pair_num;
+  int grid_width;
+};
+
+struct ColumnPairPQ column_pair_pq_new(struct Counts *column_counts,
+                                       int grid_width);
+
+void column_pair_pq_free(struct ColumnPairPQ *pq);
+
 /**
  * Returns the best column pair, ensuring that the pair only contains
  * solved columns between the donor and the receiver
  *
  * If no redistribution can be done anymore, returns a nonexistent pair
  */
-struct ColumnPair column_pair_get_best(const struct Grid *grid,
-                                       const struct Counts *column_counts);
+struct ColumnPair column_pair_pq_pop(struct ColumnPairPQ *pq);
 
 struct ReceiverDelayedMoves {
   struct ColumnPair *pairs;

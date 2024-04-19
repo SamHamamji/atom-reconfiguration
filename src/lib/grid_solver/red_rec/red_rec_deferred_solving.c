@@ -48,8 +48,11 @@ static void solver_receiver_columns(struct Grid *grid,
                                     struct Range target_range,
                                     const RedRecParams *params) {
   struct DelayedMoves delayed_moves = delayed_moves_new(grid);
-  struct ColumnPair best_pair = column_pair_get_best(grid, column_counts);
   struct ReceiverOrder *receiver_order = receiver_order_new(grid->width);
+
+  struct ColumnPairPQ column_pair_pq =
+      column_pair_pq_new(column_counts, grid->width);
+  struct ColumnPair best_pair = column_pair_pq_pop(&column_pair_pq);
   while (column_pair_exists(best_pair)) {
     delayed_moves_add(delayed_moves, best_pair);
 
@@ -57,12 +60,7 @@ static void solver_receiver_columns(struct Grid *grid,
       receiver_order_push(receiver_order, best_pair.receiver_index);
     }
 
-    column_counts[best_pair.donor_index].source_num -=
-        best_pair.exchanged_sources_num;
-    column_counts[best_pair.receiver_index].source_num +=
-        best_pair.exchanged_sources_num;
-
-    best_pair = column_pair_get_best(grid, column_counts);
+    best_pair = column_pair_pq_pop(&column_pair_pq);
   }
 
   for (int i = 0; i < receiver_order->receiver_num; i++) {

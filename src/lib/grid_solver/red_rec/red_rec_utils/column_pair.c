@@ -33,8 +33,22 @@ bool column_pair_exists(struct ColumnPair pair) {
   return pair.exchanged_sources_num >= 0;
 }
 
-struct ColumnPair column_pair_get_best(const struct Grid *grid,
-                                       const struct Counts *column_counts) {
+struct ColumnPairPQ column_pair_pq_new(struct Counts *column_counts,
+                                       int grid_width) {
+  return (struct ColumnPairPQ){
+      // .pairs = malloc(grid_width * sizeof(struct ColumnPair)),
+      .pairs = NULL,
+      .column_counts = column_counts,
+      .pair_num = 0,
+      .grid_width = grid_width,
+  };
+}
+
+void column_pair_pq_free(struct ColumnPairPQ *pq) {
+  // free(pq->pairs);
+}
+
+struct ColumnPair column_pair_pq_pop(struct ColumnPairPQ *pq) {
   struct ColumnPair best_column_pair = {
       .donor_index = -1,
       .receiver_index = -1,
@@ -44,9 +58,11 @@ struct ColumnPair column_pair_get_best(const struct Grid *grid,
 
   int previous_column = 0;
   int previous_imbalance =
-      (grid->width != 0) ? counts_get_imbalance(column_counts[0]) : 0;
-  for (int current_column = 1; current_column < grid->width; current_column++) {
-    int current_imbalance = counts_get_imbalance(column_counts[current_column]);
+      (pq->grid_width != 0) ? counts_get_imbalance(pq->column_counts[0]) : 0;
+  for (int current_column = 1; current_column < pq->grid_width;
+       current_column++) {
+    int current_imbalance =
+        counts_get_imbalance(pq->column_counts[current_column]);
     if (current_imbalance == 0) {
       continue;
     }
@@ -57,20 +73,20 @@ struct ColumnPair column_pair_get_best(const struct Grid *grid,
     if (previous_column_is_receiver != current_column_is_receiver) {
       struct ColumnPair pair =
           previous_column_is_receiver
-              ? ((struct ColumnPair){
+              ? (struct ColumnPair){
                     .donor_index = current_column,
                     .receiver_index = previous_column,
                     .exchanged_sources_num =
                         min(-previous_imbalance, current_imbalance),
                     .receiver_deficit = -previous_imbalance,
-                })
-              : ((struct ColumnPair){
+                }
+              : (struct ColumnPair){
                     .donor_index = previous_column,
                     .receiver_index = current_column,
                     .exchanged_sources_num =
                         min(previous_imbalance, -current_imbalance),
                     .receiver_deficit = -current_imbalance,
-                });
+                };
 
       if (!column_pair_exists(best_column_pair) ||
           compare_column_pairs(pair, best_column_pair) > 0) {
@@ -79,7 +95,15 @@ struct ColumnPair column_pair_get_best(const struct Grid *grid,
     }
 
     previous_column = current_column;
-    previous_imbalance = counts_get_imbalance(column_counts[previous_column]);
+    previous_imbalance =
+        counts_get_imbalance(pq->column_counts[previous_column]);
+  }
+
+  if (column_pair_exists(best_column_pair)) {
+    pq->column_counts[best_column_pair.donor_index].source_num -=
+        best_column_pair.exchanged_sources_num;
+    pq->column_counts[best_column_pair.receiver_index].source_num +=
+        best_column_pair.exchanged_sources_num;
   }
 
   return best_column_pair;
