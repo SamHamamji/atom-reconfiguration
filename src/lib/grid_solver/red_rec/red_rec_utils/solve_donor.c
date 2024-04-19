@@ -9,7 +9,15 @@ void solve_donor(struct Grid *grid, struct Reconfiguration *reconfiguration,
       },
       linear_solver->params);
 
-  reconfiguration_add_mapping(reconfiguration, grid, mapping, column_index);
+  int initial_move_count = reconfiguration->move_count;
+
+  reconfiguration_add_mapping(reconfiguration, mapping, column_index);
+
+  grid_apply_reconfiguration(
+      grid, &(struct Reconfiguration){
+                .moves = &reconfiguration->moves[initial_move_count],
+                .move_count = reconfiguration->move_count - initial_move_count,
+            });
 
   mapping_free(mapping);
 }

@@ -33,6 +33,70 @@ struct ThreadInput {
   int thread_index;
 };
 
+static void execute_last_move(struct Grid *grid,
+                              struct Reconfiguration *reconfiguration,
+                              const struct Mapping *last_donor_mapping,
+                              int last_donor_index, int receiver_index) {
+  struct Point *last_donor = grid_get_column(grid, last_donor_index);
+  struct Point *receiver = grid_get_column(grid, receiver_index);
+
+  for (int i = 0; i < last_donor_mapping->pair_count; i++) {
+    struct Pair pair = last_donor_mapping->pairs[i];
+    if (last_donor[pair.source].is_target) {
+      continue;
+    }
+
+    reconfiguration_add_move(
+        reconfiguration,
+        (struct Move){
+            .origin = {.col = last_donor_index, .row = pair.source},
+            .destination = {.col = receiver_index, .row = pair.source},
+        });
+
+    receiver[pair.target].is_source = true;
+  }
+
+  for (int i = 0; i < last_donor_mapping->pair_count; i++) {
+    struct Pair pair = last_donor_mapping->pairs[i];
+    if (last_donor[pair.source].is_target || pair.target > pair.source) {
+      continue;
+    }
+
+    reconfiguration_add_move(
+        reconfiguration,
+        (struct Move){
+            .origin = {.col = receiver_index, .row = pair.source},
+            .destination = {.col = receiver_index, .row = pair.target},
+        });
+  }
+
+  for (int i = last_donor_mapping->pair_count - 1; i >= 0; i--) {
+    struct Pair pair = last_donor_mapping->pairs[i];
+    if (last_donor[pair.source].is_target || pair.source > pair.target) {
+      continue;
+    }
+
+    reconfiguration_add_move(
+        reconfiguration,
+        (struct Move){
+            .origin = {.col = receiver_index, .row = pair.source},
+            .destination = {.col = receiver_index, .row = pair.target},
+        });
+  }
+}
+
+static void extract_last_donor_sources(const struct Mapping *last_donor_mapping,
+                                       struct Point *last_donor) {
+  for (int i = 0; i < last_donor_mapping->pair_count; i++) {
+    struct Pair pair = last_donor_mapping->pairs[i];
+    if (last_donor[pair.source].is_target) {
+      continue;
+    }
+
+    last_donor[pair.source].is_source = false;
+  }
+}
+
 static struct ThreadSyncVariables thread_sync_variables_new(int thread_num,
                                                             int grid_width) {
   struct ThreadSyncVariables sync = {
@@ -84,9 +148,22 @@ generate_receiver_reconfiguration(struct ThreadInput *input,
   struct ReceiverDelayedMoves receiver_delayed_moves =
       input->shared.delayed_moves.array[receiver_index];
 
-  int receiver_pivot = get_receiver_pivot(
+  struct Mapping *last_donor_mapping = get_last_donor_mapping(
       input->context.grid, receiver_delayed_moves, input->context.target_range,
       input->params->linear_solver);
+
+  int last_donor_index =
+      receiver_delayed_moves.pairs[receiver_delayed_moves.length - 1]
+          .donor_index;
+
+  extract_last_donor_sources(
+      last_donor_mapping,
+      grid_get_column(input->context.grid, last_donor_index));
+
+  pthread_mutex_unlock(&input->sync.column_mutexes[last_donor_index]);
+
+  int receiver_pivot =
+      get_pivot_from_mapping(last_donor_mapping, input->context.target_range);
 
   struct Range *fixed_sources_range = &(struct Range){
       .start = receiver_pivot,
@@ -103,10 +180,15 @@ generate_receiver_reconfiguration(struct ThreadInput *input,
                    .receiver_index = receiver_index,
                });
 
-  for (int i = 0; i < receiver_delayed_moves.length; i++) {
+  for (int i = 0; i < receiver_delayed_moves.length - 1; i++) {
     execute_move(input->context.grid, reconfiguration, fixed_sources_range,
                  receiver_delayed_moves.pairs[i]);
   }
+
+  execute_last_move(input->context.grid, reconfiguration, last_donor_mapping,
+                    last_donor_index, receiver_index);
+
+  mapping_free(last_donor_mapping);
 
   return reconfiguration;
 }
@@ -140,10 +222,9 @@ static void execute_delayed_moves(struct ThreadInput *input) {
           &input->sync.column_mutexes[delayed_moves.pairs[j].donor_index]);
     }
 
+    // Releases the last donor mutex
     struct Reconfiguration *private_reconfiguration =
         generate_receiver_reconfiguration(input, receiver_index);
-
-    pthread_mutex_unlock(&input->sync.column_mutexes[last_donor_index]);
 
     assert(private_reconfiguration->move_count ==
            2 * (input->context.target_range.exclusive_end -

@@ -86,10 +86,9 @@ static struct Point *get_receiver_with_squished_sources_alias(
   return receiver_alias;
 }
 
-int get_receiver_pivot(const struct Grid *grid,
-                       const struct ReceiverDelayedMoves delayed_moves,
-                       struct Range target_range,
-                       const struct LinearSolver *linear_solver) {
+struct Mapping *get_last_donor_mapping(
+    const struct Grid *grid, const struct ReceiverDelayedMoves delayed_moves,
+    struct Range target_range, const struct LinearSolver *linear_solver) {
   struct Point *receiver_alias = get_receiver_with_squished_sources_alias(
       grid, delayed_moves, target_range);
 
@@ -97,6 +96,12 @@ int get_receiver_pivot(const struct Grid *grid,
       &(struct Interval){.array = receiver_alias, .length = grid->height},
       linear_solver->params);
 
+  free(receiver_alias);
+  return mapping;
+}
+
+int get_pivot_from_mapping(const struct Mapping *mapping,
+                           struct Range target_range) {
   int pivot = target_range.exclusive_end;
   for (int i = 0; i < mapping->pair_count; i++) {
     // If source is moved up
@@ -108,7 +113,19 @@ int get_receiver_pivot(const struct Grid *grid,
     }
   }
 
-  free(receiver_alias);
+  return pivot;
+}
+
+int get_receiver_pivot(const struct Grid *grid,
+                       const struct ReceiverDelayedMoves delayed_moves,
+                       struct Range target_range,
+                       const struct LinearSolver *linear_solver) {
+  struct Mapping *mapping =
+      get_last_donor_mapping(grid, delayed_moves, target_range, linear_solver);
+
+  int pivot = get_pivot_from_mapping(mapping, target_range);
+
   mapping_free(mapping);
+
   return pivot;
 }

@@ -29,7 +29,6 @@ void reconfiguration_add_move(struct Reconfiguration *reconfiguration,
  * Requirement: Assumes `mapping` is sorted by `source`.
  */
 void reconfiguration_add_mapping(struct Reconfiguration *reconfiguration,
-                                 struct Grid *grid,
                                  const struct Mapping *mapping,
                                  int column_index) {
   int stack_head = 0;
@@ -47,11 +46,6 @@ void reconfiguration_add_mapping(struct Reconfiguration *reconfiguration,
               .destination = {.col = column_index,
                               .row = mapping->pairs[i].target},
           });
-
-      assert(move_is_valid(
-          grid, reconfiguration->moves[reconfiguration->move_count - 1]));
-      grid_apply_move(grid,
-                      reconfiguration->moves[reconfiguration->move_count - 1]);
     } else {
       delayed_stack[stack_head] = mapping->pairs[i];
       stack_head++;
@@ -67,13 +61,9 @@ void reconfiguration_add_mapping(struct Reconfiguration *reconfiguration,
             .destination = {.col = column_index,
                             .row = delayed_stack[stack_head - 1].target},
         });
-
-    assert(move_is_valid(
-        grid, reconfiguration->moves[reconfiguration->move_count - 1]));
-    grid_apply_move(grid,
-                    reconfiguration->moves[reconfiguration->move_count - 1]);
     stack_head--;
   }
+
   free(delayed_stack);
 }
 

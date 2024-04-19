@@ -37,6 +37,19 @@ void delayed_moves_add(struct DelayedMoves delayed_moves,
                        struct ColumnPair column_pair);
 
 /**
+ * Returns the mapping of the last donor sorces to the receiver target region.
+ */
+struct Mapping *get_last_donor_mapping(
+    const struct Grid *grid, const struct ReceiverDelayedMoves delayed_moves,
+    struct Range target_range, const struct LinearSolver *linear_solver);
+
+/**
+ * Returns the index at which the sources moving right and left meet.
+ */
+int get_pivot_from_mapping(const struct Mapping *mapping,
+                           struct Range target_range);
+
+/**
  * Returns a row index indicating the location in the receiver at which the
  * sources moving up and down must meet.
  */

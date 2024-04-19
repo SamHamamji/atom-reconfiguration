@@ -23,7 +23,6 @@ void reconfiguration_add_move(struct Reconfiguration *reconfiguration,
  * `grid` too.
  */
 void reconfiguration_add_mapping(struct Reconfiguration *reconfiguration,
-                                 struct Grid *grid,
                                  const struct Mapping *mapping,
                                  int column_index);
 
