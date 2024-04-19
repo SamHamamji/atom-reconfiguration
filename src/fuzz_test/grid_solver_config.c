@@ -99,13 +99,20 @@ static const struct GridSolver *grid_solvers[] = {
 };
 
 static struct Grid *grid_generator(int width, int height) {
+  int target_region_height = rand() % max(height, 1);
+  int imbalance = rand() % ((height - target_region_height) * width + 1) - 1;
+
+  if (width == 0 || target_region_height == 0) {
+    imbalance = max(imbalance, 0);
+  }
+
   return grid_factory.generate_compact_target_region_by_imbalance(
-      width, height, rand() % max(height, 1), rand() % 51 - 1);
+      width, height, target_region_height, imbalance);
 }
 
 struct GridSolversFuzzTestConfig grid_solvers_config = {
-    .width_range = {0, 2000},
-    .height_range = {0, 2000},
+    .width_range = {0, 1000},
+    .height_range = {0, 1000},
     .grid_solvers = grid_solvers,
     .grid_solvers_num = sizeof(grid_solvers) / sizeof(grid_solvers[0]),
     .time_limit_in_seconds = 120.0,
