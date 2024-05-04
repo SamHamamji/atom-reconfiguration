@@ -31,11 +31,6 @@ void reconfiguration_filter_identical(struct Reconfiguration *reconfiguration);
 void reconfiguration_free(struct Reconfiguration *reconfiguration);
 
 /**
- * Checks if move is unobstructed.
- */
-bool move_is_valid(const struct Grid *grid, struct Move move);
-
-/**
  * Applies move to grid, assumes move is valid.
  */
 void grid_apply_move(struct Grid *grid, struct Move move);

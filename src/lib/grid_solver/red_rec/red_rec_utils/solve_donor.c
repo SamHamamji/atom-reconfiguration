@@ -1,3 +1,6 @@
+#include <assert.h>
+#include <stdlib.h>
+
 #include "./red_rec_utils.h"
 
 void solve_donor(struct Grid *grid, struct Reconfiguration *reconfiguration,
@@ -8,6 +11,8 @@ void solve_donor(struct Grid *grid, struct Reconfiguration *reconfiguration,
           .length = grid->height,
       },
       linear_solver->params);
+
+  assert(mapping != NULL);
 
   int initial_move_count = reconfiguration->move_count;
 

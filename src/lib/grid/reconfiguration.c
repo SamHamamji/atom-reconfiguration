@@ -94,7 +94,7 @@ static bool coordinates_are_equal(struct Coordinates a, struct Coordinates b) {
   return a.col == b.col && a.row == b.row;
 }
 
-bool move_is_valid(const struct Grid *grid, struct Move move) {
+static bool move_is_valid(const struct Grid *grid, struct Move move) {
   if (!grid_get_point(grid, move.origin).is_source) {
     return false;
   }

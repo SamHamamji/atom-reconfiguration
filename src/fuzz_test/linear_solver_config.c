@@ -45,7 +45,7 @@ static struct Interval *interval_generator(int length, int imbalance) {
 }
 
 struct LinearSolversFuzzTestConfig linear_solvers_config = {
-    .length_range = {.start = 0, .exclusive_end = 30},
+    .length_range = {.start = 0, .exclusive_end = 1000},
     .interval_generator = interval_generator,
     .linear_solvers = linear_solvers,
     .linear_solvers_num = sizeof(linear_solvers) / sizeof(linear_solvers[0]),

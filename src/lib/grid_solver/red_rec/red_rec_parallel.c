@@ -66,10 +66,15 @@ static void *red_rec_parallel_thread(void *thread_input) {
       get_range(input->thread_index, input->params->thread_num,
                 input->context.grid->width);
 
-  compute_counts_and_solve_donors_parallel(
-      input->context, input->shared.column_counts, input->shared.total_counts,
-      input->params->linear_solver, input->sync.reconfiguration_mutex,
-      column_range);
+  compute_counts_parallel(input->context.grid,
+                          &input->shared.column_counts[column_range.start],
+                          input->shared.total_counts,
+                          input->sync.reconfiguration_mutex, column_range);
+
+  solve_donors_parallel(input->context,
+                        &input->shared.column_counts[column_range.start],
+                        input->params->linear_solver,
+                        input->sync.reconfiguration_mutex, column_range);
 
   pthread_exit(NULL);
 }

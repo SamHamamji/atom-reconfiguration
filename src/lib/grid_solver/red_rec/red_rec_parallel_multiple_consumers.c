@@ -16,6 +16,7 @@ struct ThreadSyncVariables {
   int *delayed_moves_counter;
   pthread_mutex_t *column_mutexes;
   sem_t *delayed_moves_semaphore;
+  sem_t *column_counts_semaphore;
 };
 
 struct ThreadSharedVariables {
@@ -106,8 +107,9 @@ static struct ThreadSyncVariables thread_sync_variables_new(int thread_num,
       .delayed_moves_counter = malloc(sizeof(int)),
       .column_mutexes = malloc(grid_width * sizeof(pthread_mutex_t)),
       .delayed_moves_semaphore = malloc(sizeof(sem_t)),
+      .column_counts_semaphore = malloc(sizeof(sem_t)),
   };
-  pthread_barrier_init(sync.barrier, NULL, thread_num + 1);
+  pthread_barrier_init(sync.barrier, NULL, thread_num);
   pthread_mutex_init(sync.reconfiguration_mutex, NULL);
   pthread_mutex_init(sync.delayed_moves_mutex, NULL);
   *sync.delayed_moves_counter = 0;
@@ -115,6 +117,7 @@ static struct ThreadSyncVariables thread_sync_variables_new(int thread_num,
     pthread_mutex_init(&sync.column_mutexes[i], NULL);
   }
   sem_init(sync.delayed_moves_semaphore, 0, 0);
+  sem_init(sync.column_counts_semaphore, 0, 0);
   return sync;
 }
 
@@ -127,12 +130,14 @@ static void thread_sync_variables_free(struct ThreadSyncVariables sync,
     pthread_mutex_destroy(&sync.column_mutexes[i]);
   }
   sem_destroy(sync.delayed_moves_semaphore);
+  sem_destroy(sync.column_counts_semaphore);
   free(sync.barrier);
   free(sync.reconfiguration_mutex);
   free(sync.delayed_moves_mutex);
   free(sync.delayed_moves_counter);
   free(sync.column_mutexes);
   free(sync.delayed_moves_semaphore);
+  free(sync.column_counts_semaphore);
 }
 
 static void thread_shared_variables_free(struct ThreadSharedVariables shared) {
@@ -249,10 +254,25 @@ static void *red_rec_parallel_thread(void *thread_input) {
       get_range(input->thread_index, input->params->thread_num,
                 input->context.grid->width);
 
-  compute_counts_and_solve_donors_parallel(
-      input->context, input->shared.column_counts, input->shared.total_counts,
-      input->params->linear_solver, input->sync.reconfiguration_mutex,
-      column_range);
+  struct Counts *private_counts =
+      malloc((column_range.exclusive_end - column_range.start) *
+             sizeof(struct Counts));
+
+  compute_counts_parallel(input->context.grid, private_counts,
+                          input->shared.total_counts,
+                          input->sync.reconfiguration_mutex, column_range);
+
+  memcpy(&input->shared.column_counts[column_range.start], private_counts,
+         (column_range.exclusive_end - column_range.start) *
+             sizeof(struct Counts));
+
+  sem_post(input->sync.column_counts_semaphore);
+
+  solve_donors_parallel(input->context, private_counts,
+                        input->params->linear_solver,
+                        input->sync.reconfiguration_mutex, column_range);
+
+  free(private_counts);
 
   pthread_barrier_wait(input->sync.barrier);
 
@@ -264,18 +284,17 @@ static void *red_rec_parallel_thread(void *thread_input) {
 }
 
 static void produce_delayed_moves(struct Grid *grid,
-                                  struct Counts *column_counts,
-                                  struct ReceiverOrder *receiver_order,
-                                  struct DelayedMoves delayed_moves,
+                                  struct ThreadSharedVariables shared,
                                   sem_t *delayed_moves_semaphore,
                                   int thread_num) {
   struct ColumnPairPQ column_pair_pq =
-      column_pair_pq_new(column_counts, grid->width);
+      column_pair_pq_new(shared.column_counts, grid->width);
   struct ColumnPair best_pair = column_pair_pq_pop(&column_pair_pq);
+
   while (column_pair_exists(best_pair)) {
-    delayed_moves_add(delayed_moves, best_pair);
+    delayed_moves_add(shared.delayed_moves, best_pair);
     if (best_pair.exchanged_sources_num == best_pair.receiver_deficit) {
-      receiver_order_push(receiver_order, best_pair.receiver_index);
+      receiver_order_push(shared.receiver_order, best_pair.receiver_index);
       sem_post(delayed_moves_semaphore);
     }
 
@@ -330,7 +349,9 @@ red_rec_parallel_multiple_consumers(struct Grid *grid, const void *params) {
                    &thread_inputs[i]);
   }
 
-  pthread_barrier_wait(sync.barrier);
+  for (int i = 0; i < thread_num; i++) {
+    sem_wait(sync.column_counts_semaphore);
+  }
 
   if (counts_get_imbalance(*shared.total_counts) < 0) {
     for (int i = 0; i < thread_num; i++) {
@@ -346,9 +367,7 @@ red_rec_parallel_multiple_consumers(struct Grid *grid, const void *params) {
     return NULL;
   }
 
-  produce_delayed_moves(grid, shared.column_counts, shared.receiver_order,
-                        shared.delayed_moves, sync.delayed_moves_semaphore,
-                        thread_num);
+  produce_delayed_moves(grid, shared, sync.delayed_moves_semaphore, thread_num);
 
   for (int i = 0; i < thread_num; i++) {
     pthread_join(thread_ids[i], NULL);
