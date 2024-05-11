@@ -2,7 +2,7 @@
 CC := gcc
 BUILD_TYPE := dev
 PYTHON := python
-PYTHON_VENV := venv
+PYTHON_VENV := .venv
 
 # Directories
 SRC_DIR := src
@@ -47,12 +47,12 @@ all: $(addprefix $(BIN_DIR)/, $(addsuffix .out, $(BINS)))
 $(foreach b,$(BINS),$(eval $(BIN_DIR)/$b.out: \
 	$(call SRC_TO_OBJ,$(SRC_lib)) $$(call SRC_TO_OBJ,$$(SRC_$b)) | $(BIN_DIR); \
 	$$(info Building $$@...) \
-	@$$(CC) $$(CFLAGS) -o $$@ $$^))
+	@$$(CC) -o $$@ $$^ $$(CFLAGS)))
 
 # Compile source files to object files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	@mkdir -p $(@D)
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) -c $< -o $@ $(CFLAGS)
 
 # Create directories
 $(OBJ_DIR) $(BIN_DIR):
