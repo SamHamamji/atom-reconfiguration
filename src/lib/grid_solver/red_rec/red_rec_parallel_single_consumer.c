@@ -145,16 +145,14 @@ static void produce_delayed_moves(struct Grid *grid,
   struct ColumnPairPQ column_pair_pq =
       column_pair_pq_new(shared.column_counts, grid->width);
 
-  struct ColumnPair best_pair = column_pair_pq_pop(&column_pair_pq);
-
   while (!column_pair_pq_is_empty(&column_pair_pq)) {
+    struct ColumnPair best_pair = column_pair_pq_pop(&column_pair_pq);
     delayed_moves_add(shared.delayed_moves, best_pair);
+
     if (get_exchange_num(best_pair) == -best_pair.receiver_deficit) {
       receiver_order_push(shared.receiver_order, best_pair.receiver_index);
       sem_post(delayed_moves_semaphore);
     }
-
-    best_pair = column_pair_pq_pop(&column_pair_pq);
   }
 
   column_pair_pq_free(&column_pair_pq);

@@ -53,7 +53,6 @@ static void solver_receiver_columns(struct Grid *grid,
 
   while (!column_pair_pq_is_empty(&column_pair_pq)) {
     struct ColumnPair best_pair = column_pair_pq_pop(&column_pair_pq);
-
     delayed_moves_add(delayed_moves, best_pair);
 
     if (get_exchange_num(best_pair) == -best_pair.receiver_deficit) {
