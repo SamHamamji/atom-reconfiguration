@@ -6,14 +6,21 @@
 struct ColumnPair {
   int donor_index;
   int receiver_index;
-  int exchanged_sources_num;
   int receiver_deficit;
+  int donor_surplus;
 };
 
-bool column_pair_exists(struct ColumnPair pair);
+int get_exchange_num(struct ColumnPair column_pair);
+
+struct ColumnPairNode {
+  int left_column;
+  int right_column;
+  int left_pair_index;
+  int right_pair_index;
+};
 
 struct ColumnPairPQ {
-  struct ColumnPair *pairs;
+  struct ColumnPairNode *heap;
   struct Counts *column_counts;
   int pair_num;
   int grid_width;
@@ -22,15 +29,17 @@ struct ColumnPairPQ {
 struct ColumnPairPQ column_pair_pq_new(struct Counts *column_counts,
                                        int grid_width);
 
-void column_pair_pq_free(struct ColumnPairPQ *pq);
+bool column_pair_pq_is_empty(const struct ColumnPairPQ *pq);
 
 /**
  * Returns the best column pair, ensuring that the pair only contains
  * solved columns between the donor and the receiver
- *
- * If no redistribution can be done anymore, returns a nonexistent pair
  */
 struct ColumnPair column_pair_pq_pop(struct ColumnPairPQ *pq);
+
+void column_pair_pq_print(const struct ColumnPairPQ *pq);
+
+void column_pair_pq_free(struct ColumnPairPQ *pq);
 
 struct ReceiverDelayedMoves {
   struct ColumnPair *pairs;

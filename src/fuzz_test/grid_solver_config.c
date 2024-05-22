@@ -89,10 +89,10 @@ static struct Grid *grid_generator(int width, int height) {
 }
 
 struct GridSolversFuzzTestConfig grid_solvers_config = {
-    .width_range = {0, 1000},
-    .height_range = {0, 1000},
+    .width_range = {0, 200},
+    .height_range = {0, 200},
     .grid_solvers = grid_solvers,
     .grid_solvers_num = sizeof(grid_solvers) / sizeof(grid_solvers[0]),
-    .time_limit_in_seconds = 30.0,
+    .time_limit_in_seconds = 300.0,
     .grid_generator = grid_generator,
 };

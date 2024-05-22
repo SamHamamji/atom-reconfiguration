@@ -49,25 +49,26 @@ static void solver_receiver_columns(struct Grid *grid,
                                     const RedRecParams *params) {
   struct DelayedMoves delayed_moves = delayed_moves_new(grid);
   struct ReceiverOrder *receiver_order = receiver_order_new(grid->width);
-
   struct ColumnPairPQ column_pair_pq =
       column_pair_pq_new(column_counts, grid->width);
-  struct ColumnPair best_pair = column_pair_pq_pop(&column_pair_pq);
-  while (column_pair_exists(best_pair)) {
-    delayed_moves_add(delayed_moves, best_pair);
 
-    if (best_pair.exchanged_sources_num == best_pair.receiver_deficit) {
+  while (!column_pair_pq_is_empty(&column_pair_pq)) {
+    struct ColumnPair best_pair = column_pair_pq_pop(&column_pair_pq);
+
+    delayed_moves_add(delayed_moves, best_pair);
+    if (get_exchange_num(best_pair) == -best_pair.receiver_deficit) {
       receiver_order_push(receiver_order, best_pair.receiver_index);
     }
-
-    best_pair = column_pair_pq_pop(&column_pair_pq);
   }
+
+  column_pair_pq_free(&column_pair_pq);
 
   for (int i = 0; i < receiver_order->receiver_num; i++) {
     solve_receiver(grid, reconfiguration,
                    delayed_moves.array[receiver_order->receiver_indexes[i]],
                    target_range, params);
   }
+
   delayed_moves_free(delayed_moves);
   receiver_order_free(receiver_order);
 }
