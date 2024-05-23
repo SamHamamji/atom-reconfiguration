@@ -11,7 +11,9 @@
 #include "./performance.h"
 #include "./test_grid_solvers.h"
 
-const char output_dir_name[] = "performance_results/grid_solvers";
+const char results_dir[] = "performance_results";
+const char grid_results_dir[] = "performance_results/grid_solvers";
+
 const char output_file_format[] = "./%s/%u.csv";
 
 static inline struct Grid *grid_generator(struct GridSize size,
@@ -86,9 +88,18 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
-                .thread_num = 3,
+                .thread_num = 2,
             },
-        .name = "Red rec parallel (3 threads)",
+        .name = "Red rec parallel (2 threads)",
+    },
+    &(struct GridSolver){
+        .solve = red_rec_parallel,
+        .params =
+            &(RedRecParallelParams){
+                .linear_solver = &default_linear_solver,
+                .thread_num = 4,
+            },
+        .name = "Red rec parallel (4 threads)",
     },
     &(struct GridSolver){
         .solve = red_rec_parallel,
@@ -113,9 +124,18 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
-                .thread_num = 3,
+                .thread_num = 2,
             },
-        .name = "Red rec parallel single consumer (3 threads)",
+        .name = "Red rec parallel single consumer (2 threads)",
+    },
+    &(struct GridSolver){
+        .solve = red_rec_parallel_single_consumer,
+        .params =
+            &(RedRecParallelParams){
+                .linear_solver = &default_linear_solver,
+                .thread_num = 4,
+            },
+        .name = "Red rec parallel single consumer (4 threads)",
     },
     &(struct GridSolver){
         .solve = red_rec_parallel_single_consumer,
@@ -140,9 +160,18 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
-                .thread_num = 3,
+                .thread_num = 2,
             },
-        .name = "Red rec parallel multiple consumers (3 threads)",
+        .name = "Red rec parallel multiple consumers (2 threads)",
+    },
+    &(struct GridSolver){
+        .solve = red_rec_parallel_multiple_consumers,
+        .params =
+            &(RedRecParallelParams){
+                .linear_solver = &default_linear_solver,
+                .thread_num = 4,
+            },
+        .name = "Red rec parallel multiple consumers (4 threads)",
     },
     &(struct GridSolver){
         .solve = red_rec_parallel_multiple_consumers,
@@ -169,9 +198,9 @@ static const struct PerformanceTestCasesConfig config = {
 
 static char *get_output_file_name(unsigned int seed) {
   char *output_file_name =
-      malloc(sizeof(output_dir_name) + sizeof(output_file_format) +
+      malloc(sizeof(grid_results_dir) + sizeof(output_file_format) +
              (int)log10(max(seed, 1)) + 1);
-  sprintf(output_file_name, output_file_format, output_dir_name, seed);
+  sprintf(output_file_name, output_file_format, grid_results_dir, seed);
   return output_file_name;
 }
 
@@ -183,7 +212,8 @@ int main() {
   struct PerformanceArray *results = test_grid_solvers_performance(&config);
 
   char *output_file_name = get_output_file_name(seed);
-  mkdir(output_dir_name, S_IRWXU | S_IRWXG | S_IRWXO);
+  mkdir(results_dir, S_IRWXU | S_IRWXG | S_IRWXO);
+  mkdir(grid_results_dir, S_IRWXU | S_IRWXG | S_IRWXO);
 
   performance_write_to_csv(results, output_file_name);
   printf("Output written to %s\n", output_file_name);

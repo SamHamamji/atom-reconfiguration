@@ -5,11 +5,14 @@
 #include <time.h>
 
 #include "../../lib/linear_solver/linear_solver.h"
+#include "../../lib/utils/max_min.h"
 #include "../../lib/utils/seed.h"
 #include "./performance.h"
 #include "./test_linear_solvers.h"
 
-const char output_dir_name[] = "performance_results/linear_solvers";
+const char results_dir[] = "performance_results";
+const char linear_results_dir[] = "performance_results/linear_solvers";
+
 const char output_file_format[] = "./%s/%u.csv";
 
 static inline struct Interval *interval_generator(int length,
@@ -24,7 +27,7 @@ static const int lengths[] = {
 };
 
 static const double imbalance_percentages[] = {
-    0, 1, 3, 9, 27, // 100,
+    0, 1, 2, 4, 9,
 };
 
 static const struct LinearSolver *config_linear_solvers[] = {
@@ -75,9 +78,10 @@ static const struct PerformanceTestCasesConfig config = {
 
 static char *get_output_file_name(unsigned int seed) {
   char *output_file_name =
-      malloc(sizeof(output_dir_name) + sizeof(output_file_format) +
-             (int)log10(seed) + 1);
-  sprintf(output_file_name, output_file_format, output_dir_name, seed);
+      malloc(sizeof(linear_results_dir) + sizeof(output_file_format) +
+             (int)log10(max(seed, 1)) + 1);
+
+  sprintf(output_file_name, output_file_format, linear_results_dir, seed);
   return output_file_name;
 }
 
@@ -89,7 +93,8 @@ int main() {
   struct PerformanceArray *results = test_linear_solvers_performance(&config);
 
   char *output_file_name = get_output_file_name(seed);
-  mkdir(output_dir_name, S_IRWXU | S_IRWXG | S_IRWXO);
+  mkdir(results_dir, S_IRWXU | S_IRWXG | S_IRWXO);
+  mkdir(linear_results_dir, S_IRWXU | S_IRWXG | S_IRWXO);
 
   performance_write_to_csv(results, output_file_name);
   printf("Output written to %s\n", output_file_name);
