@@ -132,6 +132,8 @@ void grid_apply_move(struct Grid *grid, struct Move move) {
 
 void grid_apply_reconfiguration(struct Grid *grid,
                                 const struct Reconfiguration *reconfiguration) {
+  (void)move_is_valid; // to avoid unused function warning
+
   if (reconfiguration == NULL) {
     return;
   }

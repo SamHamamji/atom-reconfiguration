@@ -217,6 +217,8 @@ static int column_pair_pq_bubble_up(struct ColumnPairPQ *pq, int index) {
 
 struct ColumnPairPQ column_pair_pq_new(struct Counts *column_counts,
                                        int grid_width) {
+  (void)column_pair_pq_is_valid; // to avoid unused function warning
+
   struct ColumnPairPQ pq = {
       .heap = malloc(grid_width * sizeof(struct ColumnPairNode)),
       .column_counts = column_counts,
