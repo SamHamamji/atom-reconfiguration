@@ -22,13 +22,13 @@ static void column_pair_node_print(const struct ColumnPairPQ *pq, int index) {
   int right_imbalance =
       counts_get_imbalance(pq->column_counts[node.right_column]);
 
-  int exchanged_sources = ((left_imbalance >= 0) != (right_imbalance >= 0))
-                              ? min(abs(left_imbalance), abs(right_imbalance))
-                              : 0;
+  int exchange_num = ((left_imbalance >= 0) != (right_imbalance >= 0))
+                         ? min(abs(left_imbalance), abs(right_imbalance))
+                         : 0;
 
   printf("%d<-(" BLUE "%d" RESET ": %d-%d, %s%d, %d, %d" RESET ")->%d",
          node.left_pair_index, index, node.left_column, node.right_column,
-         (exchanged_sources == 0) ? RED : GREEN, exchanged_sources,
+         (exchange_num == 0) ? RED : GREEN, exchange_num,
          abs(node.left_column - node.right_column),
          -min(left_imbalance, right_imbalance), node.right_pair_index);
 }

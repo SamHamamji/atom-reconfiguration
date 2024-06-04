@@ -32,8 +32,8 @@ static bool is_ancestor(int parent, int child) {
   return (c >> (c_bits - p_bits)) == p;
 }
 
-static int get_exchanged_sources(struct ColumnPairNode pair,
-                                 struct Counts *column_counts) {
+static int pq_node_get_exchange_num(struct ColumnPairNode pair,
+                                    struct Counts *column_counts) {
   int left_imbalance = counts_get_imbalance(column_counts[pair.left_column]);
   int right_imbalance = counts_get_imbalance(column_counts[pair.right_column]);
 
@@ -57,11 +57,11 @@ static int compare_column_pairs(const struct ColumnPairPQ *pq, int a, int b) {
   struct ColumnPairNode node_a = pq->heap[a];
   struct ColumnPairNode node_b = pq->heap[b];
 
-  int exchanged_sources_a = get_exchanged_sources(node_a, pq->column_counts);
-  int exchanged_sources_b = get_exchanged_sources(node_b, pq->column_counts);
+  int exchange_num_a = pq_node_get_exchange_num(node_a, pq->column_counts);
+  int exchange_num_b = pq_node_get_exchange_num(node_b, pq->column_counts);
 
-  if (exchanged_sources_a != exchanged_sources_b) {
-    return exchanged_sources_a - exchanged_sources_b;
+  if (exchange_num_a != exchange_num_b) {
+    return exchange_num_a - exchange_num_b;
   }
 
   int column_distance_a = abs(node_a.left_column - node_a.right_column);
@@ -71,15 +71,15 @@ static int compare_column_pairs(const struct ColumnPairPQ *pq, int a, int b) {
     return column_distance_b - column_distance_a;
   }
 
-  int b_receiver_deficit =
-      -min(counts_get_imbalance(pq->column_counts[node_b.right_column]),
-           counts_get_imbalance(pq->column_counts[node_b.left_column]));
-
-  int a_receiver_deficit =
+  int receiver_deficit_a =
       -min(counts_get_imbalance(pq->column_counts[node_a.right_column]),
            counts_get_imbalance(pq->column_counts[node_a.left_column]));
 
-  return b_receiver_deficit - a_receiver_deficit;
+  int receiver_deficit_b =
+      -min(counts_get_imbalance(pq->column_counts[node_b.right_column]),
+           counts_get_imbalance(pq->column_counts[node_b.left_column]));
+
+  return receiver_deficit_b - receiver_deficit_a;
 }
 
 static bool column_pair_node_is_valid(const struct ColumnPairPQ *pq, int i) {
@@ -258,7 +258,7 @@ bool column_pair_pq_is_empty(const struct ColumnPairPQ *pq) {
     return true;
   }
 
-  return get_exchanged_sources(pq->heap[ROOT], pq->column_counts) == 0;
+  return pq_node_get_exchange_num(pq->heap[ROOT], pq->column_counts) == 0;
 }
 
 static int get_updated_node_index(int node, int other_source, int other_target,
@@ -372,16 +372,14 @@ static void nodes_to_fix_sort(int *nodes_to_fix) {
 }
 
 struct ColumnPair column_pair_pq_pop(struct ColumnPairPQ *pq) {
-
-  assert(get_exchanged_sources(pq->heap[ROOT], pq->column_counts) != 0);
+  assert(pq_node_get_exchange_num(pq->heap[ROOT], pq->column_counts) != 0);
 
   struct ColumnPair best_pair = column_node_to_pair(pq, ROOT);
 
-  int exchanged_sources_num =
-      get_exchanged_sources(pq->heap[ROOT], pq->column_counts);
-  pq->column_counts[best_pair.donor_index].source_num -= exchanged_sources_num;
-  pq->column_counts[best_pair.receiver_index].source_num +=
-      exchanged_sources_num;
+  int exchange_num =
+      pq_node_get_exchange_num(pq->heap[ROOT], pq->column_counts);
+  pq->column_counts[best_pair.donor_index].source_num -= exchange_num;
+  pq->column_counts[best_pair.receiver_index].source_num += exchange_num;
 
   int nodes_to_fix[NODES_TO_FIX_NUM] = {
       pq->heap[ROOT].left_pair_index,
