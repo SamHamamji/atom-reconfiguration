@@ -1,11 +1,10 @@
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <time.h>
 
 #include "../../lib/linear_solver/linear_solver.h"
-#include "../../lib/utils/max_min.h"
+#include "../../lib/utils/integer_length.h"
 #include "../../lib/utils/seed.h"
 #include "./performance.h"
 #include "./test_linear_solvers.h"
@@ -79,7 +78,7 @@ static const struct PerformanceTestCasesConfig config = {
 static char *get_output_file_name(unsigned int seed) {
   char *output_file_name =
       malloc(sizeof(linear_results_dir) + sizeof(output_file_format) +
-             (int)log10(max(seed, 1)) + 1);
+             integer_length(seed));
 
   sprintf(output_file_name, output_file_format, linear_results_dir, seed);
   return output_file_name;

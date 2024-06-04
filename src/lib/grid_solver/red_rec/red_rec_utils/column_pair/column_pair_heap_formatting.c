@@ -1,18 +1,10 @@
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "../../../../utils/colors.h"
+#include "../../../../utils/integer_length.h"
 #include "../../../../utils/max_min.h"
 #include "../red_rec_utils.h"
-
-static int integer_length(int num) {
-  if (num == 0) {
-    return 1;
-  }
-
-  return (int)log10((double)abs(num)) + 1 + (int)(num < 0);
-}
 
 static void heap_node_print(const struct ColumnPairPQ *pq, int index) {
   struct ColumnPairNode node = pq->heap[index];

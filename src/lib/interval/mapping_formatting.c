@@ -1,12 +1,8 @@
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../utils/integer_length.h"
 #include "mapping.h"
-
-static int integer_length(int num) {
-  return (int)log10((double)abs(num)) + 1 + (num <= 0);
-}
 
 static int max_mapping_index_length(const struct Mapping *mapping) {
   int max = 1;

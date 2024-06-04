@@ -1,15 +1,8 @@
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../utils/integer_length.h"
 #include "grid.h"
-
-static int integer_length(int num) {
-  if (num == 0) {
-    return 1;
-  }
-  return (int)log10((double)abs(num)) + 1 + (num <= 0);
-}
 
 void grid_print(const struct Grid *grid) {
   if (grid == NULL) {
