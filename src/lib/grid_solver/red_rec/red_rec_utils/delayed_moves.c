@@ -22,7 +22,6 @@ void delayed_moves_free(struct DelayedMoves delayed_moves) {
 
 void delayed_moves_add(struct DelayedMoves delayed_moves,
                        struct ColumnPair column_pair) {
-
   struct ReceiverDelayedMoves *receiver_moves =
       &delayed_moves.array[column_pair.receiver_index];
 

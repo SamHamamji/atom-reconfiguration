@@ -12,12 +12,29 @@ static struct LinearSolver default_linear_solver = {
 static const struct GridSolver *grid_solvers[] = {
     &(struct GridSolver){
         .solve = red_rec,
-        .params = &(RedRecParams){.linear_solver = &default_linear_solver},
+        .params =
+            &(RedRecParams){
+                .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
+            },
         .name = "Red Rec",
     },
     &(struct GridSolver){
+        .solve = red_rec,
+        .params =
+            &(RedRecParams){
+                .linear_solver = &default_linear_solver,
+                .pq_type = HEAP_PRIORITY_QUEUE,
+            },
+        .name = "Red Rec heap priority queue",
+    },
+    &(struct GridSolver){
         .solve = red_rec_deferred_solving,
-        .params = &(RedRecParams){.linear_solver = &default_linear_solver},
+        .params =
+            &(RedRecParams){
+                .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
+            },
         .name = "Red Rec deferred solving",
     },
     &(struct GridSolver){
@@ -25,6 +42,7 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
                 .thread_num = 1,
             },
         .name = "Red Rec parallel (1 thread)",
@@ -34,6 +52,7 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
                 .thread_num = 7,
             },
         .name = "Red Rec parallel (7 threads)",
@@ -43,6 +62,7 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
                 .thread_num = 1,
             },
         .name = "Red Rec parallel single consumer (1 thread)",
@@ -52,6 +72,7 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
                 .thread_num = 7,
             },
         .name = "Red Rec parallel single consumer (7 threads)",
@@ -61,6 +82,7 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
                 .thread_num = 1,
             },
         .name = "Red Rec parallel multiple consumers (1 threads)",
@@ -70,9 +92,21 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
                 .thread_num = 7,
             },
         .name = "Red Rec parallel multiple consumers (7 threads)",
+    },
+    &(struct GridSolver){
+        .solve = red_rec_parallel_multiple_consumers,
+        .params =
+            &(RedRecParallelParams){
+                .linear_solver = &default_linear_solver,
+                .pq_type = HEAP_PRIORITY_QUEUE,
+                .thread_num = 7,
+            },
+        .name = "Red Rec parallel multiple consumers (7 threads) heap priority "
+                "queue",
     },
 };
 
@@ -89,8 +123,8 @@ static struct Grid *grid_generator(int width, int height) {
 }
 
 struct GridSolversFuzzTestConfig grid_solvers_config = {
-    .width_range = {0, 200},
-    .height_range = {0, 200},
+    .width_range = {0, 400},
+    .height_range = {0, 100},
     .grid_solvers = grid_solvers,
     .grid_solvers_num = sizeof(grid_solvers) / sizeof(grid_solvers[0]),
     .time_limit_in_seconds = 300.0,

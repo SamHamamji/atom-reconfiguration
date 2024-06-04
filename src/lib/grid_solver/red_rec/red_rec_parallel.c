@@ -86,7 +86,7 @@ static void solver_receiver_columns(struct Grid *grid,
                                     const RedRecParallelParams *params) {
   struct DelayedMoves delayed_moves = delayed_moves_new(grid);
   struct ColumnPairPQ column_pair_pq =
-      column_pair_pq_new(column_counts, grid->width);
+      column_pair_pq_new(column_counts, grid->width, params->pq_type);
 
   while (!column_pair_pq_is_empty(&column_pair_pq)) {
     struct ColumnPair best_pair = column_pair_pq_pop(&column_pair_pq);

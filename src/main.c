@@ -12,42 +12,43 @@ static const struct Config {
   int height;
   int width;
   int target_region_size;
+  int imbalance;
 } config = {
-    .height = 4000,
-    .width = 4000,
-    .target_region_size = 2000,
+    .height = 10,
+    .width = 10,
+    .target_region_size = 5,
+    .imbalance = 3,
 };
 
 int main() {
   seed_set(0);
-  int exit_status = EXIT_SUCCESS;
 
   struct Timer timer;
   timer_start(&timer);
 
-  for (int i = 0; i < 5; i++) {
-    struct Grid *grid =
-        grid_factory.generate_compact_target_region_by_imbalance(
-            config.width, config.height, config.target_region_size, i);
+  struct Grid *grid = grid_factory.generate_compact_target_region_by_imbalance(
+      config.width, config.height, config.target_region_size, config.imbalance);
 
-    struct Reconfiguration *reconfiguration =
-        red_rec_parallel_multiple_consumers(
-            grid, &(RedRecParallelParams){
-                      .linear_solver =
-                          &(struct LinearSolver){
-                              .solve = linear_solve_aggarwal,
-                              .params = NULL,
-                              .name = "Aggarwal linear solver",
-                          },
-                      .thread_num = 1,
-                  });
+  struct Reconfiguration *reconfiguration =
+      red_rec(grid, &(RedRecParallelParams){
+                        .linear_solver =
+                            &(struct LinearSolver){
+                                .solve = linear_solve_aggarwal,
+                                .params = NULL,
+                                .name = "Aggarwal linear solver",
+                            },
+                        .thread_num = 1,
+                        .pq_type = HEAP_PRIORITY_QUEUE,
+                    });
 
-    reconfiguration_free(reconfiguration);
-    grid_free(grid);
-  }
+  grid_print(grid);
+  reconfiguration_print(reconfiguration);
+
+  reconfiguration_free(reconfiguration);
+  grid_free(grid);
 
   timer_stop(&timer);
 
   printf("Elapsed time: %f seconds\n", timer_get_seconds(&timer));
-  return exit_status;
+  return EXIT_SUCCESS;
 }

@@ -14,7 +14,7 @@ static int integer_length(int num) {
   return (int)log10((double)abs(num)) + 1 + (int)(num < 0);
 }
 
-static void column_pair_node_print(const struct ColumnPairPQ *pq, int index) {
+static void heap_node_print(const struct ColumnPairPQ *pq, int index) {
   struct ColumnPairNode node = pq->heap[index];
 
   int left_imbalance =
@@ -33,7 +33,7 @@ static void column_pair_node_print(const struct ColumnPairPQ *pq, int index) {
          -min(left_imbalance, right_imbalance), node.right_pair_index);
 }
 
-void column_pair_pq_print(const struct ColumnPairPQ *pq) {
+void column_pair_heap_print(const struct ColumnPairPQ *pq) {
   printf("               ");
   for (int i = 0; i < pq->grid_width; i++) {
     printf("%*d, ", integer_length(counts_get_imbalance(pq->column_counts[i])),
@@ -57,7 +57,7 @@ void column_pair_pq_print(const struct ColumnPairPQ *pq) {
     } else {
       printf(" | ");
     }
-    column_pair_node_print(pq, i);
+    heap_node_print(pq, i);
   }
   printf("\n");
 }

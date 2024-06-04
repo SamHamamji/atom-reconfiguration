@@ -63,14 +63,25 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParams){
                 .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
             },
         .name = "Red rec",
+    },
+    &(struct GridSolver){
+        .solve = red_rec,
+        .params =
+            &(RedRecParams){
+                .linear_solver = &default_linear_solver,
+                .pq_type = HEAP_PRIORITY_QUEUE,
+            },
+        .name = "Red rec heap priority queue",
     },
     &(struct GridSolver){
         .solve = red_rec_deferred_solving,
         .params =
             &(RedRecParams){
                 .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
             },
         .name = "Red rec deferred solving",
     },
@@ -79,6 +90,7 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
                 .thread_num = 1,
             },
         .name = "Red rec parallel (1 threads)",
@@ -88,6 +100,7 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
                 .thread_num = 2,
             },
         .name = "Red rec parallel (2 threads)",
@@ -97,6 +110,7 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
                 .thread_num = 4,
             },
         .name = "Red rec parallel (4 threads)",
@@ -106,15 +120,27 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
                 .thread_num = 8,
             },
         .name = "Red rec parallel (8 threads)",
+    },
+    &(struct GridSolver){
+        .solve = red_rec_parallel,
+        .params =
+            &(RedRecParallelParams){
+                .linear_solver = &default_linear_solver,
+                .pq_type = HEAP_PRIORITY_QUEUE,
+                .thread_num = 8,
+            },
+        .name = "Red rec parallel (8 threads) heap priority queue",
     },
     &(struct GridSolver){
         .solve = red_rec_parallel_single_consumer,
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
                 .thread_num = 1,
             },
         .name = "Red rec parallel single consumer (1 threads)",
@@ -124,6 +150,7 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
                 .thread_num = 2,
             },
         .name = "Red rec parallel single consumer (2 threads)",
@@ -133,6 +160,7 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
                 .thread_num = 4,
             },
         .name = "Red rec parallel single consumer (4 threads)",
@@ -142,15 +170,28 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
                 .thread_num = 8,
             },
         .name = "Red rec parallel single consumer (8 threads)",
+    },
+    &(struct GridSolver){
+        .solve = red_rec_parallel_single_consumer,
+        .params =
+            &(RedRecParallelParams){
+                .linear_solver = &default_linear_solver,
+                .pq_type = HEAP_PRIORITY_QUEUE,
+                .thread_num = 8,
+            },
+        .name =
+            "Red rec parallel single consumer (8 threads) heap priority queue",
     },
     &(struct GridSolver){
         .solve = red_rec_parallel_multiple_consumers,
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
                 .thread_num = 1,
             },
         .name = "Red rec parallel multiple consumers (1 threads)",
@@ -160,6 +201,7 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
                 .thread_num = 2,
             },
         .name = "Red rec parallel multiple consumers (2 threads)",
@@ -169,6 +211,7 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
                 .thread_num = 4,
             },
         .name = "Red rec parallel multiple consumers (4 threads)",
@@ -178,9 +221,21 @@ static const struct GridSolver *grid_solvers[] = {
         .params =
             &(RedRecParallelParams){
                 .linear_solver = &default_linear_solver,
+                .pq_type = ARRAY_PRIORITY_QUEUE,
                 .thread_num = 8,
             },
         .name = "Red rec parallel multiple consumers (8 threads)",
+    },
+    &(struct GridSolver){
+        .solve = red_rec_parallel_multiple_consumers,
+        .params =
+            &(RedRecParallelParams){
+                .linear_solver = &default_linear_solver,
+                .pq_type = HEAP_PRIORITY_QUEUE,
+                .thread_num = 8,
+            },
+        .name = "Red rec parallel multiple consumers (8 threads) heap priority "
+                "queue",
     },
 };
 

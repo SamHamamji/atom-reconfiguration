@@ -49,10 +49,12 @@ static void solver_receiver_columns(struct Grid *grid,
                                     const RedRecParams *params) {
   struct DelayedMoves delayed_moves = delayed_moves_new(grid);
   struct ColumnPairPQ column_pair_pq =
-      column_pair_pq_new(column_counts, grid->width);
+      column_pair_pq_new(column_counts, grid->width, params->pq_type);
 
   while (!column_pair_pq_is_empty(&column_pair_pq)) {
     struct ColumnPair best_pair = column_pair_pq_pop(&column_pair_pq);
+    assert(get_exchange_num(best_pair) > 0);
+
     delayed_moves_add(delayed_moves, best_pair);
 
     if (get_exchange_num(best_pair) == -best_pair.receiver_deficit) {
@@ -64,6 +66,8 @@ static void solver_receiver_columns(struct Grid *grid,
 
   column_pair_pq_free(&column_pair_pq);
   delayed_moves_free(delayed_moves);
+
+  assert(grid_is_solved(grid));
 }
 
 struct Reconfiguration *red_rec(struct Grid *grid, const void *params) {

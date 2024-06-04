@@ -22,12 +22,14 @@ struct ColumnPairNode {
 struct ColumnPairPQ {
   struct ColumnPairNode *heap;
   struct Counts *column_counts;
+  enum ColumnPairPriorityQueueType pq_type;
   int pair_num;
   int grid_width;
 };
 
-struct ColumnPairPQ column_pair_pq_new(struct Counts *column_counts,
-                                       int grid_width);
+struct ColumnPairPQ
+column_pair_pq_new(struct Counts *column_counts, int grid_width,
+                   enum ColumnPairPriorityQueueType pq_type);
 
 bool column_pair_pq_is_empty(const struct ColumnPairPQ *pq);
 
@@ -36,8 +38,6 @@ bool column_pair_pq_is_empty(const struct ColumnPairPQ *pq);
  * solved columns between the donor and the receiver
  */
 struct ColumnPair column_pair_pq_pop(struct ColumnPairPQ *pq);
-
-void column_pair_pq_print(const struct ColumnPairPQ *pq);
 
 void column_pair_pq_free(struct ColumnPairPQ *pq);
 
