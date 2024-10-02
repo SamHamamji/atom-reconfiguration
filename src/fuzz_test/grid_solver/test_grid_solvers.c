@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../../lib/grid/reconfiguration.h"
-#include "../../lib/grid_solver/grid_solver.h"
 #include "../../lib/utils/colors.h"
 #include "../../lib/utils/timer.h"
 #include "./test_grid_solvers.h"

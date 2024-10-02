@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
-#include "../lib/utils/max_min.h"
+#include "../../lib/linear_solver/linear_solver.h"
+#include "../../lib/utils/max_min.h"
 #include "./config.h"
 
 static struct LinearSolver default_linear_solver = {
@@ -127,6 +128,6 @@ struct GridSolversFuzzTestConfig grid_solvers_config = {
     .height_range = {0, 100},
     .grid_solvers = grid_solvers,
     .grid_solvers_num = sizeof(grid_solvers) / sizeof(grid_solvers[0]),
-    .time_limit_in_seconds = 300.0,
+    .time_limit_in_seconds = 5.0,
     .grid_generator = grid_generator,
 };
