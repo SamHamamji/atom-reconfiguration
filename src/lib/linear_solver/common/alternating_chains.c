@@ -103,7 +103,7 @@ int *alternating_chains_get_exclusion_from_range(
 bool *
 alternating_chains_get_exclusion_array(const struct AlternatingChains *chains,
                                        int interval_length) {
-  bool *exclusion_array = calloc(sizeof(bool), interval_length);
+  bool *exclusion_array = calloc(interval_length, sizeof(bool));
   int max_exclusion_index = interval_length;
 
   for (int chain_index = chains->chain_num - 1; chain_index >= 0;
