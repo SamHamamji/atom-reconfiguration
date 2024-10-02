@@ -16,6 +16,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build fuzz tests
-      run: make bin/fuzz_test.out
-    - name: Run fuzz tests
-      run: ./bin/fuzz_test.out
+      run: make bin/linear_fuzz_test.out bin/grid_fuzz_test.out
+    - name: Run linear fuzz tests
+      run: ./bin/linear_fuzz_test.out
+    - name: Run grid fuzz tests
+      run: ./bin/grid_fuzz_test.out
