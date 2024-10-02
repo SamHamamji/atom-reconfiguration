@@ -37,7 +37,7 @@ else ifeq ($(BUILD_TYPE), release)
 else ifeq ($(BUILD_TYPE), scan-build)
 	CC := scan-build $(CC)
 else
-	$(error "Invalid build type. Valid options are: dev, release, scan-build")
+$(error "Invalid build type. Valid options are: dev, release, scan-build")
 endif
 
 .PHONY: all
