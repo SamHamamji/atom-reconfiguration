@@ -3,39 +3,22 @@
 ## Usage
 
 ### Compiling
-Default build type is `dev`.
+The default build type is `dev`.
 ```sh
-make all <BUILD_TYPE=dev|release|scan-build>
+make all <BUILD_TYPE=dev|release|static-analysis>
 ```
 
-### Running main file
-```sh
-./bin/main.out
-```
+All the executables can then be found in `./bin`
 
-### Running unit tests
-```sh
-./bin/unit_test.out
-```
-
-### Running fuzz tests
-```sh
-./bin/fuzz_test.out
-```
-
-### Running performance tests
-```sh
-./bin/grid_performance_test.out
-```
-
-```sh
-./bin/linear_performance_test.out
-```
+There are four types of executables:
+- `./bin/main.out` For custom scripts
+- `./bin/unit_test.out` For unit testing
+- `./bin/*fuzz_test.out` For fuzz testing
+- `./bin/*performance_test.out` For performance testing, the output logs are put in `./performance_results`
 
 ### Visualizing performance results
-Note that `file` is a required argument, while `port` is optional. 
 ```sh
-make visualize file=<path_to_performance_results> port=<any_unused_port>
+make visualize file=<path_to_performance_results> [port=<any_unused_port>]
 ```
 
 ## License
