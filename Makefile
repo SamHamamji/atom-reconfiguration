@@ -28,7 +28,7 @@ PYTHON_VISUALIZATION_FILE := $(SRC_DIR)/visualization/main.py
 LIB_FLAGS := -lm -lpthread
 WARNING_FLAGS := -Wall -Wextra -Wpedantic
 DEBUGGING_FLAGS := -fsanitize=undefined,address -Og -g3
-STATIC_ANALYSIS_FLAGS := -fanalyzer
+STATIC_ANALYSIS_FLAGS := -fanalyzer -Wno-analyzer-use-of-uninitialized-value -Wno-analyzer-possible-null-dereference -Wno-analyzer-possible-null-argument
 OPTIMIZATION_FLAGS := -O3 -DNDEBUG
 CFLAGS := -std=gnu2x $(LIB_FLAGS) $(WARNING_FLAGS)
 
@@ -37,7 +37,7 @@ ifeq ($(BUILD_TYPE), dev)
 else ifeq ($(BUILD_TYPE), release)
 	CFLAGS += $(OPTIMIZATION_FLAGS)
 else ifeq ($(BUILD_TYPE), static-analysis)
-	CFLAGS += 
+	CFLAGS += $(STATIC_ANALYSIS_FLAGS)
 else
 $(error "Invalid build type. Valid options are: dev, release, static-analysis")
 endif
