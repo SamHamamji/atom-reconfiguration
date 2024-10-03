@@ -3,11 +3,8 @@
 #include "height_array.h"
 
 int *get_height_array(const struct Interval *interval) {
-  if (interval->length < 0) {
+  if (interval->length <= 0) {
     return NULL;
-  }
-  if (interval->length == 0) {
-    return malloc(0);
   }
 
   int *height_array = malloc(interval->length * sizeof(int));
