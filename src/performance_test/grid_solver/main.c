@@ -24,30 +24,15 @@ static inline struct Grid *grid_generator(struct GridSize size,
 }
 
 static const struct GridSize sizes[] = {
-    {500, 500},   {1000, 500},  {1500, 500},  {2000, 500},  {2500, 500},
-    {3000, 500},  {3500, 500},  {4000, 500},  {4500, 500},  {5000, 500},
-    {500, 1000},  {1000, 1000}, {1500, 1000}, {2000, 1000}, {2500, 1000},
-    {3000, 1000}, {3500, 1000}, {4000, 1000}, {4500, 1000}, {5000, 1000},
-    {500, 1500},  {1000, 1500}, {1500, 1500}, {2000, 1500}, {2500, 1500},
-    {3000, 1500}, {3500, 1500}, {4000, 1500}, {4500, 1500}, {5000, 1500},
-    {500, 2000},  {1000, 2000}, {1500, 2000}, {2000, 2000}, {2500, 2000},
-    {3000, 2000}, {3500, 2000}, {4000, 2000}, {4500, 2000}, {5000, 2000},
-    {500, 2500},  {1000, 2500}, {1500, 2500}, {2000, 2500}, {2500, 2500},
-    {3000, 2500}, {3500, 2500}, {4000, 2500}, {4500, 2500}, {5000, 2500},
-    {500, 3000},  {1000, 3000}, {1500, 3000}, {2000, 3000}, {2500, 3000},
-    {3000, 3000}, {3500, 3000}, {4000, 3000}, {4500, 3000}, {5000, 3000},
-    {500, 3500},  {1000, 3500}, {1500, 3500}, {2000, 3500}, {2500, 3500},
-    {3000, 3500}, {3500, 3500}, {4000, 3500}, {4500, 3500}, {5000, 3500},
-    {500, 4000},  {1000, 4000}, {1500, 4000}, {2000, 4000}, {2500, 4000},
-    {3000, 4000}, {3500, 4000}, {4000, 4000}, {4500, 4000}, {5000, 4000},
-    {500, 4500},  {1000, 4500}, {1500, 4500}, {2000, 4500}, {2500, 4500},
-    {3000, 4500}, {3500, 4500}, {4000, 4500}, {4500, 4500}, {5000, 4500},
-    {500, 5000},  {1000, 5000}, {1500, 5000}, {2000, 5000}, {2500, 5000},
-    {3000, 5000}, {3500, 5000}, {4000, 5000}, {4500, 5000}, {5000, 5000},
+    {400, 400},  {800, 400},  {1200, 400},  {1600, 400},  {2000, 400},
+    {400, 800},  {800, 800},  {1200, 800},  {1600, 800},  {2000, 800},
+    {400, 1200}, {800, 1200}, {1200, 1200}, {1600, 1200}, {2000, 1200},
+    {400, 1600}, {800, 1600}, {1200, 1600}, {1600, 1600}, {2000, 1600},
+    {400, 2000}, {800, 2000}, {1200, 2000}, {1600, 2000}, {2000, 2000},
 };
 
 static const double imbalance_percentages[] = {
-    0, 1, 2, 5, 25, 50,
+    0, 0, 0, 0, 0, 0, 0.5, 0.5, 0.5, 0.5, 1, 1, 1, 2, 3, 5, 8,
 };
 
 static struct LinearSolver default_linear_solver = {
@@ -63,6 +48,7 @@ static const struct GridSolver *grid_solvers[] = {
             &(RedRecParams){
                 .linear_solver = &default_linear_solver,
                 .pq_type = ARRAY_PRIORITY_QUEUE,
+                .receiver_solving_order = ALTERNATED_SOLVING,
             },
         .name = "Red rec",
     },
@@ -72,15 +58,17 @@ static const struct GridSolver *grid_solvers[] = {
             &(RedRecParams){
                 .linear_solver = &default_linear_solver,
                 .pq_type = HEAP_PRIORITY_QUEUE,
+                .receiver_solving_order = ALTERNATED_SOLVING,
             },
         .name = "Red rec heap priority queue",
     },
     &(struct GridSolver){
-        .solve = red_rec_deferred_solving,
+        .solve = red_rec,
         .params =
             &(RedRecParams){
                 .linear_solver = &default_linear_solver,
                 .pq_type = ARRAY_PRIORITY_QUEUE,
+                .receiver_solving_order = DEFERRED_SOLVING,
             },
         .name = "Red rec deferred solving",
     },
@@ -247,7 +235,7 @@ static const struct PerformanceTestCasesConfig config = {
     .imbalance_percentages_num =
         sizeof(imbalance_percentages) / sizeof(imbalance_percentages[0]),
     .grid_solvers_num = sizeof(grid_solvers) / sizeof(grid_solvers[0]),
-    .repetition_num = 5,
+    .repetition_num = 2,
 };
 
 static char *get_output_file_name(unsigned int seed) {

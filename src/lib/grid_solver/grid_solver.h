@@ -13,7 +13,6 @@ struct GridSolver {
 };
 
 extern GridSolverFunction red_rec;
-extern GridSolverFunction red_rec_deferred_solving;
 extern GridSolverFunction red_rec_parallel;
 extern GridSolverFunction red_rec_parallel_single_consumer;
 extern GridSolverFunction red_rec_parallel_multiple_consumers;
@@ -23,9 +22,15 @@ enum ColumnPairPriorityQueueType {
   HEAP_PRIORITY_QUEUE,
 };
 
+enum ReceiverSolvingOrder {
+  ALTERNATED_SOLVING,
+  DEFERRED_SOLVING,
+};
+
 typedef struct {
   struct LinearSolver *linear_solver;
   enum ColumnPairPriorityQueueType pq_type;
+  enum ReceiverSolvingOrder receiver_solving_order;
 } RedRecParams;
 
 typedef struct {

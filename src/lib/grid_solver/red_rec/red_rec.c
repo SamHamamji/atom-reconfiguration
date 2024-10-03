@@ -42,11 +42,11 @@ static void solve_receiver(struct Grid *grid,
   }
 }
 
-static void solver_receiver_columns(struct Grid *grid,
-                                    struct Reconfiguration *reconfiguration,
-                                    struct Counts *column_counts,
-                                    struct Range target_range,
-                                    const RedRecParams *params) {
+static void solve_receivers_alternated(struct Grid *grid,
+                                       struct Reconfiguration *reconfiguration,
+                                       struct Counts *column_counts,
+                                       struct Range target_range,
+                                       const RedRecParams *params) {
   struct DelayedMoves delayed_moves = delayed_moves_new(grid);
   struct ColumnPairPQ column_pair_pq =
       column_pair_pq_new(column_counts, grid->width, params->pq_type);
@@ -66,8 +66,37 @@ static void solver_receiver_columns(struct Grid *grid,
 
   column_pair_pq_free(&column_pair_pq);
   delayed_moves_free(delayed_moves);
+}
 
-  assert(grid_is_solved(grid));
+static void solve_receivers_deferred(struct Grid *grid,
+                                     struct Reconfiguration *reconfiguration,
+                                     struct Counts *column_counts,
+                                     struct Range target_range,
+                                     const RedRecParams *params) {
+  struct DelayedMoves delayed_moves = delayed_moves_new(grid);
+  struct ColumnPairPQ column_pair_pq =
+      column_pair_pq_new(column_counts, grid->width, params->pq_type);
+  struct ReceiverOrder *receiver_order = receiver_order_new(grid->width);
+
+  while (!column_pair_pq_is_empty(&column_pair_pq)) {
+    struct ColumnPair best_pair = column_pair_pq_pop(&column_pair_pq);
+
+    delayed_moves_add(delayed_moves, best_pair);
+    if (get_exchange_num(best_pair) == -best_pair.receiver_deficit) {
+      receiver_order_push(receiver_order, best_pair.receiver_index);
+    }
+  }
+
+  column_pair_pq_free(&column_pair_pq);
+
+  for (int i = 0; i < receiver_order->receiver_num; i++) {
+    solve_receiver(grid, reconfiguration,
+                   delayed_moves.array[receiver_order->receiver_indexes[i]],
+                   target_range, params);
+  }
+
+  delayed_moves_free(delayed_moves);
+  receiver_order_free(receiver_order);
 }
 
 struct Reconfiguration *red_rec(struct Grid *grid, const void *params) {
@@ -90,14 +119,20 @@ struct Reconfiguration *red_rec(struct Grid *grid, const void *params) {
   }
 
   struct Range target_range = grid_get_compact_target_region_range(grid);
-  struct Reconfiguration *reconfiguration = reconfiguration_new(
-      2 * grid->width * (target_range.exclusive_end - target_range.start));
+  struct Reconfiguration *reconfiguration =
+      reconfiguration_new(2 * total_counts.target_num);
 
   solve_donors(grid, reconfiguration, column_counts, red_rec_params);
 
-  solver_receiver_columns(grid, reconfiguration, column_counts, target_range,
-                          red_rec_params);
+  if (red_rec_params->receiver_solving_order == ALTERNATED_SOLVING) {
+    solve_receivers_alternated(grid, reconfiguration, column_counts,
+                               target_range, red_rec_params);
+  } else {
+    solve_receivers_deferred(grid, reconfiguration, column_counts, target_range,
+                             red_rec_params);
+  }
 
+  assert(grid_is_solved(grid));
   free(column_counts);
 
   reconfiguration_filter_identical(reconfiguration);
