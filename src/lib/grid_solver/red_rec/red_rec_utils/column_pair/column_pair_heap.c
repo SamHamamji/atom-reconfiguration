@@ -283,6 +283,9 @@ static int get_updated_node_index(int node, int other_source, int other_target,
 
 static void column_pair_heap_unlink_root_neighbor(struct ColumnPairPQ *pq,
                                                   int neighbor) {
+  assert(neighbor == pq->heap[ROOT].right_pair_index ||
+         neighbor == pq->heap[ROOT].left_pair_index);
+
   bool delete_left = neighbor == pq->heap[ROOT].left_pair_index;
   int new_neighbor = (delete_left) ? pq->heap[neighbor].left_pair_index
                                    : pq->heap[neighbor].right_pair_index;
@@ -368,14 +371,17 @@ struct ColumnPair column_pair_heap_pop(struct ColumnPairPQ *pq) {
         column_pair_heap_swap(pq, neighbor, pq->pair_num - 1);
         pq->pair_num--;
       }
+    }
+  }
 
-      if (neighbor != pq->pair_num) {
-        int new_index = column_pair_heap_bubble_down(pq, neighbor);
+  for (int i = NODES_TO_FIX_NUM - 1; i >= 0; i--) {
+    int neighbor = nodes_to_fix[i];
+    if (node_exists(neighbor, pq->pair_num)) {
+      int new_index = column_pair_heap_bubble_down(pq, neighbor);
 
-        for (int j = 0; j < NODES_TO_FIX_NUM; j++) {
-          nodes_to_fix[j] = get_updated_node_index(nodes_to_fix[j], neighbor,
-                                                   new_index, pq->pair_num);
-        }
+      for (int j = 0; j < NODES_TO_FIX_NUM; j++) {
+        nodes_to_fix[j] = get_updated_node_index(nodes_to_fix[j], neighbor,
+                                                 new_index, pq->pair_num);
       }
     }
   }
