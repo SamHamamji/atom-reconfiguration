@@ -139,12 +139,11 @@ static void *red_rec_parallel_thread(void *thread_input) {
   pthread_exit(NULL);
 }
 
-static void produce_delayed_moves(struct Grid *grid,
-                                  struct ThreadSharedVariables shared,
+static void produce_delayed_moves(struct ThreadSharedVariables shared,
                                   sem_t *delayed_moves_semaphore,
                                   const RedRecParallelParams *params) {
-  struct ColumnPairPQ column_pair_pq =
-      column_pair_pq_new(shared.column_counts, grid->width, params->pq_type);
+  struct ColumnPairPQ column_pair_pq = column_pair_pq_new(
+      shared.column_counts, shared.delayed_moves.grid_width, params->pq_type);
 
   while (!column_pair_pq_is_empty(&column_pair_pq)) {
     struct ColumnPair best_pair = column_pair_pq_pop(&column_pair_pq);
@@ -221,7 +220,7 @@ struct Reconfiguration *red_rec_parallel_single_consumer(struct Grid *grid,
     return NULL;
   }
 
-  produce_delayed_moves(grid, shared, sync.delayed_moves_semaphore, params);
+  produce_delayed_moves(shared, sync.delayed_moves_semaphore, params);
 
   for (int i = 0; i < thread_num; i++) {
     pthread_join(thread_ids[i], NULL);
