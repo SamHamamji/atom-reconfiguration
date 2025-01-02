@@ -16,7 +16,7 @@ class CsvHeader(Enum):
     INTERVAL_LENGTH = "Interval length"
     LINEAR_SOLVER = "Linear solver"
     GRID_SOLVER = "Grid solver"
-    TIME_TAKEN = "Time taken"
+    TIME_TAKEN = "Time taken (s)"
     WIDTH = "Width"
     HEIGHT = "Height"
     GRID_SIZE = "Grid size"
